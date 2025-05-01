@@ -1,55 +1,78 @@
-
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Twitter } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { Instagram, Facebook, Twitter } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-luxe-black text-white pt-12 pb-6">
+    <footer className="bg-luxe-aliceBlue text-black pt-12 pb-6">
       <div className="luxury-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Column */}
+          {/* Logo and About Column */}
           <div className="col-span-1">
-            <h3 className="text-2xl font-serif font-bold mb-4">
-              Aromé <span className="text-luxe-gold">Luxe</span>
+            <h3 className="text-xl font-poppins font-black text-luxe-blue mb-4">
+              Aromé Luxe
             </h3>
-            <p className="text-gray-300 mb-4">
-              Exquisite fragrances that tell a story and leave an impression.
+            <p className="text-sm mb-4">
+              Experience the epitome of luxury fragrances, crafted with
+              precision and passion to elevate your presence.
             </p>
             <div className="flex space-x-4">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-luxe-gold transition-colors">
-                <Instagram />
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="hover:text-luxe-blue transition-colors"
+              >
+                <Facebook className="h-5 w-5" />
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-luxe-gold transition-colors">
-                <Facebook />
+              <a
+                href="#"
+                aria-label="Instagram"
+                className="hover:text-luxe-sandy transition-colors"
+              >
+                <Instagram className="h-5 w-5" />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-luxe-gold transition-colors">
-                <Twitter />
+              <a
+                href="#"
+                aria-label="Twitter"
+                className="hover:text-luxe-sandy transition-colors"
+              >
+                <Twitter className="h-5 w-5" />
               </a>
             </div>
           </div>
 
           {/* Shop Column */}
           <div className="col-span-1">
-            <h4 className="text-lg font-medium mb-4">Shop</h4>
+            <h4 className="text-lg font-medium mb-4 text-luxe-blue">Shop</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/products" className="text-gray-300 hover:text-luxe-gold transition-colors">
+                <Link
+                  to="/products"
+                  className="text-black hover:text-luxe-sandy transition-colors"
+                >
                   All Perfumes
                 </Link>
               </li>
               <li>
-                <Link to="/products?category=men" className="text-gray-300 hover:text-luxe-gold transition-colors">
+                <Link
+                  to="/products?category=men"
+                  className="text-black hover:text-luxe-sandy transition-colors"
+                >
                   Men's Collection
                 </Link>
               </li>
               <li>
-                <Link to="/products?category=women" className="text-gray-300 hover:text-luxe-gold transition-colors">
+                <Link
+                  to="/products?category=women"
+                  className="text-black hover:text-luxe-sandy transition-colors"
+                >
                   Women's Collection
                 </Link>
               </li>
               <li>
-                <Link to="/products?category=unisex" className="text-gray-300 hover:text-luxe-gold transition-colors">
+                <Link
+                  to="/products?category=unisex"
+                  className="text-black hover:text-luxe-sandy transition-colors"
+                >
                   Unisex Collection
                 </Link>
               </li>
@@ -58,56 +81,75 @@ const Footer = () => {
 
           {/* Company Column */}
           <div className="col-span-1">
-            <h4 className="text-lg font-medium mb-4">Company</h4>
+            <h4 className="text-lg font-medium mb-4 text-luxe-blue">Company</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/about" className="text-gray-300 hover:text-luxe-gold transition-colors">
+                <Link
+                  to="/about"
+                  className="text-black hover:text-luxe-sandy transition-colors"
+                >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-gray-300 hover:text-luxe-gold transition-colors">
-                  Contact
+                <Link
+                  to="/careers"
+                  className="text-black hover:text-luxe-sandy transition-colors"
+                >
+                  Careers
                 </Link>
               </li>
               <li>
-                <Link to="/shipping" className="text-gray-300 hover:text-luxe-gold transition-colors">
-                  Shipping Policy
+                <Link
+                  to="/contact"
+                  className="text-black hover:text-luxe-sandy transition-colors"
+                >
+                  Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/returns" className="text-gray-300 hover:text-luxe-gold transition-colors">
-                  Returns & Refunds
+                <Link
+                  to="/blog"
+                  className="text-black hover:text-luxe-sandy transition-colors"
+                >
+                  Blog
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact Column */}
+          {/* Support Column */}
           <div className="col-span-1">
-            <h4 className="text-lg font-medium mb-4">Contact Us</h4>
-            <address className="not-italic text-gray-300 space-y-2">
-              <p>123 Luxury Avenue</p>
-              <p>Mumbai, Maharashtra 400001</p>
-              <p>India</p>
-              <p className="mt-4">
-                <a href="mailto:info@aromeluxe.com" className="hover:text-luxe-gold transition-colors">
-                  info@aromeluxe.com
+            <h4 className="text-lg font-medium mb-4 text-luxe-blue">Support</h4>
+            <ul className="space-y-2">
+              <li>
+                <a href="#" className="hover:text-luxe-sandy transition-colors">
+                  FAQs
                 </a>
-              </p>
-              <p>
-                <a href="tel:+911234567890" className="hover:text-luxe-gold transition-colors">
-                  +91 123 456 7890
+              </li>
+              <li>
+                <a href="#" className="hover:text-luxe-sandy transition-colors">
+                  Shipping & Returns
                 </a>
-              </p>
-            </address>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8">
-          <p className="text-center text-gray-400 text-sm">
+        <hr className="my-8 border-gray-200" />
+
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <p className="text-sm text-gray-600 mb-4 md:mb-0">
             &copy; {new Date().getFullYear()} Aromé Luxe. All rights reserved.
           </p>
+          <div className="flex space-x-6">
+            <a href="#" className="text-sm text-gray-600 hover:text-luxe-sandy">
+              Privacy Policy
+            </a>
+            <a href="#" className="text-sm text-gray-600 hover:text-luxe-sandy">
+              Terms of Service
+            </a>
+          </div>
         </div>
       </div>
     </footer>

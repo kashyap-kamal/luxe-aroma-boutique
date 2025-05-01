@@ -1,5 +1,4 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -46,7 +45,12 @@
     @apply bg-background text-foreground font-sans;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-serif;
   }
 
@@ -55,18 +59,18 @@
   }
 
   .btn-primary {
-    @apply bg-luxe-purple hover:bg-luxe-darkPurple text-white font-medium py-2 px-4 rounded transition-colors duration-200;
+    @apply bg-luxe-blue hover:bg-luxe-violet text-white font-medium py-2 px-4 rounded transition-colors duration-200;
   }
 
   .btn-secondary {
     @apply bg-luxe-gold hover:bg-amber-600 text-luxe-black font-medium py-2 px-4 rounded transition-colors duration-200;
   }
-  
+
   .gold-gradient {
     @apply bg-gradient-to-r from-amber-300 to-luxe-gold;
   }
 
-  .purple-gradient {
-    @apply bg-gradient-to-r from-luxe-purple to-luxe-darkPurple;
+  .luxury-gradient {
+    @apply bg-gradient-to-r from-luxe-blue to-luxe-violet;
   }
 }

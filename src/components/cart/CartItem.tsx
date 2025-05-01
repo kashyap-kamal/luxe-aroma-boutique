@@ -1,9 +1,8 @@
-
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { CartItem as CartItemType, useCart } from '@/contexts/CartContext';
-import { Minus, Plus, Trash2 } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { CartItem as CartItemType, useCart } from "@/contexts/CartContext";
+import { Minus, Plus, Trash2 } from "lucide-react";
 
 interface CartItemProps {
   item: CartItemType;
@@ -43,7 +42,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
       <div className="flex-grow">
         <Link to={`/products/${product.id}`}>
-          <h3 className="font-medium text-lg mb-1 hover:text-luxe-purple transition-colors">
+          <h3 className="font-medium text-lg mb-1 hover:text-luxe-blue transition-colors">
             {product.name}
           </h3>
         </Link>

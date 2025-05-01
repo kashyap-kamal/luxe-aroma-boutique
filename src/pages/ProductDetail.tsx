@@ -1,20 +1,19 @@
-
-import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import { Button } from '@/components/ui/button';
-import { Minus, Plus, ShoppingBag } from 'lucide-react';
-import { getProductById } from '@/utils/mockData';
-import { useCart } from '@/contexts/CartContext';
-import { toast } from '@/components/ui/use-toast';
+import React, { useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { Button } from "@/components/ui/button";
+import { Minus, Plus, ShoppingBag } from "lucide-react";
+import { getProductById } from "@/utils/mockData";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "@/components/ui/use-toast";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
-  
+
   const product = id ? getProductById(id) : undefined;
 
   if (!product) {
@@ -24,7 +23,9 @@ const ProductDetail = () => {
         <main className="flex-grow py-16">
           <div className="luxury-container text-center">
             <h1 className="text-2xl font-medium mb-4">Product Not Found</h1>
-            <p className="mb-8">Sorry, we couldn't find the product you were looking for.</p>
+            <p className="mb-8">
+              Sorry, we couldn't find the product you were looking for.
+            </p>
             <Button asChild>
               <Link to="/products">Continue Shopping</Link>
             </Button>
@@ -36,12 +37,12 @@ const ProductDetail = () => {
   }
 
   const handleIncreaseQuantity = () => {
-    setQuantity(prev => prev + 1);
+    setQuantity((prev) => prev + 1);
   };
 
   const handleDecreaseQuantity = () => {
     if (quantity > 1) {
-      setQuantity(prev => prev - 1);
+      setQuantity((prev) => prev - 1);
     }
   };
 
@@ -56,7 +57,7 @@ const ProductDetail = () => {
 
   const handleBuyNow = () => {
     addToCart(product, quantity);
-    navigate('/cart');
+    navigate("/cart");
   };
 
   return (
@@ -68,41 +69,51 @@ const ProductDetail = () => {
             {/* Product Image */}
             <div className="w-full lg:w-1/2">
               <div className="bg-gray-100 rounded-lg overflow-hidden">
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
-                  className="w-full h-auto object-cover aspect-square" 
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-auto object-cover aspect-square"
                 />
               </div>
             </div>
-            
+
             {/* Product Details */}
             <div className="w-full lg:w-1/2">
-              <div className="mb-2">
-                <Link to="/products" className="text-luxe-purple hover:underline">
-                  {product.category}
+              <div className="flex items-center mb-4">
+                <Link to="/products" className="text-luxe-blue hover:underline">
+                  Back to Products
                 </Link>
               </div>
-              <h1 className="text-3xl font-serif font-bold mb-4">{product.name}</h1>
-              <div className="text-2xl font-medium mb-6">₹{product.price.toLocaleString()}</div>
-              
+
+              <h1 className="text-3xl font-serif font-bold mb-2">
+                {product.name}
+              </h1>
+              <div className="flex items-center mb-4">
+                <div className="text-2xl font-medium">
+                  ₹{product.price.toLocaleString()}
+                </div>
+                <div className="ml-4 inline-block px-4 py-2 border border-luxe-blue rounded-md bg-luxe-blue/10 text-luxe-blue">
+                  In Stock
+                </div>
+              </div>
+
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-2">Description</h3>
                 <p className="text-gray-700">{product.description}</p>
               </div>
-              
+
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-2">Size</h3>
-                <div className="inline-block px-4 py-2 border border-luxe-purple rounded-md bg-luxe-purple/10 text-luxe-purple">
+                <div className="inline-block px-4 py-2 border border-luxe-blue rounded-md bg-luxe-blue/10 text-luxe-blue">
                   {product.size}
                 </div>
               </div>
-              
+
               <div className="mb-8">
                 <h3 className="text-lg font-medium mb-2">Quantity</h3>
                 <div className="flex items-center">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="icon"
                     onClick={handleDecreaseQuantity}
                     disabled={quantity <= 1}
@@ -110,8 +121,8 @@ const ProductDetail = () => {
                     <Minus className="h-4 w-4" />
                   </Button>
                   <span className="w-12 text-center">{quantity}</span>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="icon"
                     onClick={handleIncreaseQuantity}
                   >
@@ -119,18 +130,18 @@ const ProductDetail = () => {
                   </Button>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
+                <Button
                   className="flex-1 bg-luxe-gold text-luxe-black hover:bg-amber-600"
                   size="lg"
                   onClick={handleBuyNow}
                 >
                   Buy Now
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="flex-1 border-luxe-purple text-luxe-purple hover:bg-luxe-purple hover:text-white"
+                <Button
+                  variant="outline"
+                  className="flex-1 border-luxe-blue text-luxe-blue hover:bg-luxe-blue hover:text-white"
                   size="lg"
                   onClick={handleAddToCart}
                 >
