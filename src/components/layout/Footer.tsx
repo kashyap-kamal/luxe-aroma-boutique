@@ -1,17 +1,17 @@
-import { Link } from "react-router-dom";
-import { Instagram, Facebook, Twitter } from "lucide-react";
+import { Link } from "react-router-dom"
+import { Instagram, Facebook, Twitter } from "lucide-react"
 
 const Footer = () => {
   return (
-    <footer className="bg-luxe-aliceBlue text-black pt-12 pb-6">
+    <footer className="pt-12 pb-6 text-black bg-luxe-aliceBlue">
       <div className="luxury-container">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Logo and About Column */}
           <div className="col-span-1">
-            <h3 className="text-xl font-poppins font-black text-luxe-blue mb-4">
+            <h3 className="mb-4 text-xl font-black font-poppins text-luxe-blue">
               Aromé Luxe
             </h3>
-            <p className="text-sm mb-4">
+            <p className="mb-4 text-sm">
               Experience the epitome of luxury fragrances, crafted with
               precision and passion to elevate your presence.
             </p>
@@ -19,35 +19,35 @@ const Footer = () => {
               <a
                 href="#"
                 aria-label="Facebook"
-                className="hover:text-luxe-blue transition-colors"
+                className="transition-colors hover:text-luxe-blue"
               >
-                <Facebook className="h-5 w-5" />
+                <Facebook className="w-5 h-5" />
               </a>
               <a
                 href="#"
                 aria-label="Instagram"
-                className="hover:text-luxe-sandy transition-colors"
+                className="transition-colors hover:text-luxe-sandy"
               >
-                <Instagram className="h-5 w-5" />
+                <Instagram className="w-5 h-5" />
               </a>
               <a
                 href="#"
                 aria-label="Twitter"
-                className="hover:text-luxe-sandy transition-colors"
+                className="transition-colors hover:text-luxe-sandy"
               >
-                <Twitter className="h-5 w-5" />
+                <Twitter className="w-5 h-5" />
               </a>
             </div>
           </div>
 
           {/* Shop Column */}
           <div className="col-span-1">
-            <h4 className="text-lg font-medium mb-4 text-luxe-blue">Shop</h4>
+            <h4 className="mb-4 text-lg font-medium text-luxe-blue">Shop</h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   to="/products"
-                  className="text-black hover:text-luxe-sandy transition-colors"
+                  className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   All Perfumes
                 </Link>
@@ -55,7 +55,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/products?category=men"
-                  className="text-black hover:text-luxe-sandy transition-colors"
+                  className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Men's Collection
                 </Link>
@@ -63,7 +63,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/products?category=women"
-                  className="text-black hover:text-luxe-sandy transition-colors"
+                  className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Women's Collection
                 </Link>
@@ -71,7 +71,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/products?category=unisex"
-                  className="text-black hover:text-luxe-sandy transition-colors"
+                  className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Unisex Collection
                 </Link>
@@ -81,12 +81,12 @@ const Footer = () => {
 
           {/* Company Column */}
           <div className="col-span-1">
-            <h4 className="text-lg font-medium mb-4 text-luxe-blue">Company</h4>
+            <h4 className="mb-4 text-lg font-medium text-luxe-blue">Company</h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   to="/about"
-                  className="text-black hover:text-luxe-sandy transition-colors"
+                  className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   About Us
                 </Link>
@@ -94,7 +94,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/careers"
-                  className="text-black hover:text-luxe-sandy transition-colors"
+                  className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Careers
                 </Link>
@@ -102,7 +102,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="text-black hover:text-luxe-sandy transition-colors"
+                  className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Contact Us
                 </Link>
@@ -110,7 +110,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/blog"
-                  className="text-black hover:text-luxe-sandy transition-colors"
+                  className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Blog
                 </Link>
@@ -120,15 +120,15 @@ const Footer = () => {
 
           {/* Support Column */}
           <div className="col-span-1">
-            <h4 className="text-lg font-medium mb-4 text-luxe-blue">Support</h4>
+            <h4 className="mb-4 text-lg font-medium text-luxe-blue">Support</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="hover:text-luxe-sandy transition-colors">
+                <a href="#" className="transition-colors hover:text-luxe-sandy">
                   FAQs
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-luxe-sandy transition-colors">
+                <a href="#" className="transition-colors hover:text-luxe-sandy">
                   Shipping & Returns
                 </a>
               </li>
@@ -138,22 +138,28 @@ const Footer = () => {
 
         <hr className="my-8 border-gray-200" />
 
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-gray-600 mb-4 md:mb-0">
+        <div className="flex flex-col items-center justify-between md:flex-row">
+          <p className="mb-4 text-sm text-gray-600 md:mb-0">
             &copy; {new Date().getFullYear()} Aromé Luxe. All rights reserved.
           </p>
           <div className="flex space-x-6">
-            <a href="#" className="text-sm text-gray-600 hover:text-luxe-sandy">
+            <Link
+              to="/privacy-policy"
+              className="text-sm text-gray-600 hover:text-luxe-sandy"
+            >
               Privacy Policy
-            </a>
-            <a href="#" className="text-sm text-gray-600 hover:text-luxe-sandy">
+            </Link>
+            <Link
+              to="/terms-of-service"
+              className="text-sm text-gray-600 hover:text-luxe-sandy"
+            >
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer
