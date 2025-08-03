@@ -128,9 +128,20 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="transition-colors hover:text-luxe-sandy">
-                  Shipping & Returns
-                </a>
+                <Link
+                  to="/shipping-delivery"
+                  className="transition-colors hover:text-luxe-sandy"
+                >
+                  Shipping & Delivery
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/cancellation-refund"
+                  className="transition-colors hover:text-luxe-sandy"
+                >
+                  Returns & Refunds
+                </Link>
               </li>
             </ul>
           </div>
@@ -154,6 +165,18 @@ const Footer = () => {
               className="text-sm text-gray-600 hover:text-luxe-sandy"
             >
               Terms of Service
+            </Link>
+            <Link
+              to="/shipping-delivery"
+              className="text-sm text-gray-600 hover:text-luxe-sandy"
+            >
+              Shipping & Delivery
+            </Link>
+            <Link
+              to="/cancellation-refund"
+              className="text-sm text-gray-600 hover:text-luxe-sandy"
+            >
+              Returns & Refunds
             </Link>
           </div>
         </div>
