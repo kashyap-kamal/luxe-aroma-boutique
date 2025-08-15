@@ -162,7 +162,6 @@ const Checkout: React.FC = () => {
       }
     }
 
-    console.log("🔍 Validation errors found:", errors)
     setFormErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -184,18 +183,11 @@ const Checkout: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    console.log("🚀 Form submission started")
-    console.log("📝 Customer Info:", customerInfo)
-    console.log("🛒 Cart Items:", cartItems)
-    console.log("💳 Payment Method:", paymentMethod)
-    console.log("✅ Terms Accepted:", acceptTerms)
-
     // Clear previous payment state
     clearPaymentState()
 
     // Validate cart
     if (cartItems.length === 0) {
-      console.log("❌ Cart validation failed: Cart is empty")
       toast({
         title: "Cart is empty",
         description: "Please add items to your cart before checking out.",
@@ -205,13 +197,9 @@ const Checkout: React.FC = () => {
     }
 
     // Validate form
-    console.log("🔍 Starting form validation...")
     const isValid = validateForm()
-    console.log("📋 Form validation result:", isValid)
-    console.log("🚨 Form errors:", formErrors)
 
     if (!isValid) {
-      console.log("❌ Form validation failed")
       toast({
         title: "Form validation failed",
         description:
@@ -233,10 +221,6 @@ const Checkout: React.FC = () => {
 
     // Check environment variables
     const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID
-    console.log(
-      "🔑 Razorpay Key ID:",
-      razorpayKeyId ? "✅ Present" : "❌ Missing",
-    )
 
     if (!razorpayKeyId) {
       toast({
@@ -249,8 +233,6 @@ const Checkout: React.FC = () => {
     }
 
     try {
-      console.log("💳 Starting payment processing...")
-
       // Prepare order items
       const orderItems: OrderItem[] = cartItems.map((item) => ({
         productId: item.product.id,
@@ -272,14 +254,10 @@ const Checkout: React.FC = () => {
         notes: `Payment method: ${paymentMethod}. Order placed via web checkout.`,
       }
 
-      console.log("📦 Order details prepared:", orderDetails)
-
       // Process payment
       const result = await processPayment(total, customerInfo, orderDetails)
-      console.log("💰 Payment result:", result)
 
       if (result.success) {
-        console.log("✅ Payment successful!")
         // Success toast
         toast({
           title: "Payment Successful! 🎉",
@@ -292,7 +270,6 @@ const Checkout: React.FC = () => {
         // Navigate to success page
         navigate(`/order-success/${result.orderId}`)
       } else {
-        console.log("❌ Payment failed")
         // Payment failed toast
         toast({
           title: "Payment Failed",
@@ -391,334 +368,361 @@ const Checkout: React.FC = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Checkout Form */}
             <div className="w-full lg:w-2/3">
-              <form onSubmit={handleSubmit}>
-                {/* Shipping Information */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+              {cartItems.length === 0 ? (
+                <div className="bg-white rounded-lg shadow-sm p-6 text-center">
                   <h2 className="text-xl font-medium mb-4">
-                    Shipping Information
+                    Your Cart is Empty
                   </h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name *</Label>
-                      <Input
-                        id="firstName"
-                        value={customerInfo.firstName}
-                        onChange={(e) =>
-                          handleInputChange("firstName", e.target.value)
-                        }
-                        className={formErrors.firstName ? "border-red-500" : ""}
-                        required
-                      />
-                      {formErrors.firstName && (
-                        <p className="text-sm text-red-500">
-                          {formErrors.firstName}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name *</Label>
-                      <Input
-                        id="lastName"
-                        value={customerInfo.lastName}
-                        onChange={(e) =>
-                          handleInputChange("lastName", e.target.value)
-                        }
-                        className={formErrors.lastName ? "border-red-500" : ""}
-                        required
-                      />
-                      {formErrors.lastName && (
-                        <p className="text-sm text-red-500">
-                          {formErrors.lastName}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={customerInfo.email}
-                        onChange={(e) =>
-                          handleInputChange("email", e.target.value)
-                        }
-                        className={formErrors.email ? "border-red-500" : ""}
-                        required
-                      />
-                      {formErrors.email && (
-                        <p className="text-sm text-red-500">
-                          {formErrors.email}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number *</Label>
-                      <Input
-                        id="phone"
-                        value={customerInfo.phone}
-                        onChange={(e) =>
-                          handleInputChange("phone", e.target.value)
-                        }
-                        className={formErrors.phone ? "border-red-500" : ""}
-                        placeholder="+91 98765 43210"
-                        required
-                      />
-                      {formErrors.phone && (
-                        <p className="text-sm text-red-500">
-                          {formErrors.phone}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="address">Address *</Label>
-                      <Input
-                        id="address"
-                        value={customerInfo.address}
-                        onChange={(e) =>
-                          handleInputChange("address", e.target.value)
-                        }
-                        className={formErrors.address ? "border-red-500" : ""}
-                        required
-                      />
-                      {formErrors.address && (
-                        <p className="text-sm text-red-500">
-                          {formErrors.address}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City *</Label>
-                      <Input
-                        id="city"
-                        value={customerInfo.city}
-                        onChange={(e) =>
-                          handleInputChange("city", e.target.value)
-                        }
-                        className={formErrors.city ? "border-red-500" : ""}
-                        required
-                      />
-                      {formErrors.city && (
-                        <p className="text-sm text-red-500">
-                          {formErrors.city}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="state">State *</Label>
-                      <Input
-                        id="state"
-                        value={customerInfo.state}
-                        onChange={(e) =>
-                          handleInputChange("state", e.target.value)
-                        }
-                        className={formErrors.state ? "border-red-500" : ""}
-                        required
-                      />
-                      {formErrors.state && (
-                        <p className="text-sm text-red-500">
-                          {formErrors.state}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="postalCode">Postal Code *</Label>
-                      <Input
-                        id="postalCode"
-                        value={customerInfo.postalCode}
-                        onChange={(e) =>
-                          handleInputChange("postalCode", e.target.value)
-                        }
-                        className={
-                          formErrors.postalCode ? "border-red-500" : ""
-                        }
-                        required
-                      />
-                      {formErrors.postalCode && (
-                        <p className="text-sm text-red-500">
-                          {formErrors.postalCode}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="country">Country</Label>
-                      <Input
-                        id="country"
-                        value={customerInfo.country}
-                        onChange={(e) =>
-                          handleInputChange("country", e.target.value)
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Information */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                  <h2 className="text-xl font-medium mb-4">Payment Method</h2>
-
-                  <RadioGroup
-                    value={paymentMethod}
-                    onValueChange={setPaymentMethod}
-                    className="space-y-3"
+                  <p className="text-gray-600 mb-6">
+                    Please add some products to your cart before proceeding to
+                    checkout.
+                  </p>
+                  <Button
+                    onClick={() => navigate("/products")}
+                    className="bg-brown-600 hover:bg-brown-700"
                   >
-                    <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-gray-50">
-                      <RadioGroupItem value="upi" id="payment-upi" />
-                      <Label
-                        htmlFor="payment-upi"
-                        className="flex-grow cursor-pointer flex items-center gap-2"
-                      >
-                        <Smartphone className="h-4 w-4" />
-                        UPI Payment (Recommended)
-                      </Label>
-                    </div>
+                    Browse Products
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  {/* Shipping Information */}
+                  <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <h2 className="text-xl font-medium mb-4">
+                      Shipping Information
+                    </h2>
 
-                    <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-gray-50">
-                      <RadioGroupItem value="card" id="payment-card" />
-                      <Label
-                        htmlFor="payment-card"
-                        className="flex-grow cursor-pointer flex items-center gap-2"
-                      >
-                        <CreditCard className="h-4 w-4" />
-                        Credit/Debit Card
-                      </Label>
-                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name *</Label>
+                        <Input
+                          id="firstName"
+                          value={customerInfo.firstName}
+                          onChange={(e) =>
+                            handleInputChange("firstName", e.target.value)
+                          }
+                          className={
+                            formErrors.firstName ? "border-red-500" : ""
+                          }
+                          required
+                        />
+                        {formErrors.firstName && (
+                          <p className="text-sm text-red-500">
+                            {formErrors.firstName}
+                          </p>
+                        )}
+                      </div>
 
-                    <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-gray-50">
-                      <RadioGroupItem
-                        value="netbanking"
-                        id="payment-netbanking"
-                      />
-                      <Label
-                        htmlFor="payment-netbanking"
-                        className="flex-grow cursor-pointer"
-                      >
-                        Net Banking
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name *</Label>
+                        <Input
+                          id="lastName"
+                          value={customerInfo.lastName}
+                          onChange={(e) =>
+                            handleInputChange("lastName", e.target.value)
+                          }
+                          className={
+                            formErrors.lastName ? "border-red-500" : ""
+                          }
+                          required
+                        />
+                        {formErrors.lastName && (
+                          <p className="text-sm text-red-500">
+                            {formErrors.lastName}
+                          </p>
+                        )}
+                      </div>
 
-                  {/* Payment method info */}
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <strong>Secure Payment:</strong> All payments are
-                      processed securely through Razorpay.
-                      {paymentMethod === "upi" &&
-                        " You can pay using any UPI app like Google Pay, PhonePe, or Paytm."}
-                    </p>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email Address *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={customerInfo.email}
+                          onChange={(e) =>
+                            handleInputChange("email", e.target.value)
+                          }
+                          className={formErrors.email ? "border-red-500" : ""}
+                          required
+                        />
+                        {formErrors.email && (
+                          <p className="text-sm text-red-500">
+                            {formErrors.email}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone Number *</Label>
+                        <Input
+                          id="phone"
+                          value={customerInfo.phone}
+                          onChange={(e) =>
+                            handleInputChange("phone", e.target.value)
+                          }
+                          className={formErrors.phone ? "border-red-500" : ""}
+                          placeholder="+91 98765 43210"
+                          required
+                        />
+                        {formErrors.phone && (
+                          <p className="text-sm text-red-500">
+                            {formErrors.phone}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="address">Address *</Label>
+                        <Input
+                          id="address"
+                          value={customerInfo.address}
+                          onChange={(e) =>
+                            handleInputChange("address", e.target.value)
+                          }
+                          className={formErrors.address ? "border-red-500" : ""}
+                          required
+                        />
+                        {formErrors.address && (
+                          <p className="text-sm text-red-500">
+                            {formErrors.address}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="city">City *</Label>
+                        <Input
+                          id="city"
+                          value={customerInfo.city}
+                          onChange={(e) =>
+                            handleInputChange("city", e.target.value)
+                          }
+                          className={formErrors.city ? "border-red-500" : ""}
+                          required
+                        />
+                        {formErrors.city && (
+                          <p className="text-sm text-red-500">
+                            {formErrors.city}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="state">State *</Label>
+                        <Input
+                          id="state"
+                          value={customerInfo.state}
+                          onChange={(e) =>
+                            handleInputChange("state", e.target.value)
+                          }
+                          className={formErrors.state ? "border-red-500" : ""}
+                          required
+                        />
+                        {formErrors.state && (
+                          <p className="text-sm text-red-500">
+                            {formErrors.state}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="postalCode">Postal Code *</Label>
+                        <Input
+                          id="postalCode"
+                          value={customerInfo.postalCode}
+                          onChange={(e) =>
+                            handleInputChange("postalCode", e.target.value)
+                          }
+                          className={
+                            formErrors.postalCode ? "border-red-500" : ""
+                          }
+                          required
+                        />
+                        {formErrors.postalCode && (
+                          <p className="text-sm text-red-500">
+                            {formErrors.postalCode}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="country">Country</Label>
+                        <Input
+                          id="country"
+                          value={customerInfo.country}
+                          onChange={(e) =>
+                            handleInputChange("country", e.target.value)
+                          }
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  {/* UPI ID Input (Optional) */}
-                  {paymentMethod === "upi" && (
-                    <div className="mt-4">
-                      <Label htmlFor="upiId" className="text-sm font-medium">
-                        UPI ID (Optional)
-                      </Label>
-                      <Input
-                        id="upiId"
-                        value={upiId}
-                        onChange={(e) => setUpiId(e.target.value)}
-                        placeholder="yourname@paytm, yourname@phonepe"
-                        className={`mt-1 ${
-                          formErrors.upiId ? "border-red-500" : ""
-                        }`}
-                      />
-                      {formErrors.upiId && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {formErrors.upiId}
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-500 mt-1">
-                        If provided, we'll pre-fill this in the payment page for
-                        your convenience.
+                  {/* Payment Information */}
+                  <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <h2 className="text-xl font-medium mb-4">Payment Method</h2>
+
+                    <RadioGroup
+                      value={paymentMethod}
+                      onValueChange={setPaymentMethod}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-gray-50">
+                        <RadioGroupItem value="upi" id="payment-upi" />
+                        <Label
+                          htmlFor="payment-upi"
+                          className="flex-grow cursor-pointer flex items-center gap-2"
+                        >
+                          <Smartphone className="h-4 w-4" />
+                          UPI Payment (Recommended)
+                        </Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-gray-50">
+                        <RadioGroupItem value="card" id="payment-card" />
+                        <Label
+                          htmlFor="payment-card"
+                          className="flex-grow cursor-pointer flex items-center gap-2"
+                        >
+                          <CreditCard className="h-4 w-4" />
+                          Credit/Debit Card
+                        </Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-gray-50">
+                        <RadioGroupItem
+                          value="netbanking"
+                          id="payment-netbanking"
+                        />
+                        <Label
+                          htmlFor="payment-netbanking"
+                          className="flex-grow cursor-pointer"
+                        >
+                          Net Banking
+                        </Label>
+                      </div>
+                    </RadioGroup>
+
+                    {/* Payment method info */}
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        <strong>Secure Payment:</strong> All payments are
+                        processed securely through Razorpay.
+                        {paymentMethod === "upi" &&
+                          " You can pay using any UPI app like Google Pay, PhonePe, or Paytm."}
                       </p>
                     </div>
-                  )}
-                </div>
 
-                {/* Terms and Conditions */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                  <div className="flex items-start space-x-2">
-                    <input
-                      type="checkbox"
-                      id="acceptTerms"
-                      checked={acceptTerms}
-                      onChange={(e) => setAcceptTerms(e.target.checked)}
-                      className="mt-1"
-                    />
-                    <Label
-                      htmlFor="acceptTerms"
-                      className="text-sm cursor-pointer"
-                    >
-                      I agree to the{" "}
-                      <Link
-                        to="/terms-of-service"
-                        className="text-brown-600 underline"
-                      >
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link
-                        to="/privacy-policy"
-                        className="text-brown-600 underline"
-                      >
-                        Privacy Policy
-                      </Link>
-                    </Label>
-                  </div>
-                  {formErrors.terms && (
-                    <p className="text-sm text-red-500 mt-2">
-                      {formErrors.terms}
-                    </p>
-                  )}
-                </div>
-
-                {/* Mobile Order Summary */}
-                <div className="lg:hidden mb-6">
-                  <OrderSummary
-                    subtotal={subtotal}
-                    shipping={SHIPPING_COST}
-                    tax={tax}
-                    total={total}
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => navigate("/cart")}
-                    disabled={isProcessing}
-                  >
-                    Back to Cart
-                  </Button>
-
-                  <Button
-                    type="submit"
-                    className="flex-1 bg-brown-600 hover:bg-brown-700"
-                    disabled={isProcessing || cartItems.length === 0}
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processing Payment...
-                      </>
-                    ) : (
-                      `Pay ₹${total.toFixed(2)}`
+                    {/* UPI ID Input (Optional) */}
+                    {paymentMethod === "upi" && (
+                      <div className="mt-4">
+                        <Label htmlFor="upiId" className="text-sm font-medium">
+                          UPI ID (Optional)
+                        </Label>
+                        <Input
+                          id="upiId"
+                          value={upiId}
+                          onChange={(e) => setUpiId(e.target.value)}
+                          placeholder="yourname@paytm, yourname@phonepe"
+                          className={`mt-1 ${
+                            formErrors.upiId ? "border-red-500" : ""
+                          }`}
+                        />
+                        {formErrors.upiId && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {formErrors.upiId}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          If provided, we'll pre-fill this in the payment page
+                          for your convenience.
+                        </p>
+                      </div>
                     )}
-                  </Button>
-                </div>
-              </form>
+                  </div>
+
+                  {/* Terms and Conditions */}
+                  <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div className="flex items-start space-x-2">
+                      <input
+                        type="checkbox"
+                        id="acceptTerms"
+                        checked={acceptTerms}
+                        onChange={(e) => setAcceptTerms(e.target.checked)}
+                        className="mt-1"
+                      />
+                      <Label
+                        htmlFor="acceptTerms"
+                        className="text-sm cursor-pointer"
+                      >
+                        I agree to the{" "}
+                        <Link
+                          to="/terms-of-service"
+                          className="text-brown-600 underline"
+                        >
+                          Terms of Service
+                        </Link>{" "}
+                        and{" "}
+                        <Link
+                          to="/privacy-policy"
+                          className="text-brown-600 underline"
+                        >
+                          Privacy Policy
+                        </Link>
+                      </Label>
+                    </div>
+                    {formErrors.terms && (
+                      <p className="text-sm text-red-500 mt-2">
+                        {formErrors.terms}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Mobile Order Summary */}
+                  <div className="lg:hidden mb-6">
+                    <OrderSummary
+                      subtotal={subtotal}
+                      shipping={SHIPPING_COST}
+                      tax={tax}
+                      total={total}
+                    />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => navigate("/cart")}
+                      disabled={isProcessing}
+                    >
+                      Back to Cart
+                    </Button>
+
+                    <Button
+                      type="submit"
+                      className="flex-1 bg-luxe-blue hover:bg-luxe-violet text-white font-semibold py-3 px-6 rounded-lg shadow-md"
+                      style={{
+                        backgroundColor: "#623cea",
+                        color: "white",
+                        border: "2px solid #623cea",
+                      }}
+                      disabled={isProcessing || cartItems.length === 0}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing Payment...
+                        </>
+                      ) : (
+                        `Pay ₹${total.toFixed(2)}`
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </div>
 
             {/* Desktop Order Summary */}
