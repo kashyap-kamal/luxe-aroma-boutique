@@ -1,7 +1,9 @@
+import Footer from "@/components/footer";
 import LearnMoreButton from "@/components/learn-more-button";
 import Navbar from "@/components/navbar";
+import ProductGrid from "@/components/product-grid";
+import { Button } from "@/components/ui/button";
 import { products } from "@/lib/ mock-data";
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
