@@ -4,8 +4,6 @@
  */
 
 import React from "react"
-import Navbar from "@/components/layout/Navbar"
-import Footer from "@/components/layout/Footer"
 import {
   Truck,
   Package,
@@ -22,7 +20,7 @@ import {
 const ShippingDelivery: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      
       <main className="flex-grow py-8">
         <div className="luxury-container">
           {/* Header */}
@@ -578,7 +576,7 @@ const ShippingDelivery: React.FC = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface CartSummaryProps {
   subtotal: number;
@@ -46,7 +46,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ subtotal }) => {
       </div>
 
       <div className="mt-auto pt-4 border-t">
-        <Link to="/checkout">
+        <Link href="/checkout">
           <Button asChild className="w-full bg-luxe-blue hover:bg-luxe-violet">
             <span>Proceed to Checkout</span>
           </Button>

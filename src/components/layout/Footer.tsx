@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import Link from "next/link"
 import { Instagram, Facebook, Twitter } from "lucide-react"
 
 const Footer = () => {
@@ -46,7 +46,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/products"
+                  href="/products"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   All Perfumes
@@ -54,7 +54,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/products?category=men"
+                  href="/products?category=men"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Men's Collection
@@ -62,7 +62,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/products?category=women"
+                  href="/products"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Women's Collection
@@ -70,7 +70,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/products?category=unisex"
+                  href="/products"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Unisex Collection
@@ -85,7 +85,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/about"
+                  href="/about"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   About Us
@@ -93,7 +93,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/careers"
+                  href="/careers"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Careers
@@ -101,7 +101,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/contact"
+                  href="/contact"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Contact Us
@@ -109,7 +109,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/blog"
+                  href="/blog"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Blog
@@ -129,7 +129,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/shipping-delivery"
+                  href="/shipping-delivery"
                   className="transition-colors hover:text-luxe-sandy"
                 >
                   Shipping & Delivery
@@ -137,7 +137,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/cancellation-refund"
+                  href="/cancellation-refund"
                   className="transition-colors hover:text-luxe-sandy"
                 >
                   Returns & Refunds
@@ -155,25 +155,25 @@ const Footer = () => {
           </p>
           <div className="flex space-x-6">
             <Link
-              to="/privacy-policy"
+              href="/privacy-policy"
               className="text-sm text-gray-600 hover:text-luxe-sandy"
             >
               Privacy Policy
             </Link>
             <Link
-              to="/terms-of-service"
+              href="/terms-of-service"
               className="text-sm text-gray-600 hover:text-luxe-sandy"
             >
               Terms of Service
             </Link>
             <Link
-              to="/shipping-delivery"
+              href="/shipping-delivery"
               className="text-sm text-gray-600 hover:text-luxe-sandy"
             >
               Shipping & Delivery
             </Link>
             <Link
-              to="/cancellation-refund"
+              href="/cancellation-refund"
               className="text-sm text-gray-600 hover:text-luxe-sandy"
             >
               Returns & Refunds

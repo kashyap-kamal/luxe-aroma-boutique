@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +22,7 @@ const Navbar = () => {
       <div className="luxury-container">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link href="/" className="flex items-center">
             <h1 className="text-2xl md:text-3xl font-poppins font-black text-luxe-blue">
               Aromé <span className="text-luxe-violet">Luxe</span>
             </h1>
@@ -29,25 +31,25 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link
-              to="/"
+              href="/"
               className="font-medium text-black hover:text-luxe-blue transition-colors"
             >
               Home
             </Link>
             <Link
-              to="/products"
+              href="/products"
               className="font-medium text-black hover:text-luxe-blue transition-colors"
             >
               Perfumes
             </Link>
             <Link
-              to="/about"
+              href="/about"
               className="font-medium text-black hover:text-luxe-blue transition-colors"
             >
               About
             </Link>
             <Link
-              to="/contact"
+              href="/contact"
               className="font-medium text-black hover:text-luxe-blue transition-colors"
             >
               Contact
@@ -63,7 +65,7 @@ const Navbar = () => {
             >
               <Search className="h-5 w-5" />
             </Button>
-            <Link to="/cart">
+            <Link href="/cart">
               <Button
                 variant="ghost"
                 size="icon"
@@ -104,28 +106,28 @@ const Navbar = () => {
           </div>
           <nav className="p-8 flex flex-col space-y-4">
             <Link
-              to="/"
+              href="/"
               className="text-lg font-medium text-black hover:text-luxe-blue transition-colors py-2"
               onClick={toggleMenu}
             >
               Home
             </Link>
             <Link
-              to="/products"
+              href="/products"
               className="text-lg font-medium text-black hover:text-luxe-blue transition-colors py-2"
               onClick={toggleMenu}
             >
               Perfumes
             </Link>
             <Link
-              to="/about"
+              href="/about"
               className="text-lg font-medium text-black hover:text-luxe-blue transition-colors py-2"
               onClick={toggleMenu}
             >
               About
             </Link>
             <Link
-              to="/contact"
+              href="/contact"
               className="text-lg font-medium text-black hover:text-luxe-blue transition-colors py-2"
               onClick={toggleMenu}
             >

@@ -1,25 +1,26 @@
 import React, { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { getProductById } from "@/utils/mockData";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "@/components/ui/use-toast";
 
-const ProductDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+interface ProductDetailProps {
+  id: string;
+}
+
+const ProductDetail = ({ id }: ProductDetailProps) => {
+  const router = useRouter();
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
 
-  const product = id ? getProductById(id) : undefined;
+  const product = getProductById(id);
 
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow py-16">
           <div className="luxury-container text-center">
             <h1 className="text-2xl font-medium mb-4">Product Not Found</h1>
@@ -27,11 +28,10 @@ const ProductDetail = () => {
               Sorry, we couldn't find the product you were looking for.
             </p>
             <Button asChild>
-              <Link to="/products">Continue Shopping</Link>
+              <Link href="/products">Continue Shopping</Link>
             </Button>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -57,12 +57,11 @@ const ProductDetail = () => {
 
   const handleBuyNow = () => {
     addToCart(product, quantity);
-    navigate("/cart");
+    router.push("/cart");
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow py-8">
         <div className="luxury-container">
           <div className="flex flex-col lg:flex-row gap-12">
@@ -80,7 +79,7 @@ const ProductDetail = () => {
             {/* Product Details */}
             <div className="w-full lg:w-1/2">
               <div className="flex items-center mb-4">
-                <Link to="/products" className="text-luxe-blue hover:underline">
+                <Link href="/products" className="text-luxe-blue hover:underline">
                   Back to Products
                 </Link>
               </div>
@@ -153,7 +152,6 @@ const ProductDetail = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

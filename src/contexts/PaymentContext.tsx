@@ -3,6 +3,8 @@
  * Provides payment functionality throughout the application
  */
 
+"use client"
+
 import React, { createContext, useContext, useState, useCallback } from "react"
 import { paymentService } from "@/services/paymentService"
 import type {

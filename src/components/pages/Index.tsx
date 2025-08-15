@@ -1,8 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import Link from "next/link";
 import ProductGrid from "@/components/product/ProductGrid";
 import { products } from "@/utils/mockData";
 import LearnMoreButton from "@/components/ui/learn-more-button";
@@ -13,7 +11,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative h-[70vh] min-h-[500px]">
@@ -33,7 +30,7 @@ const Index = () => {
               Exquisite fragrances crafted with the finest ingredients to
               elevate your presence and leave a lasting impression.
             </p>
-            <Link to="/products" className="group">
+            <Link href="/products" className="group">
               <LearnMoreButton
                 text="Shop Collection"
                 className="w-64 [&_.button-text]:text-white"
@@ -49,7 +46,7 @@ const Index = () => {
               Our Collections
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Link to="/products?category=Men's Collection" className="group">
+              <Link href="/products?category=Men's Collection" className="group">
                 <div className="relative h-80 overflow-hidden rounded-lg">
                   <img
                     src="https://images.unsplash.com/photo-1600612253971-422e7f7faeb6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
@@ -69,7 +66,7 @@ const Index = () => {
               </Link>
 
               <Link
-                to="/products?category=Women's Collection"
+                href="/products?category=Women's Collection"
                 className="group"
               >
                 <div className="relative h-80 overflow-hidden rounded-lg">
@@ -90,7 +87,7 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link to="/products?category=Unisex Collection" className="group">
+              <Link href="/products?category=Unisex Collection" className="group">
                 <div className="relative h-80 overflow-hidden rounded-lg">
                   <img
                     src="https://images.unsplash.com/photo-1595425964072-482730a1818c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
@@ -119,7 +116,7 @@ const Index = () => {
               <h2 className="text-3xl font-serif font-bold">
                 Featured Fragrances
               </h2>
-              <Link to="/products" className="text-luxe-blue hover:underline">
+              <Link href="/products" className="text-luxe-blue hover:underline">
                 View All
               </Link>
             </div>
@@ -149,10 +146,10 @@ const Index = () => {
                 innovative approaches to create scents that are both timeless
                 and contemporary.
               </p>
-              <Link to="/about" className="group">
+              <Link href="/about" className="group">
                 <LearnMoreButton
                   text="Learn More About Us"
-                  className="w-80 [&_.circle]:bg-white [&_.circle_.icon.arrow]:before:border-black [&_.button-text]:pl-8 [&_.button-text]:text-white [&_*]:group-hover:text-black"
+                  className="w-80 [&_.circle]:bg-white [&_circle_.icon.arrow]:before:border-black [&_.button-text]:pl-8 [&_.button-text]:text-white [&_*]:group-hover:text-black"
                 />
               </Link>
             </div>
@@ -182,7 +179,6 @@ const Index = () => {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 };

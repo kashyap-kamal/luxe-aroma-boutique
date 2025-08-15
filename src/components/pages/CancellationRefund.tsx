@@ -4,8 +4,6 @@
  */
 
 import React from "react"
-import Navbar from "@/components/layout/Navbar"
-import Footer from "@/components/layout/Footer"
 import {
   RotateCcw,
   CreditCard,
@@ -19,7 +17,7 @@ import {
 const CancellationRefund: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      
       <main className="flex-grow py-8">
         <div className="luxury-container">
           {/* Header */}
@@ -387,7 +385,7 @@ const CancellationRefund: React.FC = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      
     </div>
   )
 }

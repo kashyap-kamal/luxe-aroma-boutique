@@ -1,8 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import ProductGrid from '@/components/product/ProductGrid';
 import ProductFilter from '@/components/product/ProductFilter';
 import { 
@@ -45,7 +43,7 @@ const Products = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      
       <main className="flex-grow py-8">
         <div className="luxury-container">
           <h1 className="text-3xl font-serif font-bold mb-8">Our Perfume Collection</h1>
@@ -91,7 +89,7 @@ const Products = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      
     </div>
   );
 };

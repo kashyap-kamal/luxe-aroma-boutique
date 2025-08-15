@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link } from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -9,7 +9,7 @@ const PrivacyPolicy = () => {
       <div className="bg-luxe-aliceBlue py-8">
         <div className="luxury-container">
           <div className="flex items-center mb-6">
-            <Link to="/">
+            <Link href="/">
               <Button variant="ghost" size="sm" className="mr-4">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Home

@@ -1,9 +1,7 @@
 import React, { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link } from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Mail, Phone, MapPin, Clock, Send } from "lucide-react"
-import Navbar from "@/components/layout/Navbar"
-import Footer from "@/components/layout/Footer"
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -39,7 +37,7 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative h-[50vh] min-h-[400px]">
@@ -53,7 +51,7 @@ const Contact = () => {
           </div>
           <div className="relative h-full luxury-container flex flex-col justify-center items-start text-white">
             <div className="mb-4">
-              <Link to="/">
+              <Link href="/">
                 <Button
                   variant="outline"
                   className="flex items-center gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
@@ -385,7 +383,7 @@ const Contact = () => {
           </div>
         </section>
       </main>
-      <Footer />
+      
     </div>
   )
 }

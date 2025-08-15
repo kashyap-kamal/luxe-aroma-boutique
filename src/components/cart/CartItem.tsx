@@ -1,5 +1,7 @@
+"use client";
+
 import React from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CartItem as CartItemType, useCart } from "@/contexts/CartContext";
 import { Minus, Plus, Trash2 } from "lucide-react";

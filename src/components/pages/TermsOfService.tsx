@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link } from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 
@@ -8,7 +8,7 @@ const TermsOfService = () => {
       <div className="luxury-container py-12">
         {/* Back to Home Button */}
         <div className="mb-8">
-          <Link to="/">
+          <Link href="/">
             <Button variant="outline" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back to Home
@@ -221,7 +221,7 @@ const TermsOfService = () => {
               <p className="text-gray-700 leading-relaxed">
                 Your privacy is important to us. Please review our{" "}
                 <Link
-                  to="/privacy-policy"
+                  href="/privacy-policy"
                   className="text-luxe-blue hover:underline"
                 >
                   Privacy Policy

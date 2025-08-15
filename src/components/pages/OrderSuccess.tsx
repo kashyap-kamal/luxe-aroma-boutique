@@ -4,9 +4,8 @@
  */
 
 import React, { useEffect, useState } from "react"
-import { useParams, Link, useNavigate } from "react-router-dom"
-import Navbar from "@/components/layout/Navbar"
-import Footer from "@/components/layout/Footer"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { usePayment } from "@/contexts/PaymentContext"
@@ -23,9 +22,12 @@ import {
 } from "lucide-react"
 import type { OrderDetails } from "@/types/razorpay"
 
-const OrderSuccess: React.FC = () => {
-  const { orderId } = useParams<{ orderId: string }>()
-  const navigate = useNavigate()
+interface OrderSuccessProps {
+  orderId: string;
+}
+
+const OrderSuccess: React.FC<OrderSuccessProps> = ({ orderId }) => {
+  const router = useRouter()
   const { getOrderById } = usePayment()
   const [order, setOrder] = useState<OrderDetails | null>(null)
   const [loading, setLoading] = useState(true)
@@ -40,7 +42,7 @@ const OrderSuccess: React.FC = () => {
       // If order not found, redirect to home
       if (!orderDetails) {
         setTimeout(() => {
-          navigate("/")
+          router.push("/")
         }, 3000)
       }
     } else {
@@ -51,14 +53,12 @@ const OrderSuccess: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brown-600 mx-auto mb-4"></div>
             <p>Loading order details...</p>
           </div>
         </main>
-        <Footer />
       </div>
     )
   }
@@ -66,7 +66,6 @@ const OrderSuccess: React.FC = () => {
   if (!order) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center">
             <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -74,20 +73,18 @@ const OrderSuccess: React.FC = () => {
             <p className="text-gray-600 mb-4">
               The order you're looking for doesn't exist or has been removed.
             </p>
-            <Button onClick={() => navigate("/")}>
+            <Button onClick={() => router.push("/")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Home
             </Button>
           </div>
         </main>
-        <Footer />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow py-8">
         <div className="luxury-container">
           {/* Success Header */}
@@ -265,7 +262,7 @@ const OrderSuccess: React.FC = () => {
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => navigate("/products")}
+              onClick={() => router.push("/products")}
             >
               Continue Shopping
             </Button>
@@ -298,17 +295,16 @@ const OrderSuccess: React.FC = () => {
           <div className="text-center mt-8 p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600">
               Need help with your order?{" "}
-              <Link
-                to="/contact"
-                className="text-brown-600 underline font-medium"
-              >
-                Contact our support team
-              </Link>
+                          <Link
+              href="/contact"
+              className="text-brown-600 underline font-medium"
+            >
+              Contact our support team
+            </Link>
             </p>
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }

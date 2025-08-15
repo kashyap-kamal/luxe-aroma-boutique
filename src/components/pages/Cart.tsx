@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag } from 'lucide-react';
 import CartItem from '@/components/cart/CartItem';
@@ -16,7 +14,6 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow py-8">
         <div className="luxury-container">
           <h1 className="text-3xl font-serif font-bold mb-8">Shopping Cart</h1>
@@ -31,7 +28,7 @@ const Cart = () => {
                 Looks like you haven't added any items to your cart yet.
               </p>
               <Button asChild>
-                <Link to="/products">Continue Shopping</Link>
+                <Link href="/products">Continue Shopping</Link>
               </Button>
             </div>
           ) : (
@@ -68,7 +65,6 @@ const Cart = () => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

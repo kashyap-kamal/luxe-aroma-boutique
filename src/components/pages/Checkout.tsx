@@ -1,7 +1,6 @@
 import React, { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import Navbar from "@/components/layout/Navbar"
-import Footer from "@/components/layout/Footer"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -50,13 +49,13 @@ const OrderSummary: React.FC<{
 )
 
 const Checkout: React.FC = () => {
-  const navigate = useNavigate()
+  const router = useRouter()
   const { cartItems, subtotal, clearCart } = useCart()
   const { processPayment, isProcessing, error, clearPaymentState } =
     usePayment()
 
   // Environment validation
-  const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID
+  const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
   const isEnvironmentConfigured = Boolean(razorpayKeyId)
 
   // Form state
@@ -220,7 +219,7 @@ const Checkout: React.FC = () => {
     }
 
     // Check environment variables
-    const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID
+    const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
 
     if (!razorpayKeyId) {
       toast({
@@ -268,7 +267,7 @@ const Checkout: React.FC = () => {
         clearCart()
 
         // Navigate to success page
-        navigate(`/order-success/${result.orderId}`)
+        router.push(`/order-success/${result.orderId}`)
       } else {
         // Payment failed toast
         toast({
@@ -290,7 +289,6 @@ const Checkout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow py-8">
         <div className="luxury-container">
           <div className="flex items-center gap-2 mb-6">
@@ -316,13 +314,13 @@ const Checkout: React.FC = () => {
                   <ol className="text-xs text-yellow-700 list-decimal list-inside space-y-1">
                     <li>
                       Create a{" "}
-                      <code className="bg-yellow-100 px-1 rounded">.env</code>{" "}
+                      <code className="bg-yellow-100 px-1 rounded">.env.local</code>{" "}
                       file in the project root
                     </li>
                     <li>
                       Add:{" "}
                       <code className="bg-yellow-100 px-1 rounded">
-                        VITE_RAZORPAY_KEY_ID=your_key_here
+                        NEXT_PUBLIC_RAZORPAY_KEY_ID=your_key_here
                       </code>
                     </li>
                     <li>Restart the development server</li>
@@ -378,7 +376,7 @@ const Checkout: React.FC = () => {
                     checkout.
                   </p>
                   <Button
-                    onClick={() => navigate("/products")}
+                    onClick={() => router.push("/products")}
                     className="bg-brown-600 hover:bg-brown-700"
                   >
                     Browse Products
@@ -658,14 +656,14 @@ const Checkout: React.FC = () => {
                       >
                         I agree to the{" "}
                         <Link
-                          to="/terms-of-service"
+                          href="/terms-of-service"
                           className="text-brown-600 underline"
                         >
                           Terms of Service
                         </Link>{" "}
                         and{" "}
                         <Link
-                          to="/privacy-policy"
+                          href="/privacy-policy"
                           className="text-brown-600 underline"
                         >
                           Privacy Policy
@@ -695,7 +693,7 @@ const Checkout: React.FC = () => {
                       type="button"
                       variant="outline"
                       className="flex-1"
-                      onClick={() => navigate("/cart")}
+                      onClick={() => router.push("/cart")}
                       disabled={isProcessing}
                     >
                       Back to Cart
@@ -737,7 +735,6 @@ const Checkout: React.FC = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }

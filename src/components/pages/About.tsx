@@ -1,5 +1,5 @@
 import React from "react"
-import { Link } from "react-router-dom"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   ArrowLeft,
@@ -11,13 +11,10 @@ import {
   Globe,
   Shield,
 } from "lucide-react"
-import Navbar from "@/components/layout/Navbar"
-import Footer from "@/components/layout/Footer"
 
 const About = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative h-[60vh] min-h-[400px]">
@@ -31,7 +28,7 @@ const About = () => {
           </div>
           <div className="relative h-full luxury-container flex flex-col justify-center items-start text-white">
             <div className="mb-4">
-              <Link to="/">
+              <Link href="/">
                 <Button
                   variant="outline"
                   className="flex items-center gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
@@ -372,12 +369,12 @@ const About = () => {
               craftsmanship, and timeless elegance.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/products">
+              <Link href="/products">
                 <Button className="bg-luxe-sandy hover:bg-luxe-blue text-white px-8 py-3 text-lg">
                   Shop Collection
                 </Button>
               </Link>
-              <Link to="/contact">
+              <Link href="/contact">
                 <Button
                   variant="outline"
                   className="border-white text-white hover:bg-white hover:text-luxe-blue px-8 py-3 text-lg"
@@ -389,7 +386,6 @@ const About = () => {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   )
 }
