@@ -23,7 +23,7 @@ interface CartStore {
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
-  subtotal: number;
+  // subtotal: number;
 }
 
 const createCartStore: StateCreator<
@@ -31,7 +31,7 @@ const createCartStore: StateCreator<
   [["zustand/persist", unknown], ["zustand/immer", never]]
 > = (set, get) => ({
   cartItems: [],
-  subtotal: 0,
+  // subtotal: 0,
   addToCart: (product, quantity) => {
     set((state) => {
       const existingItem = (state.cartItems as CartItem[]).find(
@@ -79,3 +79,15 @@ export const useCartStore = create<CartStore>()(
     storage: createJSONStorage(() => sessionStorage),
   }),
 );
+
+export const useCartSubtotal = () => {
+  const { cartItems } = useCartStore();
+
+  // Calculate subtotal
+  const total = cartItems.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0,
+  );
+
+  return total;
+};
