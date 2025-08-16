@@ -69,7 +69,9 @@ const createCartStore: StateCreator<
     });
   },
   clearCart: () => {
-    set((state) => (state.cartItems.length = 0));
+    set((state) => {
+      state.cartItems.length = 0;
+    });
   },
 });
 

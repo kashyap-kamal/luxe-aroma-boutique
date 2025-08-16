@@ -8,16 +8,18 @@ import type {
   PaymentErrorResponse,
 } from "@/types/razorpay";
 import { PaymentStatus } from "@/types/razorpay";
+import { toast } from "sonner";
+import ky from "ky";
 
 /**
  * Configuration for Razorpay
  * Uses environment variables for security
  */
 const RAZORPAY_CONFIG = {
-  keyId: process.env.VITE_RAZORPAY_KEY_ID || "",
-  testMode: process.env.VITE_RAZORPAY_TEST_MODE === "true",
-  appName: process.env.VITE_APP_NAME || "Luxe Aroma Boutique",
-  appUrl: process.env.VITE_APP_URL || "http://localhost:5173",
+  keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+  testMode: process.env.RAZORPAY_TEST_MODE === "true",
+  appName: process.env.NEXT_PUBLIC_APP_NAME || "Luxe Aroma Boutique",
+  appUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:5173",
 } as const;
 
 /**
@@ -73,27 +75,20 @@ export const createRazorpayOrder = async (
     // Your backend should create the order using Razorpay's server-side API
 
     // Simulated API response for demo
-    const orderData: OrderResponse = {
-      id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
-      entity: "order",
-      amount: convertToPaise(amount),
-      amount_paid: 0,
-      amount_due: convertToPaise(amount),
-      currency,
-      receipt: receipt || generateReceiptId(),
-      status: "created",
-      attempts: 0,
-      notes: {
-        app_name: RAZORPAY_CONFIG.appName,
-        created_at: new Date().toISOString(),
-      },
-      created_at: Math.floor(Date.now() / 1000),
-    };
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const rpOrderResponse = await ky
+      .post<OrderResponse>("/api/checkout", {
+        json: {
+          amount,
+        },
+      })
+      .json();
 
-    return orderData;
+    if (Object.hasOwn(rpOrderResponse, "error")) {
+      throw new Error("Failed to create payment order. Please try again.");
+    }
+
+    return rpOrderResponse;
   } catch (error) {
     console.error("Error creating Razorpay order:", error);
     throw new Error("Failed to create payment order. Please try again.");
@@ -214,12 +209,17 @@ export const verifyPaymentSignature = async (
 
     console.log("Verifying payment signature:", paymentData);
 
-    // Simulate verification delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const res = await ky
+      .post<{ success: boolean; error: string }>("/api/store-payment", {
+        json: paymentData,
+      })
+      .json();
 
-    // For demo purposes, always return true
-    // In production, this should verify the actual signature
-    return true;
+    if (res.error) {
+      throw new Error(res.error);
+    }
+
+    return res.success;
   } catch (error) {
     console.error("Error verifying payment:", error);
     return false;
@@ -259,79 +259,79 @@ export const saveOrderDetails = async (
  * Load Razorpay SDK dynamically
  * Ensures the SDK is loaded before payment initialization
  */
-export const loadRazorpaySDK = (retryCount: number = 0): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    // Check if already loaded
-    if (typeof window.Razorpay !== "undefined") {
-      resolve();
-      return;
-    }
-
-    // Check if script is already being loaded
-    const existingScript = document.querySelector(
-      'script[src="https://checkout.razorpay.com/v1/checkout.js"]',
-    );
-    if (existingScript) {
-      // Script is already being loaded, wait for it
-      existingScript.addEventListener("load", () => resolve());
-      existingScript.addEventListener("error", () => {
-        if (retryCount < 3) {
-          console.warn(
-            `Razorpay SDK load failed, retrying... (${retryCount + 1}/3)`,
-          );
-          // Remove failed script
-          existingScript.remove();
-          // Retry after delay
-          setTimeout(
-            () => {
-              loadRazorpaySDK(retryCount + 1)
-                .then(resolve)
-                .catch(reject);
-            },
-            1000 * (retryCount + 1),
-          );
-        } else {
-          reject(new Error("Failed to load Razorpay SDK after 3 attempts"));
-        }
-      });
-      return;
-    }
-
-    // Create script element
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-
-    // Handle successful load
-    script.onload = () => {
-      console.log("Razorpay SDK loaded successfully");
-      resolve();
-    };
-
-    // Handle load error with retry logic
-    script.onerror = () => {
-      console.error("Failed to load Razorpay SDK");
-      script.remove(); // Clean up failed script
-
-      if (retryCount < 3) {
-        console.warn(`Retrying Razorpay SDK load... (${retryCount + 1}/3)`);
-        setTimeout(
-          () => {
-            loadRazorpaySDK(retryCount + 1)
-              .then(resolve)
-              .catch(reject);
-          },
-          1000 * (retryCount + 1),
-        ); // Exponential backoff
-      } else {
-        reject(new Error("Failed to load Razorpay SDK after 3 attempts"));
-      }
-    };
-
-    // Append to document
-    document.head.appendChild(script);
-  });
-};
+// export const loadRazorpaySDK = (retryCount: number = 0): Promise<void> => {
+//   return new Promise((resolve, reject) => {
+//     // Check if already loaded
+//     if (typeof window.Razorpay !== "undefined") {
+//       resolve();
+//       return;
+//     }
+//
+//     // Check if script is already being loaded
+//     const existingScript = document.querySelector(
+//       'script[src="https://checkout.razorpay.com/v1/checkout.js"]',
+//     );
+//     if (existingScript) {
+//       // Script is already being loaded, wait for it
+//       existingScript.addEventListener("load", () => resolve());
+//       existingScript.addEventListener("error", () => {
+//         if (retryCount < 3) {
+//           console.warn(
+//             `Razorpay SDK load failed, retrying... (${retryCount + 1}/3)`,
+//           );
+//           // Remove failed script
+//           existingScript.remove();
+//           // Retry after delay
+//           setTimeout(
+//             () => {
+//               loadRazorpaySDK(retryCount + 1)
+//                 .then(resolve)
+//                 .catch(reject);
+//             },
+//             1000 * (retryCount + 1),
+//           );
+//         } else {
+//           reject(new Error("Failed to load Razorpay SDK after 3 attempts"));
+//         }
+//       });
+//       return;
+//     }
+//
+//     // Create script element
+//     const script = document.createElement("script");
+//     script.src = "https://checkout.razorpay.com/v1/checkout.js";
+//     script.async = true;
+//
+//     // Handle successful load
+//     script.onload = () => {
+//       console.log("Razorpay SDK loaded successfully");
+//       resolve();
+//     };
+//
+//     // Handle load error with retry logic
+//     script.onerror = () => {
+//       console.error("Failed to load Razorpay SDK");
+//       script.remove(); // Clean up failed script
+//
+//       if (retryCount < 3) {
+//         console.warn(`Retrying Razorpay SDK load... (${retryCount + 1}/3)`);
+//         setTimeout(
+//           () => {
+//             loadRazorpaySDK(retryCount + 1)
+//               .then(resolve)
+//               .catch(reject);
+//           },
+//           1000 * (retryCount + 1),
+//         ); // Exponential backoff
+//       } else {
+//         reject(new Error("Failed to load Razorpay SDK after 3 attempts"));
+//       }
+//     };
+//
+//     // Append to document
+//     document.head.appendChild(script);
+//   });
+// };
 
 /**
  * Payment service class for managing payment operations
@@ -361,7 +361,7 @@ export class PaymentService {
   ): Promise<{ success: boolean; orderId?: string; error?: string }> {
     try {
       // Step 1: Load Razorpay SDK
-      await loadRazorpaySDK();
+      // await loadRazorpaySDK();
 
       // Step 2: Create order
       const order = await createRazorpayOrder(amount);

@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const router.to = useRouter();
+  const router = useRouter();
   const { addToCart } = useCartStore();
   const [quantity, setQuantity] = useState(1);
 
@@ -53,7 +53,7 @@ const ProductDetail = () => {
 
   const handleBuyNow = () => {
     addToCart(product, quantity);
-    router.to.push("/cart");
+    router.push("/cart");
   };
 
   return (

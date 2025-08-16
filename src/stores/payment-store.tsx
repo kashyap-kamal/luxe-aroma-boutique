@@ -3,6 +3,8 @@ import { OrderDetails, PaymentStatus, CustomerInfo } from "@/types/razorpay";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { paymentService } from "@/types/services/payment-services";
+import ky from "ky";
+import { toast } from "sonner";
 
 export interface PaymentState {
   isProcessing: boolean;
@@ -25,16 +27,9 @@ interface PaymentStoreType extends PaymentState {
   setPaymentError: (error: string | null) => void;
 
   // Order management
-  // getOrderHistory: () => OrderDetails[];
-  // getOrderById: (orderId: string) => OrderDetails | null;
+  getOrderHistory: () => OrderDetails[];
+  getOrderById: (orderId: string) => OrderDetails | null;
 }
-
-const initialState: PaymentState = {
-  isProcessing: false,
-  currentOrder: null,
-  paymentStatus: null,
-  error: null,
-};
 
 const createPaymentStore: StateCreator<
   PaymentStoreType,
@@ -120,6 +115,32 @@ const createPaymentStore: StateCreator<
     set((s) => {
       s.error = error;
     });
+  },
+  getOrderHistory: () => {
+    try {
+      const orders = localStorage.getItem("orders");
+      if (!orders) return [];
+
+      const parsedOrders = JSON.parse(orders);
+
+      // Fix Date deserialization - convert date strings back to Date objects
+      return parsedOrders.map((order: any) => ({
+        ...order,
+        orderDate: new Date(order.orderDate),
+      }));
+    } catch (error) {
+      console.error("Error loading order history:", error);
+      return [];
+    }
+  },
+  getOrderById: (orderId) => {
+    try {
+      const orders = get().getOrderHistory();
+      return orders.find((order) => order.id === orderId) || null;
+    } catch (error) {
+      console.error("Error loading order:", error);
+      return null;
+    }
   },
 });
 
