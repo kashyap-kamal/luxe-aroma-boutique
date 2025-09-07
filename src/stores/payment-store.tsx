@@ -3,8 +3,6 @@ import { OrderDetails, PaymentStatus, CustomerInfo } from "@/types/razorpay";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { paymentService } from "@/types/services/payment-services";
-import ky from "ky";
-import { toast } from "sonner";
 
 export interface PaymentState {
   isProcessing: boolean;
@@ -19,7 +17,7 @@ interface PaymentStoreType extends PaymentState {
   processPayment: (
     amount: number,
     customerInfo: CustomerInfo,
-    orderDetails: Omit<OrderDetails, "id" | "paymentStatus" | "orderDate">,
+    orderDetails: Omit<OrderDetails, "id" | "paymentStatus" | "orderDate">
   ) => Promise<{ success: boolean; orderId?: string }>;
 
   // State management
@@ -42,7 +40,7 @@ const createPaymentStore: StateCreator<
   processPayment: async (
     amount: number,
     customerInfo: CustomerInfo,
-    orderDetails: Omit<OrderDetails, "id" | "paymentStatus" | "orderDate">,
+    orderDetails: Omit<OrderDetails, "id" | "paymentStatus" | "orderDate">
   ): Promise<{ success: boolean; orderId?: string }> => {
     set((s) => {
       s.isProcessing = true;
@@ -71,7 +69,7 @@ const createPaymentStore: StateCreator<
       const result = await paymentService.processPayment(
         amount,
         paymentCustomerInfo,
-        orderDetails,
+        orderDetails
       );
 
       if (result.success && result.orderId) {
@@ -124,6 +122,7 @@ const createPaymentStore: StateCreator<
       const parsedOrders = JSON.parse(orders);
 
       // Fix Date deserialization - convert date strings back to Date objects
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return parsedOrders.map((order: any) => ({
         ...order,
         orderDate: new Date(order.orderDate),
@@ -148,5 +147,5 @@ export const usePaymentStore = create<PaymentStoreType>()(
   persist(immer(createPaymentStore), {
     name: "payment-store",
     storage: createJSONStorage(() => sessionStorage),
-  }),
+  })
 );

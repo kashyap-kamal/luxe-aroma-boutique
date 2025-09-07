@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "lucide-react";
 import { Product, useCartStore } from "@/stores/cart-store";
+import Image from "next/image";
 
 interface ProductCardProps {
   product: Product;
@@ -25,7 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <CardContent className="p-0">
         <Link href={`/products/${product.id}`} className="block">
           <div className="relative aspect-square overflow-hidden bg-gray-100">
-            <img
+            <Image
               src={product.image}
               alt={product.name}
               className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"

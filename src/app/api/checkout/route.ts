@@ -3,12 +3,21 @@ import Razorpay from "razorpay";
 
 export const runtime = "nodejs";
 
+// Initialize Razorpay with environment variables
+// Use placeholder values during build if env vars are not set
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder",
+  key_secret: process.env.RAZORPAY_KEY_SECRET || "placeholder_secret",
 });
 
 export async function POST(request: Request) {
+  // Check if Razorpay credentials are properly configured
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    return new Response("Payment service not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.", {
+      status: 500,
+    });
+  }
+
   const body = await request.json();
   const { amount } = body;
 

@@ -1,0 +1,36 @@
+# GitLab CI/CD Pipeline for Hostinger Deployment
+# Based on: https://dev.to/oandersonmagalhaes/deploying-your-nextjs-project-on-hostinger-4gpm
+
+image: node:21.4.0-alpine
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  - apk add lftp
+  - npm install
+
+upload:
+  environment: prd
+  stage: deploy
+  script:
+    - echo "Preparing FTP deployment to Hostinger..."
+    - echo "FTP Host: $luxe_aroma_ftp_host"
+    - echo "FTP User: $luxe_aroma_ftp_user"
+    - echo "Website URL: $luxe_aroma_url"
+    - echo "Base Path: $luxe_aroma_base_path"
+    - URL=$luxe_aroma_url BASE_PATH=$luxe_aroma_base_path npx next build
+    - echo "Build completed. Starting FTP upload..."
+    - lftp -c "set verify-certificate/$luxe_aroma_ftp_host no; set ftp:ssl-allow on; open -u $luxe_aroma_ftp_user,$luxe_aroma_ftp_password ftp://$luxe_aroma_ftp_host; mirror -Rev out/ ./ --ignore-time --parallel=10"
+    - echo "✅ Deployment completed successfully!"
+  only:
+    - master
+    - main
+
+# Required GitLab CI/CD Variables:
+# luxe_aroma_base_path: Your base path (usually empty for root domain)
+# luxe_aroma_ftp_host: Your FTP host (e.g., ftp.yourdomain.com)
+# luxe_aroma_ftp_user: Your FTP username
+# luxe_aroma_ftp_password: Your FTP password
+# luxe_aroma_url: Your website URL (e.g., https://aromeluxe.in)

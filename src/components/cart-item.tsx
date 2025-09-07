@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CartItem as CartItemType, useCartStore } from "@/stores/cart-store";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
 
 interface CartItemProps {
   item: CartItemType;
@@ -32,7 +33,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
     <div className="flex flex-col sm:flex-row items-start sm:items-center py-4 border-b">
       <div className="flex-shrink-0 w-24 h-24 bg-gray-100 rounded overflow-hidden mr-4 mb-3 sm:mb-0">
         <Link href={`/products/${product.id}`}>
-          <img
+          <Image
             src={product.image}
             alt={product.name}
             className="w-full h-full object-cover"

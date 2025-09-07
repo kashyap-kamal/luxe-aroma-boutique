@@ -33,7 +33,7 @@ const Footer = () => {
                   href="/products?category=men"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
-                  Men's Collection
+                  Men&apos;s Collection
                 </Link>
               </li>
               <li>
@@ -41,7 +41,7 @@ const Footer = () => {
                   href="/products?category=women"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
-                  Women's Collection
+                  Women&apos;s Collection
                 </Link>
               </li>
               <li>

@@ -1,5 +1,4 @@
 import type {
-  OrderRequest,
   OrderResponse,
   PaymentVerification,
   OrderDetails,
@@ -8,7 +7,6 @@ import type {
   PaymentErrorResponse,
 } from "@/types/razorpay";
 import { PaymentStatus } from "@/types/razorpay";
-import { toast } from "sonner";
 import ky from "ky";
 
 /**
@@ -67,8 +65,8 @@ export const validateRazorpayConfig = (): boolean => {
  */
 export const createRazorpayOrder = async (
   amount: number,
-  currency: string = "INR",
-  receipt?: string,
+  // currency: string = "INR",
+  // receipt?: string,
 ): Promise<OrderResponse> => {
   try {
     // In production, this should be an API call to your backend
@@ -177,6 +175,7 @@ export const initializePayment = (
     const razorpayInstance = new window.Razorpay(options);
 
     // Handle payment failures
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     razorpayInstance.on("payment.failed", (response: PaymentErrorResponse) => {
       console.error("Payment failed:", response.error);
