@@ -4,7 +4,6 @@ import {
   Package,
   Clock,
   MapPin,
-  CreditCard,
   AlertTriangle,
   CheckCircle,
   Globe,
@@ -534,7 +533,8 @@ const ShippingDelivery: React.FC = () => {
                   • Signature may be required for high-value orders (Rs 5,000+)
                 </li>
                 <li>
-                  • We're not responsible for delays due to incorrect addresses
+                  • We&apos;re not responsible for delays due to incorrect
+                  addresses
                 </li>
                 <li>• Additional charges may apply for remote locations</li>
                 <li>

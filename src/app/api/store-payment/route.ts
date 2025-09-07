@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     }
 
     // read existing file (or init empty array if not found)
-    let payments: any[] = [];
+    let payments: unknown[] = [];
     if (fs.existsSync(dataFile)) {
       const fileData = fs.readFileSync(dataFile, "utf8");
       if (fileData.trim()) {
@@ -48,6 +48,7 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ success: true, entry: newEntry }), {
       status: 201,
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     return new Response(
       JSON.stringify({ success: false, error: err.message }),

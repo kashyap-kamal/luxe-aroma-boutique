@@ -11,7 +11,6 @@ import {
   Package,
   Truck,
   MapPin,
-  Calendar,
   Phone,
   Mail,
   Download,
@@ -63,7 +62,8 @@ const OrderSuccess: React.FC = () => {
           <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Order Not Found</h1>
           <p className="text-gray-600 mb-4">
-            The order you're looking for doesn't exist or has been removed.
+            The order you&apos;re looking for doesn&apos;t exist or has been
+            removed.
           </p>
           <Button onClick={() => router.push("/")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -218,7 +218,7 @@ const OrderSuccess: React.FC = () => {
               <div>
                 <p className="font-medium text-sm">Order Processing</p>
                 <p className="text-xs text-gray-600">
-                  We'll prepare your items within 1-2 business days
+                  We&apos;ll prepare your items within 1-2 business days
                 </p>
               </div>
             </div>

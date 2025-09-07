@@ -55,12 +55,7 @@ const Checkout: React.FC = () => {
   const router = useRouter();
   const { cartItems, clearCart } = useCartStore();
   const subtotal = useCartSubtotal();
-  const { processPayment, isProcessing, error, clearPaymentState } =
-    usePaymentStore();
-
-  // Environment validation
-  const razorpayKeyId = process.env.VITE_RAZORPAY_KEY_ID;
-  // const isEnvironmentConfigured = Boolean(razorpayKeyId);
+  const { processPayment, isProcessing, clearPaymentState } = usePaymentStore();
 
   // Form state
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
@@ -235,9 +230,9 @@ const Checkout: React.FC = () => {
       const orderItems: OrderItem[] = cartItems.map((item) => ({
         productId: item.product.id,
         productName: item.product.name,
-        price: item.product.price,
+        price: item.product.price.current,
         quantity: item.quantity,
-        total: item.product.price * item.quantity,
+        total: item.product.price.current * item.quantity,
       }));
 
       // Prepare order details
@@ -579,8 +574,8 @@ const Checkout: React.FC = () => {
                           </p>
                         )}
                         <p className="text-xs text-gray-500 mt-1">
-                          If provided, we'll pre-fill this in the payment page
-                          for your convenience.
+                          If provided, we&apos;ll pre-fill this in the payment
+                          page for your convenience.
                         </p>
                       </div>
                     )}

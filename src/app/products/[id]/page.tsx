@@ -8,6 +8,7 @@ import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { getProductById } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +24,7 @@ const ProductDetail = () => {
         <div className="luxury-container text-center">
           <h1 className="text-2xl font-medium mb-4">Product Not Found</h1>
           <p className="mb-8">
-            Sorry, we couldn't find the product you were looking for.
+            Sorry, we couldn&apos;t find the product you were looking for.
           </p>
           <Button asChild>
             <Link href="/products">Continue Shopping</Link>
@@ -63,7 +64,7 @@ const ProductDetail = () => {
           {/* Product Image */}
           <div className="w-full lg:w-1/2">
             <div className="bg-gray-100 rounded-lg overflow-hidden">
-              <img
+              <Image
                 src={product.image}
                 alt={product.name}
                 className="w-full h-auto object-cover aspect-square"

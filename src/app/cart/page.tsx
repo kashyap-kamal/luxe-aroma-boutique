@@ -25,7 +25,7 @@ const Cart = () => {
             </div>
             <h2 className="text-xl font-medium mb-2">Your cart is empty</h2>
             <p className="text-gray-600 mb-8">
-              Looks like you haven't added any items to your cart yet.
+              Looks like you haven&apos;t added any items to your cart yet.
             </p>
             <Button asChild>
               <Link href="/products">Continue Shopping</Link>
@@ -41,7 +41,7 @@ const Cart = () => {
                     Items (
                     {cartItems.reduce(
                       (total, item) => total + item.quantity,
-                      0,
+                      0
                     )}
                     )
                   </h2>

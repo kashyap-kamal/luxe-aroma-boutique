@@ -70,7 +70,7 @@ const CancellationRefund: React.FC = () => {
                   </h3>
                   <p className="text-sm text-green-700">
                     You can cancel your order for free within 2 hours of placing
-                    it, provided it hasn't been processed for shipping.
+                    it, provided it hasn&apos;t been processed for shipping.
                   </p>
                 </div>
               </div>
@@ -84,7 +84,7 @@ const CancellationRefund: React.FC = () => {
                     After Processing
                   </h3>
                   <p className="text-sm text-yellow-700">
-                    Once your order is processed, you'll need to follow our
+                    Once your order is processed, you&apos;ll need to follow our
                     return process to receive a refund.
                   </p>
                 </div>
@@ -96,8 +96,8 @@ const CancellationRefund: React.FC = () => {
               <li>Contact us immediately via phone, email, or live chat</li>
               <li>Provide your order number and reason for cancellation</li>
               <li>
-                We'll confirm cancellation and process your refund within 24
-                hours
+                We&apos;ll confirm cancellation and process your refund within
+                24 hours
               </li>
             </ol>
           </section>
@@ -150,8 +150,8 @@ const CancellationRefund: React.FC = () => {
                 within 7 days of delivery
               </li>
               <li>
-                <strong>Return Authorization:</strong> We'll provide a return
-                authorization number (RMA)
+                <strong>Return Authorization:</strong> We&apos;ll provide a
+                return authorization number (RMA)
               </li>
               <li>
                 <strong>Package Items:</strong> Pack items securely in original
@@ -162,7 +162,7 @@ const CancellationRefund: React.FC = () => {
                 provide
               </li>
               <li>
-                <strong>Processing:</strong> We'll inspect and process your
+                <strong>Processing:</strong> We&apos;ll inspect and process your
                 return within 2-3 business days
               </li>
             </ol>
@@ -242,19 +242,19 @@ const CancellationRefund: React.FC = () => {
             <h3 className="text-lg font-semibold mb-3">Exchange Process</h3>
             <ol className="list-decimal list-inside space-y-2 text-gray-700">
               <li>Contact us to request an exchange</li>
-              <li>We'll provide an exchange authorization</li>
+              <li>We&apos;ll provide an exchange authorization</li>
               <li>Ship the item back using our prepaid label</li>
               <li>
-                We'll send the replacement item once we receive the returned
-                item
+                We&apos;ll send the replacement item once we receive the
+                returned item
               </li>
             </ol>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
               <p className="text-sm text-blue-800">
                 <strong>Note:</strong> If the replacement item has a higher
-                price, you'll be charged the difference. If it's lower, we'll
-                refund the difference.
+                price, you&apos;ll be charged the difference. If it&apos;s
+                lower, we&apos;ll refund the difference.
               </p>
             </div>
           </section>
