@@ -10,7 +10,11 @@ export async function generateStaticParams() {
 }
 
 // Server component that handles static generation
-const ProductDetail = async ({ params }: { params: Promise<{ id: string }> }) => {
+const ProductDetail = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
   const { id } = await params;
   return <ProductDetailClient id={id} />;
 };

@@ -8,19 +8,23 @@ export async function generateStaticParams() {
   // In a real app, you might want to generate IDs based on actual orders
   const sampleOrderIds = [
     "ORD-001",
-    "ORD-002", 
+    "ORD-002",
     "ORD-003",
     "ORD-004",
-    "ORD-005"
+    "ORD-005",
   ];
-  
+
   return sampleOrderIds.map((orderId) => ({
     orderId: orderId,
   }));
 }
 
 // Server component that handles static generation
-const OrderSuccess = async ({ params }: { params: Promise<{ orderId: string }> }) => {
+const OrderSuccess = async ({
+  params,
+}: {
+  params: Promise<{ orderId: string }>;
+}) => {
   const { orderId } = await params;
   return <OrderSuccessClient orderId={orderId} />;
 };
