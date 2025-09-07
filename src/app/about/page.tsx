@@ -1,14 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  Award,
-  Heart,
-  Leaf,
-  Star,
-  Globe,
-  Shield,
-} from "lucide-react";
+import { ArrowLeft, Heart, Leaf, Globe, Shield, User } from "lucide-react";
+import Image from "next/image";
 
 const About = () => {
   return (
@@ -16,19 +9,21 @@ const About = () => {
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[400px]">
         <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1592945403244-b3faa74b2c9a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          <Image
+            src="/assets/about-us/about-us.jpeg"
             alt="Aromé Luxe About"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-bottom"
+            width={1280}
+            height={640}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 to-transparent"></div>
         </div>
         <div className="relative h-full luxury-container flex flex-col justify-center items-start text-white">
           <div className="mb-4">
-            <Link to="/">
+            <Link href="/">
               <Button
                 variant="outline"
-                className="flex items-center gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                className="flex items-center gap-2 bg-white/20 border-white/40 text-white hover:bg-white/30 hover:border-white/60 backdrop-blur-sm"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
@@ -67,18 +62,16 @@ const About = () => {
                 meticulous attention to detail, ensuring a scent that is both
                 distinctive and enduring.
               </p>
-              <div className="flex items-center gap-4">
-                <Award className="h-8 w-8 text-luxe-sandy" />
-                <span className="text-lg font-medium text-luxe-blue">
-                  Award-winning craftsmanship
-                </span>
-              </div>
+              {/* <div className="flex items-center gap-4">
+               */}
             </div>
             <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              <Image
+                src="/assets/about-us/our-mission.jpeg"
                 alt="Luxury perfume making"
                 className="w-full h-96 object-cover rounded-lg shadow-2xl"
+                width={500}
+                height={500}
               />
             </div>
           </div>
@@ -96,9 +89,7 @@ const About = () => {
               <div className="w-16 h-16 bg-luxe-blue rounded-full flex items-center justify-center mx-auto mb-4">
                 <Heart className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-luxe-blue mb-3">
-                Passion
-              </h3>
+              <h3 className="text-xl font-semibold text-black mb-3">Passion</h3>
               <p className="text-gray-600">
                 We pour our heart into every fragrance, creating scents that
                 inspire and delight.
@@ -109,9 +100,7 @@ const About = () => {
               <div className="w-16 h-16 bg-luxe-sandy rounded-full flex items-center justify-center mx-auto mb-4">
                 <Leaf className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-luxe-blue mb-3">
-                Quality
-              </h3>
+              <h3 className="text-xl font-semibold text-black mb-3">Quality</h3>
               <p className="text-gray-600">
                 Only the finest ingredients make their way into our carefully
                 crafted fragrances.
@@ -122,7 +111,7 @@ const About = () => {
               <div className="w-16 h-16 bg-luxe-blue rounded-full flex items-center justify-center mx-auto mb-4">
                 <Globe className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-luxe-blue mb-3">
+              <h3 className="text-xl font-semibold text-black mb-3">
                 Heritage
               </h3>
               <p className="text-gray-600">
@@ -135,7 +124,7 @@ const About = () => {
               <div className="w-16 h-16 bg-luxe-sandy rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-luxe-blue mb-3">
+              <h3 className="text-xl font-semibold text-black mb-3">
                 Integrity
               </h3>
               <p className="text-gray-600">
@@ -152,10 +141,12 @@ const About = () => {
         <div className="luxury-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1590736969955-71cc94901354?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              <Image
+                src="/assets/about-us/ingredients.jpeg"
                 alt="Perfume ingredients"
                 className="w-full h-96 object-cover rounded-lg shadow-2xl"
+                width={550}
+                height={350}
               />
             </div>
             <div>
@@ -163,22 +154,29 @@ const About = () => {
                 The Aromé Luxe Journey
               </h2>
               <p className="text-lg mb-6 leading-relaxed">
-                Founded in 2020, Aromé Luxe began as a dream to bring the
-                world's most exquisite fragrances to discerning customers. What
-                started as a small boutique has grown into a respected name in
-                luxury perfumery, known for our commitment to quality and
-                innovation.
+                Growing up in an Indian household, I was surrounded by a
+                symphony of scents that shaped my earliest memories. From the
+                intoxicating aroma of jasmine garlands that my grandmother wore
+                to the earthy fragrance of sandalwood incense burning in our
+                prayer room, every corner of our home told a story through
+                scent.
               </p>
               <p className="text-lg mb-6 leading-relaxed">
-                Our journey has taken us to the most prestigious fragrance
-                houses in France, Italy, and beyond, where we've learned from
-                master perfumers and discovered rare ingredients that form the
-                foundation of our unique blends.
+                As a child, I was both fascinated and critical of the world of
+                fragrances. I would spend hours in our spice cabinet, inhaling
+                the complex layers of cardamom, cinnamon, and cloves, while
+                simultaneously being repelled by the harsh chemical odors that
+                seemed to permeate so many commercial products. This early
+                obsession with authentic, natural scents became the foundation
+                of my journey into perfumery.
               </p>
               <p className="text-lg leading-relaxed">
-                Today, we continue to push the boundaries of perfumery, creating
-                fragrances that are not just scents, but experiences that evoke
-                emotion and create lasting memories.
+                Today, Aromé Luxe represents my deep-rooted love for fragrances
+                that tell authentic stories. We blend the traditional wisdom of
+                Indian perfumery with modern techniques, creating scents that
+                honor both heritage and innovation—fragrances that would have
+                made my grandmother proud and that speak to the discerning nose
+                of today&apos;s luxury connoisseur.
               </p>
             </div>
           </div>
@@ -188,15 +186,15 @@ const About = () => {
       {/* Craftsmanship Section */}
       <section className="py-20">
         <div className="luxury-container">
-          <h2 className="text-3xl font-serif font-bold text-center text-luxe-blue mb-16">
+          <h2 className="text-3xl font-serif font-bold text-center text-black mb-16">
             The Art of Craftsmanship
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-24 h-24 bg-luxe-cream rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl font-bold text-luxe-blue">1</span>
+                <span className="text-3xl font-bold text-black">1</span>
               </div>
-              <h3 className="text-xl font-semibold text-luxe-blue mb-4">
+              <h3 className="text-xl font-semibold text-black mb-4">
                 Sourcing
               </h3>
               <p className="text-gray-600 leading-relaxed">
@@ -209,9 +207,9 @@ const About = () => {
 
             <div className="text-center">
               <div className="w-24 h-24 bg-luxe-cream rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl font-bold text-luxe-blue">2</span>
+                <span className="text-3xl font-bold text-black">2</span>
               </div>
-              <h3 className="text-xl font-semibold text-luxe-blue mb-4">
+              <h3 className="text-xl font-semibold text-black mb-4">
                 Blending
               </h3>
               <p className="text-gray-600 leading-relaxed">
@@ -224,11 +222,9 @@ const About = () => {
 
             <div className="text-center">
               <div className="w-24 h-24 bg-luxe-cream rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl font-bold text-luxe-blue">3</span>
+                <span className="text-3xl font-bold text-black">3</span>
               </div>
-              <h3 className="text-xl font-semibold text-luxe-blue mb-4">
-                Aging
-              </h3>
+              <h3 className="text-xl font-semibold text-black mb-4">Aging</h3>
               <p className="text-gray-600 leading-relaxed">
                 Like fine wine, our fragrances are aged to perfection. This
                 crucial step allows the ingredients to meld together, creating
@@ -242,61 +238,73 @@ const About = () => {
       {/* Team Section */}
       <section className="py-20 bg-luxe-cream">
         <div className="luxury-container">
-          <h2 className="text-3xl font-serif font-bold text-center text-luxe-blue mb-16">
+          <h2 className="text-3xl font-serif font-bold text-center text-black mb-16">
             Meet Our Team
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center">
-              <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                alt="Founder & Master Perfumer"
-                className="w-48 h-48 object-cover rounded-full mx-auto mb-4 shadow-lg"
-              />
-              <h3 className="text-xl font-semibold text-luxe-blue mb-2">
-                Alexandre Dubois
+              <div className="w-48 h-48 bg-luxe-cream rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <User className="h-24 w-24 text-gray-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-black mb-2">
+                Kamal Kashyap
               </h3>
               <p className="text-luxe-sandy font-medium mb-3">
                 Founder & Master Perfumer
               </p>
               <p className="text-gray-600 text-sm">
-                With over 20 years of experience in luxury perfumery, Alexandre
-                brings his passion for exceptional fragrances to every creation.
+                The visionary behind Aromé Luxe, Kamal is the master craftsman
+                who creates our exquisite fragrances with decades of expertise
+                in perfumery.
               </p>
             </div>
 
             <div className="text-center">
-              <img
-                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                alt="Creative Director"
-                className="w-48 h-48 object-cover rounded-full mx-auto mb-4 shadow-lg"
-              />
-              <h3 className="text-xl font-semibold text-luxe-blue mb-2">
-                Isabella Moreau
+              <div className="w-48 h-48 bg-luxe-cream rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <User className="h-24 w-24 text-gray-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-black mb-2">
+                Ayush Paharia
               </h3>
-              <p className="text-luxe-sandy font-medium mb-3">
-                Creative Director
-              </p>
+              <p className="text-luxe-sandy font-medium mb-3">Web Developer</p>
               <p className="text-gray-600 text-sm">
-                Isabella's artistic vision and deep understanding of fragrance
-                trends guide our creative direction and brand development.
+                Kamal&apos;s nephew who brings our digital vision to life,
+                crafting the online experience that showcases our luxury
+                fragrances to the world.
               </p>
             </div>
 
             <div className="text-center">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                alt="Head of Operations"
-                className="w-48 h-48 object-cover rounded-full mx-auto mb-4 shadow-lg"
-              />
-              <h3 className="text-xl font-semibold text-luxe-blue mb-2">
-                Marcus Chen
+              <div className="w-48 h-48 bg-luxe-cream rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <User className="h-24 w-24 text-gray-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-black mb-2">
+                Amol Paharia
               </h3>
               <p className="text-luxe-sandy font-medium mb-3">
-                Head of Operations
+                Operations Support
               </p>
               <p className="text-gray-600 text-sm">
-                Marcus ensures that every aspect of our business operates with
-                the precision and excellence our customers expect.
+                Ayush&apos;s brother and another nephew of Kamal, Amol handles
+                all the day-to-day operations that keep Aromé Luxe running
+                smoothly.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-48 h-48 bg-luxe-cream rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <User className="h-24 w-24 text-gray-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-black mb-2">
+                Moksh Kashyap
+              </h3>
+              <p className="text-luxe-sandy font-medium mb-3">
+                Fragrance Specialist
+              </p>
+              <p className="text-gray-600 text-sm">
+                Kamal&apos;s son and brother to Ayush and Amol, Moksh originally
+                started working with scents on a personal basis and brings that
+                intimate knowledge to our team.
               </p>
             </div>
           </div>
@@ -304,15 +312,15 @@ const About = () => {
       </section>
 
       {/* Awards & Recognition */}
-      <section className="py-20">
+      {/* <section className="py-20">
         <div className="luxury-container">
-          <h2 className="text-3xl font-serif font-bold text-center text-luxe-blue mb-16">
+          <h2 className="text-3xl font-serif font-bold text-center text-black mb-16">
             Awards & Recognition
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center p-6 bg-luxe-cream rounded-lg">
               <Star className="h-12 w-12 text-luxe-sandy mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-luxe-blue mb-2">
+              <h3 className="text-lg font-semibold text-black mb-2">
                 Luxury Fragrance Award
               </h3>
               <p className="text-gray-600 text-sm">
@@ -322,7 +330,7 @@ const About = () => {
 
             <div className="text-center p-6 bg-luxe-cream rounded-lg">
               <Award className="h-12 w-12 text-luxe-sandy mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-luxe-blue mb-2">
+              <h3 className="text-lg font-semibold text-black mb-2">
                 Excellence in Craftsmanship
               </h3>
               <p className="text-gray-600 text-sm">
@@ -332,7 +340,7 @@ const About = () => {
 
             <div className="text-center p-6 bg-luxe-cream rounded-lg">
               <Heart className="h-12 w-12 text-luxe-sandy mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-luxe-blue mb-2">
+              <h3 className="text-lg font-semibold text-black mb-2">
                 Customer Choice Award
               </h3>
               <p className="text-gray-600 text-sm">
@@ -342,7 +350,7 @@ const About = () => {
 
             <div className="text-center p-6 bg-luxe-cream rounded-lg">
               <Leaf className="h-12 w-12 text-luxe-sandy mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-luxe-blue mb-2">
+              <h3 className="text-lg font-semibold text-black mb-2">
                 Sustainability Award
               </h3>
               <p className="text-gray-600 text-sm">
@@ -351,7 +359,7 @@ const About = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
       <section className="py-20 bg-luxe-blue text-white">
@@ -365,15 +373,18 @@ const About = () => {
             timeless elegance.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/products">
-              <Button className="bg-luxe-sandy hover:bg-luxe-blue text-white px-8 py-3 text-lg">
+            <Link href="/products">
+              <Button
+                variant="default"
+                className="bg-white text-black hover:bg-white hover:-translate-y-1 font-semibold px-8 py-3 text-lg relative "
+              >
                 Shop Collection
               </Button>
             </Link>
-            <Link to="/contact">
+            <Link href="/contact">
               <Button
                 variant="outline"
-                className="border-white text-white hover:bg-white hover:text-luxe-blue px-8 py-3 text-lg"
+                className="border-white text-white bg-transparent hover:-translate-y-1  hover:bg-transparent hover:text-white px-8 py-3 text-lg"
               >
                 Contact Us
               </Button>

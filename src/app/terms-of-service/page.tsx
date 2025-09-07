@@ -237,9 +237,9 @@ const TermsOfService = () => {
               </h2>
               <div className="space-y-3">
                 <p className="text-gray-700 leading-relaxed">
-                  Our website and services are provided "as is" without
-                  warranties of any kind. We disclaim all warranties, express or
-                  implied, including but not limited to:
+                  Our website and services are provided &quot;as is&quot;
+                  without warranties of any kind. We disclaim all warranties,
+                  express or implied, including but not limited to:
                 </p>
                 <ul className="list-disc pl-6 space-y-2 text-gray-700">
                   <li>
@@ -350,3 +350,5 @@ const TermsOfService = () => {
     </div>
   );
 };
+
+export default TermsOfService;

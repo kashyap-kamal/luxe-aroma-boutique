@@ -30,7 +30,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               alt={product.name}
               className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+            <div className="absolute inset-0 bg-luxe-blue/0 group-hover:bg-luxe-blue/10 transition-all duration-300"></div>
           </div>
           <div className="p-4">
             <div className="text-sm text-gray-500 mb-1">{product.category}</div>
@@ -38,9 +38,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {product.name}
             </h3>
             <div className="flex justify-between items-center">
-              <span className="font-medium text-lg">
-                ₹{product.price.toLocaleString()}
-              </span>
+              <div className="flex flex-col">
+                <span className="font-medium text-lg">
+                  {product.price.currency}
+                  {product.price.current.toLocaleString()}
+                </span>
+                {product.price.on_sale && (
+                  <span className="text-sm text-gray-500 line-through">
+                    {product.price.currency}
+                    {product.price.original.toLocaleString()}
+                  </span>
+                )}
+              </div>
               <Button
                 size="sm"
                 variant="outline"

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Instagram, Facebook, Twitter } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -15,29 +14,6 @@ const Footer = () => {
               Experience the epitome of luxury fragrances, crafted with
               precision and passion to elevate your presence.
             </p>
-            <div className="flex space-x-4">
-              <Link
-                href="#"
-                aria-label="Facebook"
-                className="transition-colors hover:text-luxe-blue"
-              >
-                <Facebook className="w-5 h-5" />
-              </Link>
-              <Link
-                href="#"
-                aria-label="Instagram"
-                className="transition-colors hover:text-luxe-sandy"
-              >
-                <Instagram className="w-5 h-5" />
-              </Link>
-              <Link
-                href="#"
-                aria-label="Twitter"
-                className="transition-colors hover:text-luxe-sandy"
-              >
-                <Twitter className="w-5 h-5" />
-              </Link>
-            </div>
           </div>
 
           {/* Shop Column */}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/stores/cart-store";
+import Image from "next/image";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,9 +24,12 @@ const Navbar = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <h1 className="text-2xl md:text-3xl font-poppins font-black text-luxe-blue">
-              Aromé <span className="text-luxe-violet">Luxe</span>
-            </h1>
+            <Image
+              src="/assets/arome-luxe-logo.png"
+              alt="Aromé Luxe"
+              width={200}
+              height={200}
+            />
           </Link>
 
           {/* Desktop Navigation */}

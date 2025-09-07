@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import Image from "next/image";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +17,7 @@ const Contact = () => {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    >
   ) => {
     setFormData({
       ...formData,
@@ -42,10 +43,12 @@ const Contact = () => {
       {/* Hero Section */}
       <section className="relative h-[50vh] min-h-[400px]">
         <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          <Image
+            src="/assets/contact/contact-us.jpeg"
             alt="Contact Aromé Luxe"
             className="w-full h-full object-cover"
+            width={1280}
+            height={640}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"></div>
         </div>
@@ -65,7 +68,7 @@ const Contact = () => {
             Get in Touch
           </h1>
           <p className="text-xl max-w-2xl animate-fade-in">
-            We'd love to hear from you. Reach out to us for any questions,
+            We&apos;d love to hear from you. Reach out to us for any questions,
             feedback, or assistance.
           </p>
         </div>
@@ -144,33 +147,6 @@ const Contact = () => {
                     </p>
                     <p className="text-gray-600">Sunday: 12:00 PM - 5:00 PM</p>
                   </div>
-                </div>
-              </div>
-
-              {/* Social Media */}
-              <div className="mt-12">
-                <h3 className="text-xl font-semibold text-luxe-blue mb-4">
-                  Follow Us
-                </h3>
-                <div className="flex space-x-4">
-                  <a
-                    href="#"
-                    className="w-10 h-10 bg-luxe-blue rounded-full flex items-center justify-center text-white hover:bg-luxe-sandy transition-colors"
-                  >
-                    <span className="text-sm font-bold">F</span>
-                  </a>
-                  <a
-                    href="#"
-                    className="w-10 h-10 bg-luxe-blue rounded-full flex items-center justify-center text-white hover:bg-luxe-sandy transition-colors"
-                  >
-                    <span className="text-sm font-bold">I</span>
-                  </a>
-                  <a
-                    href="#"
-                    className="w-10 h-10 bg-luxe-blue rounded-full flex items-center justify-center text-white hover:bg-luxe-sandy transition-colors"
-                  >
-                    <span className="text-sm font-bold">T</span>
-                  </a>
                 </div>
               </div>
             </div>
@@ -294,7 +270,7 @@ const Contact = () => {
                   Interactive Map Coming Soon
                 </p>
                 <p className="text-gray-500">
-                  123 Luxury Lane, Connaught Place, New Delhi
+                  Aromé Luxe Boutique Launching Soon
                 </p>
               </div>
             </div>
@@ -315,8 +291,8 @@ const Contact = () => {
                   How can I track my order?
                 </h3>
                 <p className="text-gray-600">
-                  Once your order ships, you'll receive a tracking number via
-                  email. You can also track your order through your account
+                  Once your order ships, you&apos;ll receive a tracking number
+                  via email. You can also track your order through your account
                   dashboard.
                 </p>
               </div>
@@ -361,7 +337,8 @@ const Contact = () => {
                 </h3>
                 <p className="text-gray-600">
                   Yes, all our fragrances are cruelty-free and we never test on
-                  animals. We're committed to ethical and sustainable practices.
+                  animals. We&apos;re committed to ethical and sustainable
+                  practices.
                 </p>
               </div>
 

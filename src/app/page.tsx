@@ -2,22 +2,27 @@ import LearnMoreButton from "@/components/learn-more-button";
 import ProductGrid from "@/components/product-grid";
 import { Button } from "@/components/ui/button";
 import { products } from "@/lib/mock-data";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   const featuredProducts = products.slice(0, 4);
 
+  const heroImage =
+    "https://images.unsplash.com/photo-1654448079061-46d219efffde?q=80&w=2070&auhref=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
   return (
     <main className="flex-grow">
       {/* Hero Section */}
       <section className="relative h-[70vh] min-h-[500px]">
         <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1654448079061-46d219efffde?q=80&w=2070&auhref=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          <Image
+            src={heroImage}
             alt="Luxury perfumes"
             className="w-full h-full object-cover"
+            width={1280}
+            height={640}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
         </div>
         <div className="relative h-full luxury-container flex flex-col justify-center items-start text-white">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 max-w-2xl animate-fade-in">
@@ -45,7 +50,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Link href="/products?category=Men's Collection" className="group">
               <div className="relative h-80 overflow-hidden rounded-lg">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1600612253971-422e7f7faeb6?ixlib=rb-4.0.3&auhref=format&fit=crop&w=600&q=80"
                   alt="Men's Collection"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -53,7 +58,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-2xl font-serif font-bold text-white mb-2">
-                    Men's Collection
+                    Men&apos;s Collection
                   </h3>
                   <button className="flex items-center bg-transparent text-white cursor-pointer font-bold text-sm uppercase border-0 outline-0 p-4 before:bg-white before:content-[''] before:inline-block before:h-[1px] before:mr-[10px] before:transition-all before:duration-[0.42s] before:ease-[cubic-bezier(.25,.8,.25,1)] before:w-0 group-hover:before:bg-white group-hover:before:w-12">
                     Explore Now
@@ -67,7 +72,7 @@ export default function Home() {
               className="group"
             >
               <div className="relative h-80 overflow-hidden rounded-lg">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1499575026295-b114e3f40397?ixlib=rb-4.0.3&auhref=format&fit=crop&w=600&q=80"
                   alt="Women's Collection"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -75,7 +80,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-2xl font-serif font-bold text-white mb-2">
-                    Women's Collection
+                    Women&apos;s Collection
                   </h3>
                   <button className="flex items-center bg-transparent text-white cursor-pointer font-bold text-sm uppercase border-0 outline-0 p-4 before:bg-white before:content-[''] before:inline-block before:h-[1px] before:mr-[10px] before:transition-all before:duration-[0.42s] before:ease-[cubic-bezier(.25,.8,.25,1)] before:w-0 group-hover:before:bg-white group-hover:before:w-12">
                     Explore Now
@@ -86,9 +91,11 @@ export default function Home() {
 
             <Link href="/products?category=Unisex Collection" className="group">
               <div className="relative h-80 overflow-hidden rounded-lg">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1595425964072-482730a1818c?ixlib=rb-4.0.3&auhref=format&fit=crop&w=600&q=80"
                   alt="Unisex Collection"
+                  width={600}
+                  height={600}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -113,7 +120,7 @@ export default function Home() {
             <h2 className="text-3xl font-serif font-bold">
               Featured Fragrances
             </h2>
-            <Link href="/products" className="text-luxe-blue hover:underline">
+            <Link href="/products" className="text-black hover:underline">
               View All
             </Link>
           </div>
@@ -130,10 +137,10 @@ export default function Home() {
           <div className="max-w-3xl mx-auto">
             <p className="text-lg mb-8">
               Aromé Luxe was born from a passion for exceptional fragrances and
-              a desire to bring the world's finest scents to discerning
+              a desire to bring the world&apos;s finest scents to discerning
               customers. Our journey began with a simple belief: that a perfume
-              is more than just a scent—it's an expression of personality, a
-              memory in the making, and a finishing touch to any outfit.
+              is more than just a scent—it&apos;s an expression of personality,
+              a memory in the making, and a finishing touch to any outfit.
             </p>
             <p className="text-lg mb-8">
               Each of our fragrances is carefully crafted using the highest
@@ -168,7 +175,7 @@ export default function Home() {
               placeholder="Your email address"
               className="flex-grow px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-luxe-blue"
             />
-            <Button className="bg-luxe-sandy h-full hover:bg-luxe-blue">
+            <Button className="bg-black h-full hover:bg-luxe-blue">
               Subscribe
             </Button>
           </div>

@@ -6,6 +6,8 @@ import {
   filterProducts,
   getProductCategories,
   getMaxPrice,
+  sortProducts,
+  SortOption,
   products as allProducts,
 } from "@/lib/mock-data";
 import ProductGrid from "@/components/product-grid";
@@ -22,12 +24,14 @@ const Products = () => {
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
   const [filteredProducts, setFilteredProducts] = useState(allProducts);
 
   // Update filtered products when filters change
   useEffect(() => {
     const filtered = filterProducts(selectedCategory, priceRange);
-    setFilteredProducts(filtered);
+    const sorted = sortProducts(filtered, sortBy);
+    setFilteredProducts(sorted);
 
     const params = new URLSearchParams();
     // Update URL params
@@ -36,13 +40,19 @@ const Products = () => {
     } else {
       params.delete("category");
     }
+    if (sortBy !== "default") {
+      params.set("sort", sortBy);
+    } else {
+      params.delete("sort");
+    }
     replace(`${pathname}?${params.toString()}`);
-  }, [selectedCategory, priceRange, searchParams]);
+  }, [selectedCategory, priceRange, sortBy, searchParams]);
 
   // Reset filters
   const handleReset = () => {
     setSelectedCategory("");
     setPriceRange([0, maxPrice]);
+    setSortBy("default");
   };
 
   return (
@@ -61,8 +71,10 @@ const Products = () => {
                 selectedCategory={selectedCategory}
                 priceRange={priceRange}
                 maxPrice={maxPrice}
+                sortBy={sortBy}
                 onCategoryChange={setSelectedCategory}
                 onPriceChange={setPriceRange}
+                onSortChange={setSortBy}
                 onReset={handleReset}
               />
             </div>

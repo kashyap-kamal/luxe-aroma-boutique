@@ -5,11 +5,23 @@ import { immer } from "zustand/middleware/immer";
 export interface Product {
   id: string;
   name: string;
-  price: number;
+  price: {
+    original: number;
+    current: number;
+    currency: string;
+    on_sale: boolean;
+  };
   image: string;
   category: string;
-  size: string;
-  description: string;
+  size?: string;
+  description?: string;
+  url?: string;
+  tags?: string[];
+  rating?: {
+    stars: number;
+    out_of: number;
+  };
+  status: string;
 }
 
 export interface CartItem {
@@ -85,9 +97,9 @@ export const useCartStore = create<CartStore>()(
 export const useCartSubtotal = () => {
   const { cartItems } = useCartStore();
 
-  // Calculate subtotal
+  // Calculate subtotal using current price
   const total = cartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
+    (sum, item) => sum + item.product.price.current * item.quantity,
     0,
   );
 

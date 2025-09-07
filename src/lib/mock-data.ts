@@ -1,95 +1,24 @@
 import { Product } from "@/stores/cart-store";
+import productsData from "@/products.json";
 
-export const products: Product[] = [
-  {
-    id: "1",
-    name: "Royal Oud",
-    price: 4999,
-    image:
-      "https://images.unsplash.com/photo-1547887537-6158d64c35b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    category: "Men's Collection",
-    size: "100ml",
-    description:
-      "A sophisticated blend of rare oud wood, sandalwood, and musk, creating a rich and long-lasting fragrance perfect for special occasions.",
+// Transform the JSON data to match our Product interface
+export const products: Product[] = productsData.products.map((product) => ({
+  id: product.id.toString(),
+  name: product.name,
+  price: {
+    original: product.price.original,
+    current: product.price.current,
+    currency: product.price.currency,
+    on_sale: product.price.on_sale,
   },
-  {
-    id: "2",
-    name: "Midnight Rose",
-    price: 3999,
-    image:
-      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    category: "Women's Collection",
-    size: "75ml",
-    description:
-      "An enchanting floral fragrance with notes of Bulgarian rose, black currant, and patchouli, ideal for evening wear.",
-  },
-  {
-    id: "3",
-    name: "Citrus Ocean",
-    price: 2999,
-    image:
-      "https://images.unsplash.com/photo-1616697539697-99aa3e3b2dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    category: "Unisex Collection",
-    size: "50ml",
-    description:
-      "A refreshing blend of citrus, ocean breeze, and light woods, perfect for casual, everyday wear.",
-  },
-  {
-    id: "4",
-    name: "Amber Mystic",
-    price: 5999,
-    image:
-      "https://images.unsplash.com/photo-1544468266-6a8948003cd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    category: "Men's Collection",
-    size: "100ml",
-    description:
-      "A warm and spicy fragrance with notes of amber, cardamom, and cedarwood, creating a mysterious and masculine scent.",
-  },
-  {
-    id: "5",
-    name: "Velvet Orchid",
-    price: 4499,
-    image:
-      "https://images.unsplash.com/photo-1541643600914-78b084683601?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    category: "Women's Collection",
-    size: "75ml",
-    description:
-      "An elegant and luxurious fragrance featuring rare orchid, warm vanilla, and sandalwood, designed for the sophisticated woman.",
-  },
-  {
-    id: "6",
-    name: "Fresh Bliss",
-    price: 1999,
-    image:
-      "https://images.unsplash.com/photo-1615634376658-c80abf877da2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    category: "Unisex Collection",
-    size: "50ml",
-    description:
-      "A light and refreshing scent with notes of bergamot, green tea, and white musk, perfect for everyday wear.",
-  },
-  {
-    id: "7",
-    name: "Saffron Gold",
-    price: 6999,
-    image:
-      "https://images.unsplash.com/photo-1617897903246-719242758050?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    category: "Men's Collection",
-    size: "100ml",
-    description:
-      "A luxury fragrance featuring rare saffron, leather, and smoky woods, creating a bold and distinctive scent for confident men.",
-  },
-  {
-    id: "8",
-    name: "Jasmine Dreams",
-    price: 3599,
-    image:
-      "https://images.unsplash.com/photo-1580331451678-64cfd90d62e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    category: "Women's Collection",
-    size: "75ml",
-    description:
-      "A delicate floral fragrance centered around jasmine, ylang-ylang, and vanilla, creating a dreamy and romantic aura.",
-  },
-];
+  image: `/assets/perfumes/${product.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace('-edp', '')}.png`,
+  category: product.category,
+  size: "100ml", // Default size since not specified in JSON
+  description: `Premium ${product.name} fragrance - a luxurious scent perfect for any occasion.`,
+  tags: product.tags || [],
+  rating: product.rating,
+  status: product.status,
+}));
 
 export const getProductById = (id: string): Product | undefined => {
   return products.find((product) => product.id === id);
@@ -100,7 +29,7 @@ export const getProductCategories = (): string[] => {
 };
 
 export const getMaxPrice = (): number => {
-  return Math.max(...products.map((product) => product.price));
+  return Math.max(...products.map((product) => product.price.current));
 };
 
 export const filterProducts = (
@@ -112,7 +41,59 @@ export const filterProducts = (
       ? product.category === categoryFilter
       : true;
     const matchesPrice =
-      product.price >= priceRange[0] && product.price <= priceRange[1];
+      product.price.current >= priceRange[0] && product.price.current <= priceRange[1];
     return matchesCategory && matchesPrice;
   });
+};
+
+// Sorting options based on the JSON data
+export type SortOption = 
+  | "default"
+  | "popularity" 
+  | "rating" 
+  | "latest" 
+  | "price-low-high" 
+  | "price-high-low";
+
+export const sortProducts = (products: Product[], sortBy: SortOption): Product[] => {
+  const sortedProducts = [...products];
+  
+  switch (sortBy) {
+    case "popularity":
+      // Sort by rating (higher rating = more popular)
+      return sortedProducts.sort((a, b) => (b.rating?.stars || 0) - (a.rating?.stars || 0));
+    
+    case "rating":
+      // Sort by rating (higher rating first)
+      return sortedProducts.sort((a, b) => (b.rating?.stars || 0) - (a.rating?.stars || 0));
+    
+    case "latest":
+      // Sort by ID (higher ID = newer, assuming IDs are sequential)
+      return sortedProducts.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+    
+    case "price-low-high":
+      // Sort by current price (low to high)
+      return sortedProducts.sort((a, b) => a.price.current - b.price.current);
+    
+    case "price-high-low":
+      // Sort by current price (high to low)
+      return sortedProducts.sort((a, b) => b.price.current - a.price.current);
+    
+    case "default":
+    default:
+      // Return products in original order
+      return sortedProducts;
+  }
+};
+
+// Get all available sorting options
+export const getSortingOptions = (): { value: SortOption; label: string }[] => {
+  return [
+    { value: "default", label: "Default sorting" },
+    { value: "popularity", label: "Sort by popularity" },
+    { value: "rating", label: "Sort by average rating" },
+    { value: "latest", label: "Sort by latest" },
+    { value: "price-low-high", label: "Sort by price: low to high" },
+    { value: "price-high-low", label: "Sort by price: high to low" },
+  ];
 };

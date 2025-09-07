@@ -1,14 +1,24 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SortOption, getSortingOptions } from "@/lib/mock-data";
 
 interface FilterProps {
   categories: string[];
   selectedCategory: string;
   priceRange: [number, number];
   maxPrice: number;
+  sortBy: SortOption;
   onCategoryChange: (category: string) => void;
   onPriceChange: (range: [number, number]) => void;
+  onSortChange: (sort: SortOption) => void;
   onReset: () => void;
 }
 
@@ -17,10 +27,13 @@ const ProductFilter: React.FC<FilterProps> = ({
   selectedCategory,
   priceRange,
   maxPrice,
+  sortBy,
   onCategoryChange,
   onPriceChange,
+  onSortChange,
   onReset,
 }) => {
+  const sortingOptions = getSortingOptions();
   return (
     <div className="space-y-6">
       <div>
@@ -61,6 +74,22 @@ const ProductFilter: React.FC<FilterProps> = ({
           <span>₹{priceRange[0]}</span>
           <span>₹{priceRange[1]}</span>
         </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-3">Sort By</h3>
+        <Select value={sortBy} onValueChange={onSortChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select sorting option" />
+          </SelectTrigger>
+          <SelectContent>
+            {sortingOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <Button variant="outline" onClick={onReset} className="w-full">

@@ -79,7 +79,8 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
       </div>
 
       <div className="flex-shrink-0 mt-2 sm:mt-0 font-medium text-right">
-        ₹{(product.price * quantity).toLocaleString()}
+        {product.price.currency}
+        {(product.price.current * quantity).toLocaleString()}
       </div>
     </div>
   );
