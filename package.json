@@ -43,7 +43,7 @@
     "embla-carousel-react": "^8.6.0",
     "immer": "^10.1.1",
     "input-otp": "^1.4.2",
-    "ky": "^1.8.2",
+    "ky": "^1.10.0",
     "lucide-react": "^0.539.0",
     "nanoid": "^5.1.5",
     "next": "15.4.6",

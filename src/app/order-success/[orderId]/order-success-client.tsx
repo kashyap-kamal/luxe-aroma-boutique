@@ -17,6 +17,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import type { OrderDetails } from "@/types/razorpay";
+import OrderTracker from "@/components/order-tracker";
 
 interface OrderSuccessClientProps {
   orderId: string;
@@ -282,6 +283,18 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId }) => {
             <Download className="mr-2 h-4 w-4" />
             Download Receipt
           </Button>
+        </div>
+
+        {/* Order Tracking */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <h3 className="font-medium mb-4 flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            Track Your Order
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Enter your waybill number to track your order status
+          </p>
+          <OrderTracker />
         </div>
 
         {/* Contact Support */}

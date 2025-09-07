@@ -30,6 +30,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               src={product.image}
               alt={product.name}
               className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+              width={400}
+              height={640}
             />
             <div className="absolute inset-0 bg-luxe-blue/0 group-hover:bg-luxe-blue/10 transition-all duration-300"></div>
           </div>

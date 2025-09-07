@@ -3,6 +3,8 @@ import { OrderDetails, PaymentStatus, CustomerInfo } from "@/types/razorpay";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { paymentService } from "@/types/services/payment-services";
+import { orderManager, Order } from "@/lib/order-management";
+import { billingCalculator } from "@/lib/billing";
 
 export interface PaymentState {
   isProcessing: boolean;
@@ -73,6 +75,40 @@ const createPaymentStore: StateCreator<
       );
 
       if (result.success && result.orderId) {
+        // Create order in order management system
+        const billingItems = orderDetails.items.map((item) => ({
+          id: item.productId,
+          name: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+          category: "Perfume",
+          hsnCode: "3303",
+        }));
+
+        const order = orderManager.createOrder({
+          customerInfo: {
+            firstName: customerInfo.firstName,
+            lastName: customerInfo.lastName || "",
+            email: customerInfo.email,
+            phone: customerInfo.phone,
+            address: customerInfo.address || "",
+            city: customerInfo.city || "",
+            state: customerInfo.state || "",
+            postalCode: customerInfo.postalCode || "",
+            country: customerInfo.country || "India",
+          },
+          items: billingItems,
+          paymentMethod: orderDetails.paymentMethod || "online",
+          razorpayOrderId: result.orderId,
+          notes: orderDetails.notes,
+        });
+
+        // Update order with payment success
+        orderManager.updateOrder(order.id, {
+          status: "confirmed",
+          paymentStatus: "completed",
+        });
+
         set((s) => {
           s.isProcessing = false;
           s.paymentStatus = PaymentStatus.SUCCESS;

@@ -12,40 +12,59 @@ import { usePaymentStore } from "@/stores/payment-store";
 import { Loader2, CreditCard, Smartphone, ShoppingBag } from "lucide-react";
 import type { CustomerInfo, OrderItem } from "@/types/razorpay";
 import { useCartStore, useCartSubtotal } from "@/stores/cart-store";
+import { billingCalculator } from "@/lib/billing";
 import { toast } from "sonner";
 import Script from "next/script";
+import PincodeChecker from "@/components/pincode-checker";
 
 // Order Summary Component
 const OrderSummary: React.FC<{
-  subtotal: number;
-  shipping: number;
-  tax: number;
-  total: number;
-}> = ({ subtotal, shipping, tax, total }) => (
+  billing: {
+    subtotal: number;
+    discount: number;
+    discountPercentage: number;
+    tax: number;
+    taxPercentage: number;
+    shipping: number;
+    total: number;
+    currency: string;
+  };
+}> = ({ billing }) => (
   <div className="bg-white rounded-lg shadow-sm p-6 h-fit">
     <h2 className="text-xl font-medium mb-4">Order Summary</h2>
 
     <div className="space-y-3">
       <div className="flex justify-between">
         <span>Subtotal</span>
-        <span>₹{subtotal.toFixed(2)}</span>
+        <span>{billingCalculator.formatCurrency(billing.subtotal)}</span>
       </div>
+
+      {billing.discount > 0 && (
+        <div className="flex justify-between text-green-600">
+          <span>Discount ({billing.discountPercentage.toFixed(0)}%)</span>
+          <span>-{billingCalculator.formatCurrency(billing.discount)}</span>
+        </div>
+      )}
 
       <div className="flex justify-between">
         <span>Shipping</span>
-        <span>{shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}</span>
+        <span>
+          {billing.shipping === 0
+            ? "Free"
+            : billingCalculator.formatCurrency(billing.shipping)}
+        </span>
       </div>
 
       <div className="flex justify-between">
-        <span>Tax (18% GST)</span>
-        <span>₹{tax.toFixed(2)}</span>
+        <span>Tax ({billing.taxPercentage}% GST)</span>
+        <span>{billingCalculator.formatCurrency(billing.tax)}</span>
       </div>
 
       <Separator />
 
       <div className="flex justify-between text-lg font-medium">
         <span>Total</span>
-        <span>₹{total.toFixed(2)}</span>
+        <span>{billingCalculator.formatCurrency(billing.total)}</span>
       </div>
     </div>
   </div>
@@ -53,7 +72,8 @@ const OrderSummary: React.FC<{
 
 const Checkout: React.FC = () => {
   const router = useRouter();
-  const { cartItems, clearCart } = useCartStore();
+  const { cartItems, clearCart, getBillingBreakdown, getBillingItems } =
+    useCartStore();
   const subtotal = useCartSubtotal();
   const { processPayment, isProcessing, clearPaymentState } = usePaymentStore();
 
@@ -74,12 +94,43 @@ const Checkout: React.FC = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [upiId, setUpiId] = useState("");
+  const [isPincodeServiceable, setIsPincodeServiceable] = useState(false);
+  const [deliveryInfo, setDeliveryInfo] = useState<{
+    pincode: string;
+    serviceable: boolean;
+    deliveryTime?: string;
+    charges?: {
+      cod: number;
+      prepaid: number;
+    };
+    error?: string;
+  } | null>(null);
 
-  // Shipping and tax calculation
-  const SHIPPING_COST = subtotal > 2000 ? 0 : 150;
-  const TAX_RATE = 0.18; // 18% GST
-  const tax = subtotal * TAX_RATE;
-  const total = subtotal + tax + SHIPPING_COST;
+  // Get billing breakdown using the new billing calculator
+  const billing = getBillingBreakdown();
+
+  // Handle pincode serviceability change
+  const handlePincodeServiceabilityChange = (
+    isServiceable: boolean,
+    info?: {
+      pincode: string;
+      serviceable: boolean;
+      deliveryTime?: string;
+      charges?: {
+        cod: number;
+        prepaid: number;
+      };
+      error?: string;
+    }
+  ) => {
+    setIsPincodeServiceable(isServiceable);
+    setDeliveryInfo(info || null);
+
+    // Log delivery info for debugging
+    if (info) {
+      console.log("Delivery info updated:", info);
+    }
+  };
 
   /**
    * Validate form data
@@ -150,6 +201,11 @@ const Checkout: React.FC = () => {
     // Terms acceptance
     if (!acceptTerms) {
       errors.terms = "Please accept the terms and conditions";
+    }
+
+    // Pincode serviceability check
+    if (!isPincodeServiceable) {
+      errors.pincode = "Please check pincode serviceability before proceeding";
     }
 
     // UPI ID validation (only if UPI payment method is selected and UPI ID is provided)
@@ -239,18 +295,61 @@ const Checkout: React.FC = () => {
       const orderDetails = {
         customerInfo,
         items: orderItems,
-        subtotal,
-        tax,
-        shipping: SHIPPING_COST,
-        total,
+        subtotal: billing.subtotal,
+        discount: billing.discount,
+        tax: billing.tax,
+        shipping: billing.shipping,
+        total: billing.total,
         paymentMethod,
         notes: `Payment method: ${paymentMethod}. Order placed via web checkout.`,
       };
 
       // Process payment
-      const result = await processPayment(total, customerInfo, orderDetails);
+      const result = await processPayment(
+        billing.total,
+        customerInfo,
+        orderDetails
+      );
 
       if (result.success) {
+        // Create Delhivery order after successful payment
+        try {
+          const delhiveryResponse = await fetch("/api/create-delhivery-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              customerInfo,
+              orderItems,
+              totalAmount: billing.total,
+              paymentMode: paymentMethod === "cod" ? "cod" : "prepaid",
+              razorpayOrderId: result.orderId,
+            }),
+          });
+
+          const delhiveryResult = await delhiveryResponse.json();
+
+          if (delhiveryResult.success) {
+            toast.success("Order Created with Delhivery! 🚚", {
+              description: `Waybill: ${delhiveryResult.waybill}`,
+            });
+          } else {
+            console.warn(
+              "Delhivery order creation failed:",
+              delhiveryResult.error
+            );
+            toast.warning("Order placed but shipping setup pending", {
+              description: "We'll contact you for shipping details.",
+            });
+          }
+        } catch (delhiveryError) {
+          console.error("Delhivery order creation error:", delhiveryError);
+          toast.warning("Order placed but shipping setup pending", {
+            description: "We'll contact you for shipping details.",
+          });
+        }
+
         // Success toast
         toast.success("Payment Successful! 🎉", {
           description: `Order #${result.orderId} has been placed successfully.`,
@@ -496,6 +595,24 @@ const Checkout: React.FC = () => {
                         />
                       </div>
                     </div>
+
+                    {/* Pincode Serviceability Check */}
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                      <h3 className="font-medium mb-3">
+                        Check Delivery Availability
+                      </h3>
+                      <PincodeChecker
+                        onServiceabilityChange={
+                          handlePincodeServiceabilityChange
+                        }
+                        disabled={!customerInfo.postalCode}
+                      />
+                      {formErrors.pincode && (
+                        <p className="text-sm text-red-500 mt-2">
+                          {formErrors.pincode}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Payment Information */}
@@ -620,12 +737,7 @@ const Checkout: React.FC = () => {
 
                   {/* Mobile Order Summary */}
                   <div className="lg:hidden mb-6">
-                    <OrderSummary
-                      subtotal={subtotal}
-                      shipping={SHIPPING_COST}
-                      tax={tax}
-                      total={total}
-                    />
+                    <OrderSummary billing={billing} />
                   </div>
 
                   {/* Action Buttons */}
@@ -656,7 +768,7 @@ const Checkout: React.FC = () => {
                           Processing Payment...
                         </>
                       ) : (
-                        `Pay ₹${total.toFixed(2)}`
+                        `Pay ${billingCalculator.formatCurrency(billing.total)}`
                       )}
                     </Button>
                   </div>
@@ -666,12 +778,7 @@ const Checkout: React.FC = () => {
 
             {/* Desktop Order Summary */}
             <div className="hidden lg:block w-1/3">
-              <OrderSummary
-                subtotal={subtotal}
-                shipping={SHIPPING_COST}
-                tax={tax}
-                total={total}
-              />
+              <OrderSummary billing={billing} />
             </div>
           </div>
         </div>

@@ -54,6 +54,8 @@ export default function Home() {
                   src="https://images.unsplash.com/photo-1600612253971-422e7f7faeb6?ixlib=rb-4.0.3&auhref=format&fit=crop&w=600&q=80"
                   alt="Men's Collection"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  width={1280}
+                  height={640}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
@@ -76,6 +78,8 @@ export default function Home() {
                   src="https://images.unsplash.com/photo-1499575026295-b114e3f40397?ixlib=rb-4.0.3&auhref=format&fit=crop&w=600&q=80"
                   alt="Women's Collection"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  width={1280}
+                  height={640}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">

@@ -37,6 +37,8 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
             src={product.image}
             alt={product.name}
             className="w-full h-full object-cover"
+            width={96}
+            height={96}
           />
         </Link>
       </div>

@@ -1,6 +1,7 @@
 import { create, StateCreator } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import { billingCalculator, BillingBreakdown, BillingItem } from "@/lib/billing";
 
 export interface Product {
   id: string;
@@ -35,7 +36,8 @@ interface CartStore {
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
-  // subtotal: number;
+  getBillingBreakdown: () => BillingBreakdown;
+  getBillingItems: () => BillingItem[];
 }
 
 const createCartStore: StateCreator<
@@ -84,6 +86,29 @@ const createCartStore: StateCreator<
     set((state) => {
       state.cartItems.length = 0;
     });
+  },
+  getBillingBreakdown: () => {
+    const { cartItems } = get();
+    const billingItems = cartItems.map(item => ({
+      id: item.product.id,
+      name: item.product.name,
+      price: item.product.price.current,
+      quantity: item.quantity,
+      category: item.product.category,
+      hsnCode: '3303', // HSN code for perfumes
+    }));
+    return billingCalculator.calculateBilling(billingItems);
+  },
+  getBillingItems: () => {
+    const { cartItems } = get();
+    return cartItems.map(item => ({
+      id: item.product.id,
+      name: item.product.name,
+      price: item.product.price.current,
+      quantity: item.quantity,
+      category: item.product.category,
+      hsnCode: '3303', // HSN code for perfumes
+    }));
   },
 });
 
