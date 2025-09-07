@@ -1,0 +1,139 @@
+{
+    "shop_info": {
+      "name": "Aromeluxe Shop",
+      "base_url": "https://aromeluxe.shop",
+      "total_products": 7,
+      "currency": "₹"
+    },
+    "products": [
+      {
+        "id": 68,
+        "name": "Ameer Al Oud",
+        "category": "Men",
+        "price": {
+          "original": 588.33,
+          "current": 335.83,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 435,
+        "name": "Aqua",
+        "category": "Men",
+        "tags": ["New Launch"],
+        "price": {
+          "original": 588.33,
+          "current": 335.83,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 61,
+        "name": "Aventus",
+        "category": "Men",
+        "price": {
+          "original": 588.33,
+          "current": 335.83,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 70,
+        "name": "Cool Water",
+        "category": "Men",
+        "price": {
+          "original": 588.33,
+          "current": 335.83,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 72,
+        "name": "Hawas",
+        "category": "Men",
+        "price": {
+          "original": 588.33,
+          "current": 335.83,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 439,
+        "name": "Icon",
+        "category": "Men",
+        "tags": ["New Launch"],
+        "price": {
+          "original": 588.33,
+          "current": 335.83,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 508,
+        "name": "Most Wanted EDP",
+        "category": "Men",
+        "tags": ["New Launch"],
+        "price": {
+          "original": 588.33,
+          "current": 335.83,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      }
+    ],
+    "features": {
+      "wishlist": true,
+      "quick_view": true,
+      "product_comparison": true,
+      "ajax_add_to_cart": true
+    },
+    "sorting_options": [
+      "Default sorting",
+      "Sort by popularity",
+      "Sort by average rating",
+      "Sort by latest",
+      "Sort by price: low to high",
+      "Sort by price: high to low"
+    ]
+  }
