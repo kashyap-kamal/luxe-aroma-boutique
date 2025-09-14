@@ -3,8 +3,7 @@ import { OrderDetails, PaymentStatus, CustomerInfo } from "@/types/razorpay";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { paymentService } from "@/types/services/payment-services";
-import { orderManager, Order } from "@/lib/order-management";
-import { billingCalculator } from "@/lib/billing";
+import { orderManager } from "@/lib/order-management";
 
 export interface PaymentState {
   isProcessing: boolean;

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { ArrowLeft, Mail, Send } from "lucide-react";
 import Image from "next/image";
 
 const Contact = () => {
@@ -93,60 +93,25 @@ const Contact = () => {
                     <h3 className="text-lg font-semibold text-luxe-blue mb-2">
                       Email
                     </h3>
-                    <p className="text-gray-600 mb-1">info@aromeluxe.in</p>
-                    <p className="text-gray-600">support@aromeluxe.in</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-luxe-sandy rounded-full flex items-center justify-center flex-shrink-0">
-                    <Phone className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-luxe-blue mb-2">
-                      Phone
-                    </h3>
-                    <p className="text-gray-600 mb-1">+91 98765 43210</p>
-                    <p className="text-gray-600">+91 98765 43211</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-luxe-blue rounded-full flex items-center justify-center flex-shrink-0">
-                    <MapPin className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-luxe-blue mb-2">
-                      Address
-                    </h3>
-                    <p className="text-gray-600">
-                      Aromé Luxe Boutique
-                      <br />
-                      123 Luxury Lane, Connaught Place
-                      <br />
-                      New Delhi, Delhi 110001
-                      <br />
-                      India
+                    <p className="text-gray-600  font-medium">
+                      contact@aromeluxe.in
+                    </p>
+                    <p className="text-gray-500 text-sm mt-2">
+                      We&apos;ll get back to you within 24 hours
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-luxe-sandy rounded-full flex items-center justify-center flex-shrink-0">
-                    <Clock className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-luxe-blue mb-2">
-                      Business Hours
-                    </h3>
-                    <p className="text-gray-600 mb-1">
-                      Monday - Friday: 10:00 AM - 8:00 PM
-                    </p>
-                    <p className="text-gray-600 mb-1">
-                      Saturday: 10:00 AM - 6:00 PM
-                    </p>
-                    <p className="text-gray-600">Sunday: 12:00 PM - 5:00 PM</p>
-                  </div>
+                <div className="bg-luxe-cream p-6 rounded-lg">
+                  <h4 className="text-lg font-semibold text-luxe-blue mb-3">
+                    Why Email Only?
+                  </h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    We focus on providing the best online shopping experience.
+                    Our email support ensures we can give you detailed,
+                    thoughtful responses to all your queries about our
+                    fragrances, orders, and services.
+                  </p>
                 </div>
               </div>
             </div>
@@ -251,28 +216,6 @@ const Contact = () => {
                   Send Message
                 </Button>
               </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Map Section */}
-      <section className="py-20 bg-gray-100">
-        <div className="luxury-container">
-          <h2 className="text-3xl font-serif font-bold text-center text-luxe-blue mb-12">
-            Visit Our Boutique
-          </h2>
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="h-96 bg-gray-200 flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 text-lg">
-                  Interactive Map Coming Soon
-                </p>
-                <p className="text-gray-500">
-                  Aromé Luxe Boutique Launching Soon
-                </p>
-              </div>
             </div>
           </div>
         </div>

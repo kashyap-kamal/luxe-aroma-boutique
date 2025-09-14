@@ -31,9 +31,9 @@ export interface BillingConfig {
 
 // Default billing configuration
 const DEFAULT_CONFIG: BillingConfig = {
-  taxRate: 18, // 18% GST for perfumes
-  shippingRate: 50, // ₹50 shipping charge
-  freeShippingThreshold: 500, // Free shipping above ₹500
+  taxRate: 0, // GST already included in product price
+  shippingRate: 0, // Shipping already included in product price
+  freeShippingThreshold: 0, // No free shipping threshold
   currency: '₹',
   hsnCode: '3303', // HSN code for perfumes and toilet waters
 };
@@ -85,19 +85,7 @@ export class BillingCalculator {
    * Calculate discount based on business rules
    */
   private calculateDiscount(subtotal: number): number {
-    // Example discount rules:
-    // - 5% discount for orders above ₹1000
-    // - 10% discount for orders above ₹2000
-    // - 15% discount for orders above ₹3000
-
-    if (subtotal >= 3000) {
-      return subtotal * 0.15; // 15% discount
-    } else if (subtotal >= 2000) {
-      return subtotal * 0.10; // 10% discount
-    } else if (subtotal >= 1000) {
-      return subtotal * 0.05; // 5% discount
-    }
-
+    // No discounts since GST and shipping are already included in product price
     return 0;
   }
 
@@ -112,10 +100,8 @@ export class BillingCalculator {
    * Calculate shipping charges
    */
   private calculateShipping(taxableAmount: number): number {
-    if (taxableAmount >= this.config.freeShippingThreshold) {
-      return 0; // Free shipping
-    }
-    return this.config.shippingRate;
+    // Shipping already included in product price
+    return 0;
   }
 
   /**

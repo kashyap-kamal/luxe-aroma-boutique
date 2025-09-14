@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { usePaymentStore } from "@/stores/payment-store";
 import { Loader2, CreditCard, Smartphone, ShoppingBag } from "lucide-react";
 import type { CustomerInfo, OrderItem } from "@/types/razorpay";
-import { useCartStore, useCartSubtotal } from "@/stores/cart-store";
+import { useCartStore } from "@/stores/cart-store";
 import { billingCalculator } from "@/lib/billing";
 import { toast } from "sonner";
 import Script from "next/script";
@@ -46,18 +46,14 @@ const OrderSummary: React.FC<{
         </div>
       )}
 
-      <div className="flex justify-between">
+      <div className="flex justify-between text-sm text-gray-600">
         <span>Shipping</span>
-        <span>
-          {billing.shipping === 0
-            ? "Free"
-            : billingCalculator.formatCurrency(billing.shipping)}
-        </span>
+        <span>Included</span>
       </div>
 
-      <div className="flex justify-between">
-        <span>Tax ({billing.taxPercentage}% GST)</span>
-        <span>{billingCalculator.formatCurrency(billing.tax)}</span>
+      <div className="flex justify-between text-sm text-gray-600">
+        <span>GST & Shipping</span>
+        <span>Included</span>
       </div>
 
       <Separator />
@@ -72,9 +68,7 @@ const OrderSummary: React.FC<{
 
 const Checkout: React.FC = () => {
   const router = useRouter();
-  const { cartItems, clearCart, getBillingBreakdown, getBillingItems } =
-    useCartStore();
-  const subtotal = useCartSubtotal();
+  const { cartItems, clearCart, getBillingBreakdown } = useCartStore();
   const { processPayment, isProcessing, clearPaymentState } = usePaymentStore();
 
   // Form state
@@ -95,16 +89,6 @@ const Checkout: React.FC = () => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [upiId, setUpiId] = useState("");
   const [isPincodeServiceable, setIsPincodeServiceable] = useState(false);
-  const [deliveryInfo, setDeliveryInfo] = useState<{
-    pincode: string;
-    serviceable: boolean;
-    deliveryTime?: string;
-    charges?: {
-      cod: number;
-      prepaid: number;
-    };
-    error?: string;
-  } | null>(null);
 
   // Get billing breakdown using the new billing calculator
   const billing = getBillingBreakdown();
@@ -124,7 +108,6 @@ const Checkout: React.FC = () => {
     }
   ) => {
     setIsPincodeServiceable(isServiceable);
-    setDeliveryInfo(info || null);
 
     // Log delivery info for debugging
     if (info) {

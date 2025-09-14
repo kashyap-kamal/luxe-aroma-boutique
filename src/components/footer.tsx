@@ -67,28 +67,13 @@ const Footer = () => {
                   About Us
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/careers"
-                  className="text-black transition-colors hover:text-luxe-sandy"
-                >
-                  Careers
-                </Link>
-              </li>
+
               <li>
                 <Link
                   href="/contact"
                   className="text-black transition-colors hover:text-luxe-sandy"
                 >
                   Contact Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/blog"
-                  className="text-black transition-colors hover:text-luxe-sandy"
-                >
-                  Blog
                 </Link>
               </li>
             </ul>
@@ -98,11 +83,6 @@ const Footer = () => {
           <div className="col-span-1">
             <h4 className="mb-4 text-lg font-medium text-luxe-blue">Support</h4>
             <ul className="space-y-2">
-              <li>
-                <a href="#" className="transition-colors hover:text-luxe-sandy">
-                  FAQs
-                </a>
-              </li>
               <li>
                 <Link
                   href="/shipping-delivery"

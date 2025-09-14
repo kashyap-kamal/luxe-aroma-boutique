@@ -5,12 +5,12 @@
 
 echo "🚀 Starting Hostinger deployment process..."
 
-# Check if .env.local exists
-if [ ! -f ".env.local" ]; then
-    echo "⚠️  Warning: .env.local not found. Creating from example..."
-    echo "BASE_PATH=" > .env.local
-    echo "URL=" >> .env.local
-    echo "Please update .env.local with your actual values before deploying."
+# Check if .env exists
+if [ ! -f ".env" ]; then
+    echo "⚠️  Warning: .env not found. Creating from example..."
+    echo "BASE_PATH=" > .env
+    echo "URL=" >> .env
+    echo "Please update .env with your actual values before deploying."
 fi
 
 # Build the static site

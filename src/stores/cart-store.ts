@@ -22,6 +22,7 @@ export interface Product {
     stars: number;
     out_of: number;
   };
+
   status: string;
 }
 

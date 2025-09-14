@@ -134,7 +134,7 @@ const Products = () => {
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow py-8">
         <div className="luxury-container">
-          <h1 className="text-3xl font-serif font-bold mb-8">
+          <h1 className="text-3xl text-luxe-blue font-serif font-bold mb-8">
             Our Perfume Collection
           </h1>
 

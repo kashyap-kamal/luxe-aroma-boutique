@@ -4,92 +4,26 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Toaster } from "sonner";
+import PerformanceMonitor from "@/components/performance-monitor";
+import { baseMetadata } from "@/lib/metadata";
 
+// Optimized font loading with display swap
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: false, // Only preload primary font
 });
 
-export const metadata: Metadata = {
-  title: "Arome Luxe - Luxury Aroma Boutique",
-  description:
-    "Premium luxury aromas and fragrances boutique. Discover our exquisite collection of fine perfumes and aromatic experiences.",
-  keywords: [
-    "luxury perfumes",
-    "aroma boutique",
-    "fine fragrances",
-    "premium scents",
-  ],
-  authors: [{ name: "Arome Luxe" }],
-  creator: "Arome Luxe",
-  publisher: "Arome Luxe",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  metadataBase: new URL("https://aromeluxe.com"),
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: "Arome Luxe - Luxury Aroma Boutique",
-    description: "Premium luxury aromas and fragrances boutique",
-    url: "https://aromeluxe.com",
-    siteName: "Arome Luxe",
-    images: [
-      {
-        url: "/assets/arome-luxe-logo.png",
-        width: 1200,
-        height: 630,
-        alt: "Arome Luxe Logo",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  icons: {
-    icon: [
-      { url: "/assets/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/assets/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/assets/favicon.ico", sizes: "any" },
-    ],
-    apple: [
-      {
-        url: "/assets/apple-touch-icon.png",
-        sizes: "180x180",
-        type: "image/png",
-      },
-    ],
-    other: [
-      {
-        rel: "android-chrome-192x192",
-        url: "/assets/android-chrome-192x192.png",
-      },
-      {
-        rel: "android-chrome-512x512",
-        url: "/assets/android-chrome-512x512.png",
-      },
-    ],
-  },
-  manifest: "/assets/site.webmanifest",
-};
+// Use centralized metadata
+export const metadata: Metadata = baseMetadata;
 
 export default function RootLayout({
   children,
@@ -97,7 +31,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
+      <head>
+        {/* Preconnect to external domains for better performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="preconnect" href="https://images.unsplash.com" />
+
+        {/* DNS prefetch for external resources */}
+        <link rel="dns-prefetch" href="//checkout.razorpay.com" />
+        <link rel="dns-prefetch" href="//track.delhivery.com" />
+
+        {/* Preload critical resources */}
+        <link
+          rel="preload"
+          href="/fonts/geist-sans.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -107,6 +64,7 @@ export default function RootLayout({
           <Footer />
         </div>
         <Toaster />
+        <PerformanceMonitor />
       </body>
     </html>
   );

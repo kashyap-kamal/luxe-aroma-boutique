@@ -65,7 +65,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-black hover:text-luxe-blue"
+              className="text-black hover:text-white hover:bg-black"
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -73,11 +73,11 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative text-black hover:text-luxe-blue"
+                className="relative text-black hover:text-white hover:bg-black group"
               >
                 <ShoppingBag className="h-5 w-5" />
                 {itemCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-luxe-sandy text-white text-xs h-5 w-5 flex items-center justify-center rounded-full">
+                  <Badge className="absolute -top-2 -right-2 bg-luxe-sandy text-white  text-xs h-5 w-5 flex items-center justify-center rounded-full transition-colors">
                     {itemCount}
                   </Badge>
                 )}

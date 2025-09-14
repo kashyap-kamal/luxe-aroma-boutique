@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SortOption, getSortingOptions } from "@/lib/mock-data";
+import { categoryNameMap } from "@/lib/utils";
 
 interface FilterProps {
   categories: string[];
@@ -53,7 +54,7 @@ const ProductFilter: React.FC<FilterProps> = ({
               className="mr-2 mb-2"
               onClick={() => onCategoryChange(category)}
             >
-              {category}
+              {categoryNameMap(category)}
             </Button>
           ))}
         </div>

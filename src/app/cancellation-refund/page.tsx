@@ -302,13 +302,7 @@ const CancellationRefund: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p>
-                    <strong>Email:</strong> returns@luxearomaboutique.com
-                  </p>
-                  <p>
-                    <strong>Phone:</strong> +91 98765-43210
-                  </p>
-                  <p>
-                    <strong>WhatsApp:</strong> +91 98765-43210
+                    <strong>Email:</strong> contact@aromeluxe.in
                   </p>
                 </div>
                 <div>

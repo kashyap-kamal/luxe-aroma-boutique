@@ -9,7 +9,7 @@
       {
         "id": 68,
         "name": "Ameer Al Oud",
-        "category": "Men",
+        "category": "men",
         "price": {
           "original": 700,
           "current": 399,
@@ -25,7 +25,7 @@
       {
         "id": 435,
         "name": "Aqua",
-        "category": "Men",
+        "category": "men",
         "tags": ["New Launch"],
         "price": {
           "original": 700,
@@ -42,7 +42,7 @@
       {
         "id": 61,
         "name": "Aventus",
-        "category": "Men",
+        "category": "men",
         "price": {
           "original": 700,
           "current": 399,
@@ -58,7 +58,7 @@
       {
         "id": 70,
         "name": "Cool Water",
-        "category": "Men",
+        "category": "men",
         "price": {
           "original": 700,
           "current": 399,
@@ -74,7 +74,7 @@
       {
         "id": 72,
         "name": "Hawas",
-        "category": "Men",
+        "category": "men",
         "price": {
           "original": 700,
           "current": 399,
@@ -90,7 +90,7 @@
       {
         "id": 439,
         "name": "Icon",
-        "category": "Men",
+        "category": "men",
         "tags": ["New Launch"],
         "price": {
           "original": 700,
@@ -107,7 +107,7 @@
       {
         "id": 508,
         "name": "Most Wanted EDP",
-        "category": "Men",
+        "category": "men",
         "tags": ["New Launch"],
         "price": {
           "original": 700,

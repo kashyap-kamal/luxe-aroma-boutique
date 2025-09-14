@@ -5,37 +5,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
-import { getProductById } from "@/lib/mock-data";
+import { Product } from "@/lib/data-service";
 import { useCartStore } from "@/stores/cart-store";
 import { toast } from "sonner";
 import Image from "next/image";
 
 interface ProductDetailClientProps {
-  id: string;
+  product: Product;
 }
 
-const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ id }) => {
+const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
+  product,
+}) => {
   const router = useRouter();
   const { addToCart } = useCartStore();
   const [quantity, setQuantity] = useState(1);
-
-  const product = getProductById(id);
-
-  if (!product) {
-    return (
-      <main className="flex-grow py-16">
-        <div className="luxury-container text-center">
-          <h1 className="text-2xl font-medium mb-4">Product Not Found</h1>
-          <p className="mb-8">
-            Sorry, we couldn&apos;t find the product you were looking for.
-          </p>
-          <Button asChild>
-            <Link href="/products">Continue Shopping</Link>
-          </Button>
-        </div>
-      </main>
-    );
-  }
 
   const handleIncreaseQuantity = () => {
     setQuantity((prev) => prev + 1);
