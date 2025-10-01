@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/stores/cart-store";
+import { UserMenu } from "@/components/auth/user-menu";
 import Image from "next/image";
 
 const Navbar = () => {
@@ -83,6 +84,7 @@ const Navbar = () => {
                 )}
               </Button>
             </Link>
+            <UserMenu />
             <Button
               variant="ghost"
               size="icon"

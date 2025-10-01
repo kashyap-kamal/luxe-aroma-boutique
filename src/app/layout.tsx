@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import { Toaster } from "sonner";
 import PerformanceMonitor from "@/components/performance-monitor";
 import { baseMetadata } from "@/lib/metadata";
+import { AuthProvider } from "@/components/auth/auth-provider";
 
 // Optimized font loading with display swap
 const geistSans = Geist({
@@ -58,13 +59,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="min-h-screen flex flex-col">
-          <Navbar />
-          {children}
-          <Footer />
-        </div>
-        <Toaster />
-        <PerformanceMonitor />
+        <AuthProvider>
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            {children}
+            <Footer />
+          </div>
+          <Toaster />
+          <PerformanceMonitor />
+        </AuthProvider>
       </body>
     </html>
   );

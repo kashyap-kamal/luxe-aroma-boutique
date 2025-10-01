@@ -20,16 +20,22 @@
     Header always set X-XSS-Protection "1; mode=block"
     
     # Frame Options
-    Header always set X-Frame-Options "SAMEORIGIN"
+    Header set X-Frame-Options "DENY"
     
     # Content Type Options
-    Header always set X-Content-Type-Options "nosniff"
+    Header set X-Content-Type-Options "nosniff"
     
     # Referrer Policy
-    Header always set Referrer-Policy "origin-when-cross-origin"
+    Header set Referrer-Policy "no-referrer"
     
     # DNS Prefetch Control
     Header always set X-DNS-Prefetch-Control "on"
+    
+    # Strict Transport Security (HSTS)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    
+    # Content Security Policy (CSP)
+    # Header add Content-Security-Policy "default-src 'self'; script-src 'self'; img-src 'self' data:; style-src 'self';"
     
     # CORS headers for API routes
     Header always set Access-Control-Allow-Origin "*"
@@ -97,6 +103,10 @@ Redirect 301 /home /index.html
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ /index.html [QSA,L]
+    
+    # Auto-serve .html files without extension
+    RewriteCond %{REQUEST_FILENAME}.html -f
+    RewriteRule !.*\.html$ %{REQUEST_FILENAME}.html [L]
 </IfModule>
 
 # Error pages

@@ -53,7 +53,7 @@ export class BillingCalculator {
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     // Calculate discount (if any)
-    const discount = this.calculateDiscount(subtotal);
+    const discount = this.calculateDiscount();
     const discountPercentage = subtotal > 0 ? (discount / subtotal) * 100 : 0;
 
     // Calculate taxable amount (after discount)
@@ -64,7 +64,7 @@ export class BillingCalculator {
     const taxPercentage = this.config.taxRate;
 
     // Calculate shipping
-    const shipping = this.calculateShipping(taxableAmount);
+    const shipping = this.calculateShipping();
 
     // Calculate total
     const total = taxableAmount + tax + shipping;
@@ -84,7 +84,7 @@ export class BillingCalculator {
   /**
    * Calculate discount based on business rules
    */
-  private calculateDiscount(subtotal: number): number {
+  private calculateDiscount(): number {
     // No discounts since GST and shipping are already included in product price
     return 0;
   }
@@ -99,7 +99,7 @@ export class BillingCalculator {
   /**
    * Calculate shipping charges
    */
-  private calculateShipping(taxableAmount: number): number {
+  private calculateShipping(): number {
     // Shipping already included in product price
     return 0;
   }
