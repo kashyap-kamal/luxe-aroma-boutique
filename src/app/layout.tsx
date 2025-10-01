@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
-import { Toaster } from "sonner";
-import PerformanceMonitor from "@/components/performance-monitor";
-import { baseMetadata } from "@/lib/metadata";
-import { AuthProvider } from "@/components/auth/auth-provider";
+import type { Metadata } from "next"
+import { Geist, Geist_Mono } from "next/font/google"
+import "./globals.css"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+import MarqueeTopbar from "@/components/marquee-topbar"
+import { Toaster } from "sonner"
+import PerformanceMonitor from "@/components/performance-monitor"
+import { baseMetadata } from "@/lib/metadata"
+import { AuthProvider } from "@/components/auth/auth-provider"
 
 // Optimized font loading with display swap
 const geistSans = Geist({
@@ -14,22 +15,22 @@ const geistSans = Geist({
   subsets: ["latin"],
   display: "swap",
   preload: true,
-});
+})
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
   preload: false, // Only preload primary font
-});
+})
 
 // Use centralized metadata
-export const metadata: Metadata = baseMetadata;
+export const metadata: Metadata = baseMetadata
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
@@ -61,6 +62,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <div className="min-h-screen flex flex-col">
+            <MarqueeTopbar />
             <Navbar />
             {children}
             <Footer />
@@ -70,5 +72,5 @@ export default function RootLayout({
         </AuthProvider>
       </body>
     </html>
-  );
+  )
 }

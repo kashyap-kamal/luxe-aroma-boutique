@@ -1,51 +1,74 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock } from "lucide-react";
+} from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2, Mail, Lock } from "lucide-react"
+import { toast } from "sonner"
 
 export function SignInForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
+    e.preventDefault()
+    setIsLoading(true)
+    setError("")
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
 
       if (signInError) {
-        setError("Invalid email or password");
-      } else {
-        router.push("/");
-        router.refresh();
+        // Show specific error messages
+        const errorMessage = signInError.message.includes("Invalid")
+          ? "Invalid email or password. Please try again."
+          : signInError.message.includes("Email not confirmed")
+          ? "Please confirm your email before signing in."
+          : signInError.message
+
+        setError(errorMessage)
+        toast.error("Sign In Failed", {
+          description: errorMessage,
+        })
+      } else if (data.user) {
+        // Success! Show success message
+        toast.success("Welcome back!", {
+          description: `Signed in as ${data.user.email}`,
+        })
+
+        // Small delay to show the toast
+        setTimeout(() => {
+          router.push("/")
+          router.refresh()
+        }, 500)
       }
-    } catch {
-      setError("An error occurred. Please try again.");
+    } catch (err) {
+      const errorMsg = "An unexpected error occurred. Please try again."
+      setError(errorMsg)
+      toast.error("Error", { description: errorMsg })
+      console.error("Sign in error:", err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -82,7 +105,17 @@ export function SignInForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <Button
+                variant="link"
+                className="p-0 h-auto text-xs font-normal"
+                type="button"
+                onClick={() => router.push("/auth/forgot-password")}
+              >
+                Forgot password?
+              </Button>
+            </div>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -115,5 +148,5 @@ export function SignInForm() {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

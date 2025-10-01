@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
-import { useUser, useLogout } from "@/stores/auth-store";
-import { Button } from "@/components/ui/button";
+import { useState } from "react"
+import { supabase } from "@/lib/supabase"
+import { useRouter } from "next/navigation"
+import { useUser, useLogout } from "@/stores/auth-store"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,29 +12,37 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, Settings, ShoppingBag } from "lucide-react";
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { User, LogOut, Settings, ShoppingBag } from "lucide-react"
+import { toast } from "sonner"
 
 export function UserMenu() {
-  const user = useUser();
-  const logout = useLogout();
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const user = useUser()
+  const logout = useLogout()
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSignOut = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      await supabase.auth.signOut();
-      logout();
-      router.push("/");
-      router.refresh();
+      // Sign out from Supabase
+      await supabase.auth.signOut()
+
+      // Clear local auth state
+      logout()
+
+      // Show success message
+      toast.success("Signed out successfully!")
+
+      // Redirect to home page with a full page reload to clear all state
+      window.location.href = "/"
     } catch (error) {
-      console.error("Sign out error:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Sign out error:", error)
+      toast.error("Failed to sign out. Please try again.")
+      setIsLoading(false)
     }
-  };
+  }
 
   if (!user) {
     return (
@@ -44,7 +52,7 @@ export function UserMenu() {
         </Button>
         <Button onClick={() => router.push("/auth/signup")}>Sign Up</Button>
       </div>
-    );
+    )
   }
 
   const userInitials =
@@ -54,7 +62,7 @@ export function UserMenu() {
       .join("")
       .toUpperCase() ||
     user.email?.[0]?.toUpperCase() ||
-    "U";
+    "U"
 
   return (
     <DropdownMenu>
@@ -104,5 +112,5 @@ export function UserMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }

@@ -1,16 +1,18 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js"
 
 // Supabase configuration
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key'
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "https://your-project.supabase.co"
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "your-anon-key"
 
 // Create Supabase client for client-side operations
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
-  }
+    detectSessionInUrl: true,
+  },
 })
 
 // Database types (you can generate these from your Supabase dashboard)
@@ -23,6 +25,7 @@ export interface Database {
           email: string
           full_name: string | null
           avatar_url: string | null
+          phone: string | null
           created_at: string
           updated_at: string
         }
@@ -31,6 +34,7 @@ export interface Database {
           email: string
           full_name?: string | null
           avatar_url?: string | null
+          phone?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -39,6 +43,7 @@ export interface Database {
           email?: string
           full_name?: string | null
           avatar_url?: string | null
+          phone?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -50,7 +55,7 @@ export interface Database {
           email: string
           subject: string
           message: string
-          status: 'new' | 'read' | 'replied' | 'closed'
+          status: "new" | "read" | "replied" | "closed"
           created_at: string
           updated_at: string
         }
@@ -60,7 +65,7 @@ export interface Database {
           email: string
           subject: string
           message: string
-          status?: 'new' | 'read' | 'replied' | 'closed'
+          status?: "new" | "read" | "replied" | "closed"
           created_at?: string
           updated_at?: string
         }
@@ -70,7 +75,7 @@ export interface Database {
           email?: string
           subject?: string
           message?: string
-          status?: 'new' | 'read' | 'replied' | 'closed'
+          status?: "new" | "read" | "replied" | "closed"
           created_at?: string
           updated_at?: string
         }
@@ -90,4 +95,3 @@ export interface Database {
 
 // Type for the Supabase client with database types
 export type SupabaseClient = ReturnType<typeof createClient<Database>>
-

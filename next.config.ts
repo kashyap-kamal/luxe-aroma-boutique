@@ -1,69 +1,75 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   // Configure for static export to Hostinger
-  output: "export",
+  // output: "export",
   // Only set basePath and assetPrefix for production builds
-  basePath: process.env.NODE_ENV === "production" && process.env.BASE_PATH ? process.env.BASE_PATH : "",
-  assetPrefix: process.env.NODE_ENV === "production" && process.env.URL ? process.env.URL : undefined,
-  
+  basePath:
+    process.env.NODE_ENV === "production" && process.env.BASE_PATH
+      ? process.env.BASE_PATH
+      : "",
+  assetPrefix:
+    process.env.NODE_ENV === "production" && process.env.URL
+      ? process.env.URL
+      : undefined,
+
   // Image optimization for static export
   images: {
     unoptimized: true,
-    formats: ['image/webp', 'image/avif'],
+    formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  
+
   // Disable trailing slash for better compatibility
   trailingSlash: false,
-  
+
   // Experimental features for better performance
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
-  
+
   // Turbopack configuration (moved from experimental)
   turbopack: {
     rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
       },
     },
   },
-  
+
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  
+
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
     // Optimize bundle size
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
-        chunks: 'all',
+        chunks: "all",
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
+            name: "vendors",
+            chunks: "all",
           },
           common: {
-            name: 'common',
+            name: "common",
             minChunks: 2,
-            chunks: 'all',
+            chunks: "all",
             enforce: true,
           },
         },
-      };
+      }
     }
-    
-    return config;
+
+    return config
   },
-  
+
   // Headers for performance and security (disabled for static export)
   // Note: Headers don't work with static export, configure them on your hosting provider
   // async headers() {
@@ -125,7 +131,7 @@ const nextConfig: NextConfig = {
   //     },
   //   ];
   // },
-  
+
   // Redirects for SEO (disabled for static export)
   // Note: Redirects don't work with static export, configure them on your hosting provider
   // async redirects() {
@@ -137,6 +143,6 @@ const nextConfig: NextConfig = {
   //     },
   //   ];
   // },
-};
+}
 
-export default nextConfig;
+export default nextConfig

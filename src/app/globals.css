@@ -126,13 +126,11 @@
 /* Design tokens (Tailwind v4) */
 @theme {
   /* Fonts */
-  --font-sans:
-    "Montserrat", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", "Noto Color Emoji";
-  --font-serif:
-    "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times,
-    serif;
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria,
+    "Times New Roman", Times, serif;
   --font-poppins: "Poppins", var(--font-sans);
 
   /* Core palette (use via bg-*, text-*, ring-*, border-*) */
@@ -214,4 +212,32 @@ h6 {
 
 .luxury-gradient {
   @apply bg-gradient-to-r from-luxe-blue to-luxe-violet;
+}
+
+/* Marquee Animation Styles */
+/* Creates a smooth scrolling effect for the topbar message */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-container {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.marquee-content {
+  display: flex;
+  animation: marquee 35s linear infinite;
+  /* Slower animation for better readability */
+  /* Pause animation on hover so users can read the message */
+}
+
+.marquee-content:hover {
+  animation-play-state: paused;
 }
