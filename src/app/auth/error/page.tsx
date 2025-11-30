@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { AuthHeader } from "@/components/auth/auth-header";
 
 function AuthErrorContent() {
   const searchParams = useSearchParams();
@@ -40,10 +41,7 @@ function AuthErrorContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Aromé Luxe</h1>
-          <p className="text-gray-600">Luxury Fragrances & Perfumes</p>
-        </div>
+        <AuthHeader />
 
         <Card>
           <CardHeader className="text-center">
@@ -79,12 +77,7 @@ export default function AuthErrorPage() {
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-md w-full space-y-8">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Aromé Luxe
-              </h1>
-              <p className="text-gray-600">Luxury Fragrances & Perfumes</p>
-            </div>
+            <AuthHeader />
             <Card>
               <CardContent className="p-8 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-luxe-blue mx-auto"></div>

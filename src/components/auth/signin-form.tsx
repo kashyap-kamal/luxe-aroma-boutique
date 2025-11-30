@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "@/lib/auth-service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,14 +14,30 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock } from "lucide-react";
+import { Loader2, Mail, Lock, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
 export function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [verified, setVerified] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Check if user just verified their email
+  useEffect(() => {
+    const verifiedParam = searchParams.get("verified");
+    if (verifiedParam === "true") {
+      setVerified(true);
+      // Clear the verified param from URL after showing message
+      setTimeout(() => {
+        router.replace("/auth/signin");
+        setVerified(false);
+      }, 5000);
+    }
+  }, [searchParams, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,16 +45,14 @@ export function SignInForm() {
     setError("");
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Use Supabase Edge Function for secure signin
+      const result = await signIn(email, password);
 
-      if (signInError) {
-        setError("Invalid email or password");
-      } else {
+      if (result.success) {
         router.push("/");
         router.refresh();
+      } else {
+        setError(result.error || "Invalid email or password");
       }
     } catch {
       setError("An error occurred. Please try again.");
@@ -59,6 +73,14 @@ export function SignInForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {verified && (
+            <Alert className="border-green-500 bg-green-50">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                Email verified successfully! You can now sign in.
+              </AlertDescription>
+            </Alert>
+          )}
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -82,7 +104,15 @@ export function SignInForm() {
           </div>
 
           <div className="space-y-2">
+            <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input

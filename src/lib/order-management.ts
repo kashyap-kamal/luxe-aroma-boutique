@@ -28,8 +28,8 @@ export interface Order {
   payment: {
     method: string;
     status: 'pending' | 'completed' | 'failed' | 'refunded';
-    razorpayOrderId?: string;
-    razorpayPaymentId?: string;
+    cashfreeOrderId?: string;
+    cashfreePaymentId?: string;
     amount: number;
     currency: string;
   };
@@ -51,7 +51,7 @@ export interface OrderCreateRequest {
   customerInfo: Order['customerInfo'];
   items: BillingItem[];
   paymentMethod: string;
-  razorpayOrderId?: string;
+  cashfreeOrderId?: string;
   notes?: string;
 }
 
@@ -59,7 +59,7 @@ export interface OrderUpdateRequest {
   status?: Order['status'];
   paymentStatus?: Order['payment']['status'];
   shippingStatus?: Order['shipping']['status'];
-  razorpayPaymentId?: string;
+  cashfreePaymentId?: string;
   delhiveryOrderId?: string;
   waybill?: string;
   trackingUrl?: string;
@@ -87,7 +87,7 @@ class OrderManager {
       payment: {
         method: request.paymentMethod,
         status: 'pending',
-        razorpayOrderId: request.razorpayOrderId,
+        cashfreeOrderId: request.cashfreeOrderId,
         amount: billing.total,
         currency: billing.currency,
       },
@@ -128,8 +128,8 @@ class OrderManager {
       updatedOrder.shipping.status = updates.shippingStatus;
     }
     
-    if (updates.razorpayPaymentId) {
-      updatedOrder.payment.razorpayPaymentId = updates.razorpayPaymentId;
+    if (updates.cashfreePaymentId) {
+      updatedOrder.payment.cashfreePaymentId = updates.cashfreePaymentId;
     }
     
     if (updates.delhiveryOrderId) {

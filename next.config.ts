@@ -1,11 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Configure for static export to Hostinger
+  // Static export for Hostinger deployment
+  // Note: API routes won't work with static export
+  // Most functionality uses Supabase Edge Functions (which work fine)
   output: "export",
-  // Only set basePath and assetPrefix for production builds
-  basePath: process.env.NODE_ENV === "production" && process.env.BASE_PATH ? process.env.BASE_PATH : "",
-  assetPrefix: process.env.NODE_ENV === "production" && process.env.URL ? process.env.URL : undefined,
   
   // Image optimization for static export
   images: {

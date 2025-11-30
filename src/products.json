@@ -2,31 +2,14 @@
     "shop_info": {
       "name": "Aromeluxe Shop",
       "base_url": "https://aromeluxe.shop",
-      "total_products": 7,
+      "total_products": 20,
       "currency": "₹"
     },
     "products": [
       {
         "id": 68,
         "name": "Ameer Al Oud",
-        "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
-        "status": "in_stock"
-      },
-      {
-        "id": 435,
-        "name": "Aqua",
-        "category": "men",
-        "tags": ["New Launch"],
+        "category": "unisex",
         "price": {
           "original": 700,
           "current": 399,
@@ -42,6 +25,55 @@
       {
         "id": 61,
         "name": "Aventus",
+        "category": "men",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 435,
+        "name": "Aqua Di Gio",
+        "category": "men",
+        "tags": ["New Launch"],
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 501,
+        "name": "Bin Sheikh",
+        "category": "men",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 502,
+        "name": "Blue De Chanel",
         "category": "men",
         "price": {
           "original": 700,
@@ -72,6 +104,23 @@
         "status": "in_stock"
       },
       {
+        "id": 439,
+        "name": "Dunhill Icon",
+        "category": "men",
+        "tags": ["New Launch"],
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
         "id": 72,
         "name": "Hawas",
         "category": "men",
@@ -88,8 +137,8 @@
         "status": "in_stock"
       },
       {
-        "id": 439,
-        "name": "Icon",
+        "id": 508,
+        "name": "Most Wanted",
         "category": "men",
         "tags": ["New Launch"],
         "price": {
@@ -105,10 +154,169 @@
         "status": "in_stock"
       },
       {
-        "id": 508,
-        "name": "Most Wanted EDP",
+        "id": 503,
+        "name": "Sauvage",
         "category": "men",
-        "tags": ["New Launch"],
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 504,
+        "name": "Ultra Male",
+        "category": "men",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 505,
+        "name": "1 Million",
+        "category": "men",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 506,
+        "name": "Versace Oud",
+        "category": "men",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 507,
+        "name": "Gucci Flora",
+        "category": "women",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 509,
+        "name": "Baccarat Rouge 540",
+        "category": "unisex",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 510,
+        "name": "Gucci Guilty",
+        "category": "unisex",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 511,
+        "name": "Khamrah",
+        "category": "unisex",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 512,
+        "name": "Oud For Greatness",
+        "category": "unisex",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 513,
+        "name": "Tam Dao",
+        "category": "unisex",
+        "price": {
+          "original": 700,
+          "current": 399,
+          "currency": "₹",
+          "on_sale": true
+        },
+        "rating": {
+          "stars": 0,
+          "out_of": 5
+        },
+        "status": "in_stock"
+      },
+      {
+        "id": 514,
+        "name": "Tobacco Vanilla",
+        "category": "unisex",
         "price": {
           "original": 700,
           "current": 399,

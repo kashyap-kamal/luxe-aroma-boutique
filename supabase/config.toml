@@ -1,0 +1,8 @@
+# Supabase Configuration
+# This file configures Edge Functions and other Supabase settings
+
+# Disable JWT verification for cashfree-webhook function
+# This allows Cashfree webhooks to call the function without authentication
+# Webhook security is handled via signature verification in the function code
+[functions.cashfree-webhook]
+verify_jwt = false

@@ -34,6 +34,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        {/* Favicon */}
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/assets/android-chrome-192x192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/assets/android-chrome-512x512.png" />
+
         {/* Preconnect to external domains for better performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -44,7 +52,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://images.unsplash.com" />
 
         {/* DNS prefetch for external resources */}
-        <link rel="dns-prefetch" href="//checkout.razorpay.com" />
+        <link rel="dns-prefetch" href="//sdk.cashfree.com" />
         <link rel="dns-prefetch" href="//track.delhivery.com" />
 
         {/* Preload critical resources */}

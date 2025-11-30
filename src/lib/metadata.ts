@@ -1,9 +1,34 @@
 import { Metadata } from 'next';
 import { getProducts, getProductById, Product, getProductsByCategory } from './data-service';
 
+// Get base URL - works for both localhost and production
+// This function will be called at runtime to get the correct URL
+const getBaseUrl = (): string => {
+  // Server-side: use env variable or default
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+  // For Vercel deployments
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  // For localhost development
+  if (process.env.NODE_ENV === 'development') {
+    // Note: OG images won't work on localhost for social media previews
+    // but this ensures the site works correctly in development
+    return 'http://localhost:3000';
+  }
+  // Default fallback for production
+  return 'https://aromeluxe.in';
+};
+
+// Get base URL as constant for metadataBase (evaluated at module load)
+// Use environment variable or fallback to production URL
+const baseUrlString = process.env.NEXT_PUBLIC_SITE_URL || 'https://aromeluxe.in';
+
 // Base metadata configuration
 const baseMetadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://aromeluxe.in'),
+  metadataBase: new URL(baseUrlString),
   title: {
     default: 'Aromé Luxe - Premium Perfumes & Fragrances',
     template: '%s | Aromé Luxe',
@@ -28,6 +53,20 @@ const baseMetadata: Metadata = {
     address: false,
     telephone: false,
   },
+  icons: {
+    icon: [
+      { url: '/assets/favicon.ico', sizes: 'any' },
+      { url: '/assets/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/assets/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/assets/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      { rel: 'android-chrome-192x192', url: '/assets/android-chrome-192x192.png' },
+      { rel: 'android-chrome-512x512', url: '/assets/android-chrome-512x512.png' },
+    ],
+  },
   openGraph: {
     type: 'website',
     locale: 'en_IN',
@@ -37,10 +76,10 @@ const baseMetadata: Metadata = {
     description: 'Discover exquisite fragrances crafted with the finest ingredients. Premium perfumes for men and women with free shipping across India.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: `${baseUrlString}/assets/og-image/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'Aromé Luxe - Premium Perfumes',
+        alt: 'Aromé Luxe - Premium Perfumes & Fragrances',
       },
     ],
   },
@@ -48,7 +87,7 @@ const baseMetadata: Metadata = {
     card: 'summary_large_image',
     title: 'Aromé Luxe - Premium Perfumes & Fragrances',
     description: 'Discover exquisite fragrances crafted with the finest ingredients.',
-    images: ['/twitter-image.jpg'],
+    images: [`${baseUrlString}/assets/og-image/og-image.png`],
     creator: '@aromeluxe',
   },
   robots: {
@@ -82,8 +121,8 @@ export async function generateHomeMetadata(): Promise<Metadata> {
     '@type': 'Organization',
     name: 'Aromé Luxe',
     description: 'Premium perfumes and fragrances for men and women',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://aromeluxe.in',
-    logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://aromeluxe.in'}/logo.png`,
+    url: getBaseUrl(),
+    logo: `${getBaseUrl()}/assets/arome-luxe-logo.png`,
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+91-9876543210',
@@ -121,7 +160,7 @@ export async function generateProductsMetadata(): Promise<Metadata> {
     '@type': 'CollectionPage',
     name: 'Perfume Collection',
     description: 'Browse our complete collection of premium perfumes and fragrances',
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://aromeluxe.in'}/products`,
+    url: `${getBaseUrl()}/products`,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: products.length,
@@ -239,7 +278,7 @@ export async function generateCategoryMetadata(category: string): Promise<Metada
     '@type': 'CollectionPage',
     name: `${categoryName} Perfumes`,
     description: `Explore our ${categoryName} perfume collection`,
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://aromeluxe.in'}/products?category=${category}`,
+    url: `${getBaseUrl()}/products?category=${category}`,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: products.length,
@@ -298,7 +337,7 @@ export function generateContactMetadata(): Metadata {
     '@type': 'ContactPage',
     name: 'Contact Us - Aromé Luxe',
     description: 'Get in touch with Aromé Luxe for any questions about our perfumes and fragrances.',
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://aromeluxe.in'}/contact`,
+    url: `${getBaseUrl()}/contact`,
     mainEntity: {
       '@type': 'Organization',
       name: 'Aromé Luxe',

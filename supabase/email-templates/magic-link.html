@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Magic Link - Aromé Luxe</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Montserrat', Arial, sans-serif; background-color: #faf8f3; line-height: 1.6;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #faf8f3;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding: 40px 30px 30px; background: linear-gradient(135deg, #623cea 0%, #4a2bb8 100%); border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0; color: #ffffff; font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: 700; letter-spacing: 1px;">
+                Aromé Luxe
+              </h1>
+              <p style="margin: 10px 0 0; color: #f0f8ff; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">
+                Luxury Fragrances & Perfumes
+              </p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="margin: 0 0 20px; color: #623cea; font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 600;">
+                Your Magic Link ✨
+              </h2>
+              
+              <p style="margin: 0 0 20px; color: #333333; font-size: 16px;">
+                {{ if .Data.full_name }}Hello {{ .Data.full_name }},{{ else }}Hello,{{ end }}
+              </p>
+              
+              <p style="margin: 0 0 20px; color: #333333; font-size: 16px;">
+                Click the button below to securely sign in to your Aromé Luxe account{{ if .Email }} ({{ .Email }}){{ end }}. No password needed!
+              </p>
+
+              <!-- CTA Button -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="{{ .ConfirmationURL }}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #623cea 0%, #4a2bb8 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(98, 60, 234, 0.3);">
+                      Sign In to Aromé Luxe
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Alternative: OTP Code -->
+              <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 4px; text-align: center;">
+                <p style="margin: 0 0 10px; color: #333333; font-size: 14px; font-weight: 600;">
+                  Or use this verification code:
+                </p>
+                <p style="margin: 0; color: #623cea; font-size: 32px; font-weight: 700; letter-spacing: 8px; font-family: 'Montserrat', monospace;">
+                  {{ .Token }}
+                </p>
+                <p style="margin: 10px 0 0; color: #666666; font-size: 12px;">
+                  Enter this code on the sign-in page
+                </p>
+              </div>
+
+              <!-- Alternative Link -->
+              <p style="margin: 30px 0 0; color: #666666; font-size: 14px; text-align: center;">
+                Or copy and paste this link into your browser:<br>
+                <a href="{{ .ConfirmationURL }}" style="color: #623cea; text-decoration: underline; word-break: break-all;">
+                  {{ .ConfirmationURL }}
+                </a>
+              </p>
+              
+              {{ if .RedirectTo }}
+              <p style="margin: 15px 0 0; color: #666666; font-size: 14px; text-align: center;">
+                After signing in, you'll be redirected to: <a href="{{ .RedirectTo }}" style="color: #623cea; text-decoration: underline;">{{ .RedirectTo }}</a>
+              </p>
+              {{ end }}
+
+              <!-- Security Note -->
+              <div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-left: 4px solid #623cea; border-radius: 4px;">
+                <p style="margin: 0; color: #666666; font-size: 14px;">
+                  <strong style="color: #623cea;">Security Note:</strong> This magic link will expire in 1 hour and can only be used once. If you didn't request this link, please ignore this email.
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #faf8f3; border-radius: 0 0 8px 8px; border-top: 1px solid #e5e5e5;">
+              <p style="margin: 0 0 15px; color: #333333; font-size: 16px; font-weight: 600; text-align: center;">
+                Explore Our Collection
+              </p>
+              <p style="margin: 0 0 20px; color: #666666; font-size: 14px; text-align: center;">
+                Visit us at <a href="{{ .SiteURL }}" style="color: #623cea; text-decoration: none; font-weight: 500;">aromeluxe.in</a>
+              </p>
+              
+              <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e5e5;">
+                <p style="margin: 0 0 10px; color: #999999; font-size: 12px;">
+                  © 2025 Aromé Luxe. All rights reserved.
+                </p>
+                <p style="margin: 0; color: #999999; font-size: 12px;">
+                  Premium Perfumes & Fragrances | Made with ❤️ in India
+                </p>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+

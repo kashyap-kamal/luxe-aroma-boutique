@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { delhiveryAPI } from '@/lib/delhivery-api';
+import ky from 'ky';
 
 export const runtime = 'nodejs';
 
@@ -16,12 +16,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check pincode serviceability
-    const result = await delhiveryAPI.checkPincodeServiceability({
-      pincode,
-      weight: weight || 0.5,
-      cod: cod || false,
-    });
+    // Validate Supabase configuration
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json(
+        { error: 'Supabase configuration is missing' },
+        { status: 500 }
+      );
+    }
+
+    // Call Supabase Edge Function to check pincode serviceability
+    // Delhivery API keys are securely stored in Supabase secrets
+    const result = await ky
+      .post(
+        `${supabaseUrl}/functions/v1/check-delhivery-pincode`,
+        {
+          headers: {
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            "Content-Type": "application/json",
+          },
+          json: {
+            pincode,
+            weight: weight || 0.5,
+            cod: cod || false,
+          },
+        }
+      )
+      .json();
 
     return NextResponse.json(result);
   } catch (error) {

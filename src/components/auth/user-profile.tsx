@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -11,10 +12,29 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Calendar, Shield } from "lucide-react";
+import { User, Mail, Calendar, Shield, Lock, Bell, ShieldCheck, Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 export function UserProfile() {
   const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  // Handle account actions
+  const handleChangePassword = () => {
+    router.push("/profile/change-password");
+  };
+
+  const handleEditProfile = () => {
+    toast.info("Edit Profile feature coming soon!");
+  };
+
+  const handleNotificationSettings = () => {
+    toast.info("Notification settings coming soon!");
+  };
+
+  const handlePrivacySettings = () => {
+    toast.info("Privacy settings coming soon!");
+  };
 
   if (!isAuthenticated || !user) {
     return (
@@ -115,16 +135,36 @@ export function UserProfile() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={handleEditProfile}
+            >
+              <Pencil className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={handleChangePassword}
+            >
+              <Lock className="w-4 h-4 mr-2" />
               Change Password
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={handleNotificationSettings}
+            >
+              <Bell className="w-4 h-4 mr-2" />
               Notification Settings
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={handlePrivacySettings}
+            >
+              <ShieldCheck className="w-4 h-4 mr-2" />
               Privacy Settings
             </Button>
           </CardContent>

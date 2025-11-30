@@ -1,8 +1,8 @@
 import { create, StateCreator } from "zustand";
-import { OrderDetails, PaymentStatus, CustomerInfo } from "@/types/razorpay";
+import { OrderDetails, PaymentStatus, CustomerInfo } from "@/types/cashfree";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { paymentService } from "@/types/services/payment-services";
+import { cashfreePaymentService } from "@/types/services/cashfree-services";
 import { orderManager } from "@/lib/order-management";
 
 export interface PaymentState {
@@ -66,11 +66,21 @@ const createPaymentStore: StateCreator<
         contact: customerInfo.phone,
       };
 
-      // call service
-      const result = await paymentService.processPayment(
+      // Prepare cart items for Cashfree
+      const cartItems = orderDetails.items.map((item) => ({
+        productId: item.productId,
+        productName: item.productName,
+        price: item.price,
+        quantity: item.quantity,
+        imageUrl: undefined, // Can be enhanced later with product images
+      }));
+
+      // call Cashfree payment service
+      const result = await cashfreePaymentService.processPayment(
         amount,
         paymentCustomerInfo,
-        orderDetails
+        orderDetails,
+        cartItems
       );
 
       if (result.success && result.orderId) {
@@ -98,7 +108,7 @@ const createPaymentStore: StateCreator<
           },
           items: billingItems,
           paymentMethod: orderDetails.paymentMethod || "online",
-          razorpayOrderId: result.orderId,
+          cashfreeOrderId: result.orderId,
           notes: orderDetails.notes,
         });
 

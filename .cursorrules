@@ -1,0 +1,323 @@
+# Cursor Rules for Aromé Luxe Project
+
+## Supabase MCP Tools Usage
+
+This project uses Supabase MCP (Model Context Protocol) tools for all Supabase-related tasks. **ALWAYS use MCP tools instead of manual Supabase CLI commands or dashboard operations.**
+
+### Project Configuration
+- **Project Reference**: `bzqwezglotpkzxghjxvc`
+- **Project URL**: `https://bzqwezglotpkzxghjxvc.supabase.co`
+- **Dashboard**: `https://supabase.com/dashboard/project/bzqwezglotpkzxghjxvc`
+
+### Available Supabase MCP Tools
+
+#### Database Operations
+- **`mcp_supabase_list_tables`** - List all tables in the database
+  - Use when: Checking database schema, verifying table existence
+  - Example: List tables before creating migrations
+
+- **`mcp_supabase_execute_sql`** - Execute raw SQL queries
+  - Use when: Running SELECT queries, checking data, debugging
+  - Note: Use `mcp_supabase_apply_migration` for DDL operations
+
+- **`mcp_supabase_apply_migration`** - Apply database migrations (DDL)
+  - Use when: Creating/modifying tables, indexes, RLS policies, triggers
+  - Always use this for schema changes, NOT `execute_sql`
+  - Migration files should be in `supabase/migrations/` directory
+
+#### Migrations Management
+- **`mcp_supabase_list_migrations`** - List all applied migrations
+  - Use when: Checking migration history, verifying what's deployed
+
+#### Edge Functions
+- **`mcp_supabase_list_edge_functions`** - List all Edge Functions
+  - Use when: Checking deployed functions, verifying function names
+
+- **`mcp_supabase_get_edge_function`** - Get Edge Function code
+  - Use when: Reviewing existing function code before modifications
+
+- **`mcp_supabase_deploy_edge_function`** - Deploy Edge Functions
+  - Use when: Creating new functions or updating existing ones
+  - Function files should be in `supabase/functions/{function-name}/index.ts`
+  - Always deploy after making changes to Edge Functions
+
+#### Monitoring & Debugging
+- **`mcp_supabase_get_logs`** - Get logs for a specific service
+  - Use when: Debugging errors, checking function execution logs
+  - Services: `api`, `postgres`, `edge-function`, `auth`, `storage`, `realtime`
+  - Example: Check `edge-function` logs when debugging auth-signup errors
+
+- **`mcp_supabase_get_advisors`** - Get security/performance advisories
+  - Use when: After applying migrations, checking for security issues
+  - Types: `security`, `performance`
+  - Always check after DDL operations
+
+#### Type Generation
+- **`mcp_supabase_generate_typescript_types`** - Generate TypeScript types
+  - Use when: After schema changes, updating frontend types
+  - Output should be saved to `src/types/supabase.ts` or similar
+
+#### Documentation
+- **`mcp_supabase_search_docs`** - Search Supabase documentation
+  - Use when: Need to verify API usage, check best practices
+  - Always use GraphQL query format
+
+### Workflow Guidelines
+
+#### When Creating Database Migrations
+1. Create migration file in `supabase/migrations/` with timestamp prefix
+2. Use `mcp_supabase_apply_migration` to apply it
+3. Use `mcp_supabase_get_advisors` to check for security issues
+4. Use `mcp_supabase_list_tables` to verify changes
+5. Update TypeScript types with `mcp_supabase_generate_typescript_types`
+
+#### When Working with Edge Functions
+1. Read existing function with `mcp_supabase_get_edge_function` if updating
+2. Make changes to `supabase/functions/{name}/index.ts`
+3. Deploy with `mcp_supabase_deploy_edge_function`
+4. Test the function endpoint
+5. Check logs with `mcp_supabase_get_logs` if errors occur
+
+#### When Debugging Issues
+1. Check Edge Function logs: `mcp_supabase_get_logs` with service `edge-function`
+2. Check API logs: `mcp_supabase_get_logs` with service `api`
+3. Verify database state: `mcp_supabase_execute_sql` for SELECT queries
+4. Check migration history: `mcp_supabase_list_migrations`
+5. Review security advisories: `mcp_supabase_get_advisors` with type `security`
+
+### Common Tasks
+
+#### Deploy Updated Edge Function
+```typescript
+// Example: Deploy auth-signup function
+1. Read current function: mcp_supabase_get_edge_function("auth-signup")
+2. Update code in supabase/functions/auth-signup/index.ts
+3. Deploy: mcp_supabase_deploy_edge_function with updated files
+4. Verify: Check logs if needed
+```
+
+#### Create New Migration
+```sql
+-- Example: Add new column
+1. Create file: supabase/migrations/20250115000000_add_column.sql
+2. Apply: mcp_supabase_apply_migration(name, query)
+3. Verify: mcp_supabase_list_tables() to see changes
+4. Check: mcp_supabase_get_advisors(type: "security")
+```
+
+#### Debug Edge Function Error
+```
+1. Get logs: mcp_supabase_get_logs(service: "edge-function")
+2. Check function code: mcp_supabase_get_edge_function("function-name")
+3. Fix code and redeploy: mcp_supabase_deploy_edge_function
+4. Check logs again to verify fix
+```
+
+### Important Rules
+
+1. **NEVER use Supabase CLI commands** - Always use MCP tools
+2. **NEVER manually edit database** - Always use migrations via MCP
+3. **ALWAYS check advisors** after applying migrations
+4. **ALWAYS check logs** when debugging Edge Function issues
+5. **ALWAYS deploy Edge Functions** after code changes
+6. **ALWAYS verify** changes with appropriate MCP tools
+
+### Edge Functions in This Project
+
+Current Edge Functions:
+- `auth-signup` - User registration
+- `auth-signin` - User authentication
+- `auth-forgot-password` - Password reset email
+- `auth-reset-password` - Password update
+- `create-cashfree-order` - Cashfree payment order creation
+- `verify-cashfree-payment` - Payment verification
+- `cashfree-webhook` - Webhook handler for Cashfree events
+- `contact-handler` - Contact form submission handler
+
+### Database Tables
+
+Key tables:
+- `profiles` - User profiles (linked to auth.users)
+- `orders` - Order records
+- `webhooks` - Webhook event logs
+- `contact_messages` - Contact form submissions
+
+### Environment Variables
+
+Required Supabase environment variables:
+- `SUPABASE_URL` - Project URL
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (for Edge Functions)
+- `NEXT_PUBLIC_SUPABASE_URL` - Public URL (for frontend)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Anonymous key (for frontend)
+
+### Best Practices
+
+1. **Migration Naming**: Use format `YYYYMMDDHHMMSS_description.sql`
+2. **Function Structure**: Keep functions in `supabase/functions/{name}/index.ts`
+3. **Error Handling**: Always include proper error handling in Edge Functions
+4. **CORS Headers**: Always include CORS headers in Edge Functions
+5. **Logging**: Use `console.log`/`console.error` for debugging (visible in logs)
+6. **Type Safety**: Regenerate TypeScript types after schema changes
+
+### When User Asks About Supabase
+
+- **Database changes**: Use `mcp_supabase_apply_migration`
+- **Function deployment**: Use `mcp_supabase_deploy_edge_function`
+- **Debugging**: Use `mcp_supabase_get_logs`
+- **Schema verification**: Use `mcp_supabase_list_tables`
+- **Documentation**: Use `mcp_supabase_search_docs`
+
+### Example: Fixing auth-signup Error
+
+If user reports error with auth-signup:
+1. Get logs: `mcp_supabase_get_logs(service: "edge-function")`
+2. Get function code: `mcp_supabase_get_edge_function("auth-signup")`
+3. Identify issue in code
+4. Fix the code
+5. Deploy: `mcp_supabase_deploy_edge_function` with updated files
+6. Verify: Check logs again or test endpoint
+
+---
+
+## Hostinger MCP Tools Usage
+
+This project uses Hostinger MCP (Model Context Protocol) tools for hosting, domain, and email management tasks. **ALWAYS use MCP tools instead of manual Hostinger dashboard operations.**
+
+### Project Configuration
+- **Domain**: `aromeluxe.in` (main domain)
+- **Additional Domain**: `aromeluxe.shop` (addon domain)
+- **Username**: `u677900242`
+- **Order ID**: `1007084419`
+- **Client ID**: `1013484342`
+
+### Available Hostinger MCP Tools
+
+#### Domain Management
+- **`mcp_hostinger-mcp_domains_getDomainListV1`** - List all domains
+  - Use when: Checking domain status, verifying domain ownership
+  - Returns: Domain list with status, type, expiration dates
+
+- **`mcp_hostinger-mcp_domains_getDomainDetailsV1`** - Get domain details
+  - Use when: Checking specific domain configuration
+  - Parameters: `domain` (e.g., "aromeluxe.in")
+
+- **`mcp_hostinger-mcp_DNS_getDNSRecordsV1`** - Get DNS records
+  - Use when: Checking DNS configuration, verifying SPF/DKIM records
+  - Parameters: `domain` (e.g., "aromeluxe.in")
+
+- **`mcp_hostinger-mcp_DNS_updateDNSRecordsV1`** - Update DNS records
+  - Use when: Adding/modifying DNS records (SPF, DKIM, MX, etc.)
+  - Parameters: `domain`, `zone` (array of records), `overwrite` (boolean)
+
+#### Website Management
+- **`mcp_hostinger-mcp_hosting_listWebsitesV1`** - List all websites
+  - Use when: Checking website status, verifying deployment
+  - Returns: Website list with domains, status, root directories
+
+- **`mcp_hostinger-mcp_hosting_createWebsiteV1`** - Create new website
+  - Use when: Setting up new website/subdomain
+  - Parameters: `domain`, `order_id`, `datacenter_code` (optional)
+
+#### Email Management (via Hostinger Dashboard)
+- **Note**: Email account creation is done via Hostinger hPanel
+- **SMTP Configuration**: Done in Supabase Dashboard → Authentication → Settings → SMTP Settings
+- **Email Accounts**: Create/manage at https://hpanel.hostinger.com/ → Email → Email Accounts
+
+#### DNS Configuration for Email
+- **SPF Record**: Already configured (`v=spf1 include:_spf.mail.hostinger.com ~all`)
+- **DKIM Records**: Already configured (3 CNAME records)
+- **DMARC Record**: Already configured (`v=DMARC1; p=none`)
+- **MX Records**: Already configured (mx1.hostinger.com, mx2.hostinger.com)
+
+### Common Tasks
+
+#### Check Domain DNS Configuration
+```
+1. Get DNS records: mcp_hostinger-mcp_DNS_getDNSRecordsV1("aromeluxe.in")
+2. Verify SPF/DKIM records are present
+3. Check MX records for email
+```
+
+#### Update DNS Records
+```
+1. Get current records: mcp_hostinger-mcp_DNS_getDNSRecordsV1("aromeluxe.in")
+2. Prepare new records array
+3. Update: mcp_hostinger-mcp_DNS_updateDNSRecordsV1(domain, zone, overwrite)
+```
+
+#### Verify Website Status
+```
+1. List websites: mcp_hostinger-mcp_hosting_listWebsitesV1()
+2. Check domain status and root directory
+3. Verify is_enabled status
+```
+
+### SMTP Configuration Checklist
+
+When troubleshooting email issues:
+
+1. **Verify Email Account Exists**
+   - Go to: https://hpanel.hostinger.com/ → Email → Email Accounts
+   - Check if `noreply@aromeluxe.in` exists
+   - Verify email account is active
+
+2. **Check Supabase SMTP Settings**
+   - Go to: https://supabase.com/dashboard/project/bzqwezglotpkzxghjxvc/auth/settings
+   - Verify "Enable Custom SMTP" is ON
+   - Check SMTP configuration:
+     - Host: `smtp.hostinger.com`
+     - Port: `465` (or `587`)
+     - Username: `noreply@aromeluxe.in`
+     - Password: [email account password]
+     - Sender Email: `noreply@aromeluxe.in`
+     - Sender Name: `Aromé Luxe`
+
+3. **Test SMTP Connection**
+   - In Supabase Dashboard → Authentication → Settings → SMTP Settings
+   - Click "Send Test Email"
+   - Check if test email is received
+
+4. **Check Email Logs**
+   - Supabase: Dashboard → Logs → Filter by "auth"
+   - Hostinger: hPanel → Email → Email Logs
+
+5. **Verify DNS Records**
+   - Use: `mcp_hostinger-mcp_DNS_getDNSRecordsV1("aromeluxe.in")`
+   - Ensure SPF, DKIM, DMARC records are present
+
+### Important Rules
+
+1. **NEVER use Hostinger dashboard manually** - Use MCP tools when possible
+2. **Email accounts** - Must be created in Hostinger hPanel (not via MCP)
+3. **SMTP settings** - Configured in Supabase Dashboard (not via MCP)
+4. **DNS changes** - Use MCP tools for DNS record updates
+5. **Always verify** DNS changes after updates
+
+### Troubleshooting Email Issues
+
+#### No Emails Received
+1. Check Supabase SMTP is enabled
+2. Verify email account exists in Hostinger
+3. Test SMTP connection in Supabase Dashboard
+4. Check spam/junk folder
+5. Verify DNS records (SPF/DKIM)
+6. Check email logs in both Supabase and Hostinger
+
+#### SMTP Connection Failed
+1. Verify SMTP host: `smtp.hostinger.com`
+2. Check port: Try 465 first, then 587
+3. Verify username/password are correct
+4. Ensure email account is active
+5. Check firewall settings
+
+#### Emails Going to Spam
+1. Verify SPF record is configured
+2. Check DKIM records are present
+3. Verify DMARC record
+4. Check sender reputation
+5. Wait for DNS propagation (up to 48 hours)
+
+---
+
+**Remember**: MCP tools provide direct access to Supabase and Hostinger. Use them instead of manual operations for consistency, reliability, and better error handling.
+

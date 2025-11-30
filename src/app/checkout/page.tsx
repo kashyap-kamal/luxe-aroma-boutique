@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +10,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { usePaymentStore } from "@/stores/payment-store";
 import { Loader2, CreditCard, Smartphone, ShoppingBag } from "lucide-react";
-import type { CustomerInfo, OrderItem } from "@/types/razorpay";
+import type { CustomerInfo, OrderItem } from "@/types/cashfree";
 import { useCartStore } from "@/stores/cart-store";
-import { billingCalculator } from "@/lib/billing";
+import { billingCalculator, type BillingBreakdown } from "@/lib/billing";
 import { toast } from "sonner";
 import Script from "next/script";
 import PincodeChecker from "@/components/pincode-checker";
@@ -68,8 +68,21 @@ const OrderSummary: React.FC<{
 
 const Checkout: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { cartItems, clearCart, getBillingBreakdown } = useCartStore();
   const { processPayment, isProcessing, clearPaymentState } = usePaymentStore();
+
+  // Check if user was redirected back from cancelled payment
+  useEffect(() => {
+    const paymentStatus = searchParams.get("payment");
+    if (paymentStatus === "cancelled") {
+      toast.info("Payment Cancelled", {
+        description: "You can continue shopping or try again when ready.",
+      });
+      // Clean up URL
+      router.replace("/checkout");
+    }
+  }, [searchParams, router]);
 
   // Form state
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
@@ -89,9 +102,37 @@ const Checkout: React.FC = () => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [upiId, setUpiId] = useState("");
   const [isPincodeServiceable, setIsPincodeServiceable] = useState(false);
+  
+  // Billing state - initialized after hydration to prevent SSR mismatch
+  // Cart data comes from sessionStorage which is not available during SSR
+  const [billing, setBilling] = useState<BillingBreakdown>({
+    subtotal: 0,
+    discount: 0,
+    discountPercentage: 0,
+    tax: 0,
+    taxPercentage: 0,
+    shipping: 0,
+    total: 0,
+    currency: "INR",
+  });
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Get billing breakdown using the new billing calculator
-  const billing = getBillingBreakdown();
+  // Update billing after component mounts (client-side only)
+  // This prevents hydration mismatch since cart data comes from sessionStorage
+  useEffect(() => {
+    setIsMounted(true);
+    // Calculate billing breakdown after mount
+    const breakdown = getBillingBreakdown();
+    setBilling(breakdown);
+  }, []); // Only run once on mount
+
+  // Update billing whenever cart items change (after mount)
+  useEffect(() => {
+    if (isMounted) {
+      const breakdown = getBillingBreakdown();
+      setBilling(breakdown);
+    }
+  }, [cartItems, isMounted]); // Update when cart items change
 
   // Handle pincode serviceability change
   const handlePincodeServiceabilityChange = (
@@ -288,65 +329,47 @@ const Checkout: React.FC = () => {
       };
 
       // Process payment
+      // Note: With Cashfree redirectTarget: "_self", the page will redirect to Cashfree checkout
+      // The Promise returns immediately after opening checkout, not after payment completes
       const result = await processPayment(
         billing.total,
         customerInfo,
         orderDetails
       );
 
-      if (result.success) {
-        // Create Delhivery order after successful payment
-        try {
-          const delhiveryResponse = await fetch("/api/create-delhivery-order", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
+      if (result.success && result.orderId) {
+        // Store order details in sessionStorage for use after Cashfree redirect
+        // The order success page will handle payment verification
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(
+            "pending_order_details",
+            JSON.stringify({
+              orderId: result.orderId,
               customerInfo,
               orderItems,
-              totalAmount: billing.total,
-              paymentMode: paymentMethod === "cod" ? "cod" : "prepaid",
-              razorpayOrderId: result.orderId,
-            }),
-          });
-
-          const delhiveryResult = await delhiveryResponse.json();
-
-          if (delhiveryResult.success) {
-            toast.success("Order Created with Delhivery! 🚚", {
-              description: `Waybill: ${delhiveryResult.waybill}`,
-            });
-          } else {
-            console.warn(
-              "Delhivery order creation failed:",
-              delhiveryResult.error
-            );
-            toast.warning("Order placed but shipping setup pending", {
-              description: "We'll contact you for shipping details.",
-            });
-          }
-        } catch (delhiveryError) {
-          console.error("Delhivery order creation error:", delhiveryError);
-          toast.warning("Order placed but shipping setup pending", {
-            description: "We'll contact you for shipping details.",
-          });
+              billing,
+              paymentMethod,
+            })
+          );
         }
 
-        // Success toast
-        toast.success("Payment Successful! 🎉", {
-          description: `Order #${result.orderId} has been placed successfully.`,
-        });
-
-        // Clear cart
+        // Clear cart before redirect (Cashfree will redirect the page)
         clearCart();
 
-        // Navigate to success page
-        router.push(`/order-success/${result.orderId}`);
+        // Note: We don't navigate here - Cashfree will redirect to the return URL
+        // The return URL is set in the order creation: /order-success/{order_id}
+        // Cashfree will replace {order_id} with the actual order ID
+        toast.info("Redirecting to payment...", {
+          description: "Please complete your payment on the next page.",
+        });
+
+        // The page will redirect automatically via Cashfree checkout
+        // No need to manually navigate - Cashfree handles the redirect
       } else {
-        // Payment failed toast
+        // Payment initialization failed
         toast.error("Payment Failed", {
           description:
+            result.error ||
             "Please try again or contact support if the issue persists.",
         });
       }
@@ -647,7 +670,7 @@ const Checkout: React.FC = () => {
                     <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                       <p className="text-sm text-blue-800">
                         <strong>Secure Payment:</strong> All payments are
-                        processed securely through Razorpay.
+                        processed securely through Cashfree One Click Checkout.
                         {paymentMethod === "upi" &&
                           " You can pay using any UPI app like Google Pay, PhonePe, or Paytm."}
                       </p>
@@ -766,7 +789,7 @@ const Checkout: React.FC = () => {
           </div>
         </div>
       </main>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" />
     </>
   );
 };

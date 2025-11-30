@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Reauthentication - Aromé Luxe</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Montserrat', Arial, sans-serif; background-color: #faf8f3; line-height: 1.6;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #faf8f3;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding: 40px 30px 30px; background: linear-gradient(135deg, #623cea 0%, #4a2bb8 100%); border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0; color: #ffffff; font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: 700; letter-spacing: 1px;">
+                Aromé Luxe
+              </h1>
+              <p style="margin: 10px 0 0; color: #f0f8ff; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">
+                Luxury Fragrances & Perfumes
+              </p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="margin: 0 0 20px; color: #623cea; font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 600;">
+                Confirm Reauthentication 🔒
+              </h2>
+              
+              <p style="margin: 0 0 20px; color: #333333; font-size: 16px;">
+                {{ if .Data.full_name }}Hello {{ .Data.full_name }},{{ else }}Hello,{{ end }}
+              </p>
+              
+              <p style="margin: 0 0 20px; color: #333333; font-size: 16px;">
+                You've requested to perform a sensitive action on your Aromé Luxe account{{ if .Email }} ({{ .Email }}){{ end }}. For security reasons, we need to verify your identity.
+              </p>
+              
+              <p style="margin: 0 0 30px; color: #333333; font-size: 16px;">
+                Please use the verification code below to confirm this action:
+              </p>
+
+              <!-- OTP Code Display -->
+              <div style="margin: 30px 0; padding: 30px; background: linear-gradient(135deg, #f8f9fa 0%, #f0f8ff 100%); border-radius: 8px; border: 2px solid #623cea; text-align: center;">
+                <p style="margin: 0 0 15px; color: #333333; font-size: 16px; font-weight: 600;">
+                  Your Verification Code:
+                </p>
+                <p style="margin: 0; color: #623cea; font-size: 48px; font-weight: 700; letter-spacing: 12px; font-family: 'Montserrat', monospace; line-height: 1.2;">
+                  {{ .Token }}
+                </p>
+                <p style="margin: 15px 0 0; color: #666666; font-size: 14px;">
+                  Enter this 6-digit code to proceed
+                </p>
+              </div>
+
+              <!-- Security Note -->
+              <div style="margin-top: 40px; padding: 20px; background-color: #fff3cd; border-left: 4px solid #f8ca2e; border-radius: 4px;">
+                <p style="margin: 0 0 10px; color: #856404; font-size: 14px; font-weight: 600;">
+                  ⚠️ Important Security Information
+                </p>
+                <p style="margin: 0; color: #856404; font-size: 14px;">
+                  This verification code will expire in 10 minutes. If you didn't request this action, please ignore this email and contact our support team immediately at <a href="mailto:support@aromeluxe.in" style="color: #856404; text-decoration: underline;">support@aromeluxe.in</a>.
+                </p>
+              </div>
+
+              <!-- Help Text -->
+              <p style="margin: 30px 0 0; color: #666666; font-size: 14px;">
+                Enter this code on the reauthentication page at <a href="{{ .SiteURL }}/auth/reauthenticate" style="color: #623cea; text-decoration: underline;">{{ .SiteURL }}/auth/reauthenticate</a>
+              </p>
+              
+              {{ if .Data }}
+              <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+                <p style="margin: 0; color: #666666; font-size: 14px;">
+                  {{ if .Data.action }}Action: <strong>{{ .Data.action }}</strong>{{ end }}
+                </p>
+              </div>
+              {{ end }}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #faf8f3; border-radius: 0 0 8px 8px; border-top: 1px solid #e5e5e5;">
+              <p style="margin: 0 0 15px; color: #333333; font-size: 16px; font-weight: 600; text-align: center;">
+                Need Help?
+              </p>
+              <p style="margin: 0 0 20px; color: #666666; font-size: 14px; text-align: center;">
+                Contact us at <a href="mailto:support@aromeluxe.in" style="color: #623cea; text-decoration: none; font-weight: 500;">support@aromeluxe.in</a> or visit <a href="{{ .SiteURL }}/contact" style="color: #623cea; text-decoration: none; font-weight: 500;">aromeluxe.in/contact</a>
+              </p>
+              
+              <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e5e5;">
+                <p style="margin: 0 0 10px; color: #999999; font-size: 12px;">
+                  © 2025 Aromé Luxe. All rights reserved.
+                </p>
+                <p style="margin: 0; color: #999999; font-size: 12px;">
+                  Premium Perfumes & Fragrances | Made with ❤️ in India
+                </p>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+

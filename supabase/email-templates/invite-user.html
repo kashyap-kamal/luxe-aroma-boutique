@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You've Been Invited - Aromé Luxe</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Montserrat', Arial, sans-serif; background-color: #faf8f3; line-height: 1.6;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #faf8f3;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding: 40px 30px 30px; background: linear-gradient(135deg, #623cea 0%, #4a2bb8 100%); border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0; color: #ffffff; font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: 700; letter-spacing: 1px;">
+                Aromé Luxe
+              </h1>
+              <p style="margin: 10px 0 0; color: #f0f8ff; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">
+                Luxury Fragrances & Perfumes
+              </p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="margin: 0 0 20px; color: #623cea; font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 600;">
+                You've Been Invited! 🎁
+              </h2>
+              
+              <p style="margin: 0 0 20px; color: #333333; font-size: 16px;">
+                Hello{{ if .Email }},{{ end }}
+              </p>
+              
+              <p style="margin: 0 0 20px; color: #333333; font-size: 16px;">
+                {{ if .Email }}You've been invited to join <strong>Aromé Luxe</strong> using {{ .Email }}.{{ else }}You've been invited to join <strong>Aromé Luxe</strong>.{{ end }} Your destination for premium perfumes and luxury fragrances.
+              </p>
+              
+              <p style="margin: 0 0 30px; color: #333333; font-size: 16px;">
+                Click the button below to accept the invitation and create your account. Start exploring our exquisite collection of fragrances crafted with the finest ingredients.
+              </p>
+
+              <!-- CTA Button -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="{{ .ConfirmationURL }}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #623cea 0%, #4a2bb8 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(98, 60, 234, 0.3);">
+                      Accept Invitation
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Alternative: OTP Code -->
+              <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 4px; text-align: center;">
+                <p style="margin: 0 0 10px; color: #333333; font-size: 14px; font-weight: 600;">
+                  Or use this verification code:
+                </p>
+                <p style="margin: 0; color: #623cea; font-size: 32px; font-weight: 700; letter-spacing: 8px; font-family: 'Montserrat', monospace;">
+                  {{ .Token }}
+                </p>
+                <p style="margin: 10px 0 0; color: #666666; font-size: 12px;">
+                  Enter this code on the invitation acceptance page
+                </p>
+              </div>
+
+              <!-- Alternative Link -->
+              <p style="margin: 30px 0 0; color: #666666; font-size: 14px; text-align: center;">
+                Or copy and paste this link into your browser:<br>
+                <a href="{{ .ConfirmationURL }}" style="color: #623cea; text-decoration: underline; word-break: break-all;">
+                  {{ .ConfirmationURL }}
+                </a>
+              </p>
+              
+              {{ if .RedirectTo }}
+              <p style="margin: 15px 0 0; color: #666666; font-size: 14px; text-align: center;">
+                After accepting, you'll be redirected to: <a href="{{ .RedirectTo }}" style="color: #623cea; text-decoration: underline;">{{ .RedirectTo }}</a>
+              </p>
+              {{ end }}
+              
+              {{ if .Data }}
+              <div style="margin-top: 20px; padding: 15px; background-color: #f0f8ff; border-radius: 4px;">
+                <p style="margin: 0 0 10px; color: #623cea; font-size: 14px; font-weight: 600;">
+                  Invitation Details:
+                </p>
+                {{ if .Data.invited_by }}
+                <p style="margin: 0; color: #333333; font-size: 14px;">
+                  Invited by: {{ .Data.invited_by }}
+                </p>
+                {{ end }}
+                {{ if .Data.role }}
+                <p style="margin: 5px 0 0; color: #333333; font-size: 14px;">
+                  Role: {{ .Data.role }}
+                </p>
+                {{ end }}
+              </div>
+              {{ end }}
+
+              <!-- What to Expect -->
+              <div style="margin-top: 40px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #f0f8ff 100%); border-radius: 4px;">
+                <p style="margin: 0 0 15px; color: #623cea; font-size: 16px; font-weight: 600;">
+                  What to Expect:
+                </p>
+                <ul style="margin: 0; padding-left: 20px; color: #333333; font-size: 14px;">
+                  <li style="margin-bottom: 8px;">Access to exclusive fragrance collections</li>
+                  <li style="margin-bottom: 8px;">Personalized recommendations</li>
+                  <li style="margin-bottom: 8px;">Early access to new arrivals</li>
+                  <li style="margin-bottom: 0;">Special member-only offers</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #faf8f3; border-radius: 0 0 8px 8px; border-top: 1px solid #e5e5e5;">
+              <p style="margin: 0 0 15px; color: #333333; font-size: 16px; font-weight: 600; text-align: center;">
+                Welcome to Aromé Luxe
+              </p>
+              <p style="margin: 0 0 20px; color: #666666; font-size: 14px; text-align: center;">
+                Visit us at <a href="{{ .SiteURL }}" style="color: #623cea; text-decoration: none; font-weight: 500;">aromeluxe.in</a>
+              </p>
+              
+              <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e5e5;">
+                <p style="margin: 0 0 10px; color: #999999; font-size: 12px;">
+                  © 2025 Aromé Luxe. All rights reserved.
+                </p>
+                <p style="margin: 0; color: #999999; font-size: 12px;">
+                  Premium Perfumes & Fragrances | Made with ❤️ in India
+                </p>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useUser, useLogout } from "@/stores/auth-store";
+import { signOut } from "@/lib/auth-service";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,7 +25,8 @@ export function UserMenu() {
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      await supabase.auth.signOut();
+      // Use auth service for sign out
+      await signOut();
       logout();
       router.push("/");
       router.refresh();

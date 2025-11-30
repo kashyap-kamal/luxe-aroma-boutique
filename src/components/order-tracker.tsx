@@ -15,6 +15,7 @@ import { toast } from "sonner";
 
 interface OrderTrackerProps {
   onTrackResult?: (result: TrackingResult) => void;
+  initialWaybill?: string;
 }
 
 interface TrackingResult {
@@ -29,8 +30,8 @@ interface TrackingResult {
   error?: string;
 }
 
-const OrderTracker: React.FC<OrderTrackerProps> = ({ onTrackResult }) => {
-  const [waybill, setWaybill] = useState("");
+const OrderTracker: React.FC<OrderTrackerProps> = ({ onTrackResult, initialWaybill }) => {
+  const [waybill, setWaybill] = useState(initialWaybill || "");
   const [loading, setLoading] = useState(false);
   const [trackingResult, setTrackingResult] = useState<TrackingResult | null>(
     null

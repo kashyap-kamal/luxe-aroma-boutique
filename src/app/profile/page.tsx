@@ -10,7 +10,8 @@ export const metadata: Metadata = {
 export default function ProfilePage() {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-12">
+      {/* pt-28 accounts for fixed navbar height */}
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 pt-28 pb-12">
         <div className="luxury-container">
           <div className="max-w-2xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
