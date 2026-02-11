@@ -4,7 +4,7 @@
 
 -- Create order_errors table
 CREATE TABLE IF NOT EXISTS order_errors (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Order identifiers
   order_id TEXT NOT NULL, -- Internal order ID

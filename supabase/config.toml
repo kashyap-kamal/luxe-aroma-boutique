@@ -6,3 +6,13 @@
 # Webhook security is handled via signature verification in the function code
 [functions.cashfree-webhook]
 verify_jwt = false
+
+# Disable JWT verification for shiprocket-webhook function
+# This allows Shiprocket to call the function without Supabase auth
+# Webhook security is handled via x-api-key token verification in the function code
+[functions.shiprocket-webhook]
+verify_jwt = false
+
+# Renamed endpoint for Shiprocket (Shiprocket blocks URLs containing "shiprocket")
+[functions.shipment-tracking-webhook]
+verify_jwt = false

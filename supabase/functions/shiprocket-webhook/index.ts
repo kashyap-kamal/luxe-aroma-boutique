@@ -8,7 +8,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-api-key",
 };
 
 /**
@@ -80,14 +80,89 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Handle GET requests (Shiprocket uses GET to validate the webhook URL)
+  if (req.method === "GET") {
+    return new Response(
+      JSON.stringify({ status: true, message: "Webhook endpoint active" }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  // Only accept POST for actual webhook events
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ status: true, message: "Method not allowed" }),
+      {
+        status: 405,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
   try {
+    // Verify Shiprocket webhook token from x-api-key header
+    const shiprocketWebhookToken = Deno.env.get("SHIPROCKET_WEBHOOK_TOKEN");
+    const apiKey = req.headers.get("x-api-key");
+
+    if (shiprocketWebhookToken && apiKey !== shiprocketWebhookToken) {
+      console.error("Invalid Shiprocket webhook token");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Parse webhook payload
+    const bodyText = await req.text();
+
+    // Handle empty body (Shiprocket validation/test ping)
+    if (!bodyText || bodyText.trim() === "" || bodyText.trim() === "{}") {
+      console.log("Shiprocket webhook validation ping received");
+      return new Response(
+        JSON.stringify({ status: true, message: "Webhook endpoint active" }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    let payload: any;
+    try {
+      payload = JSON.parse(bodyText);
+    } catch {
+      console.log("Non-JSON body received, treating as test ping");
+      return new Response(
+        JSON.stringify({ status: true, message: "Webhook endpoint active" }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Handle test/empty payloads from Shiprocket's webhook verification
+    if (!payload || Object.keys(payload).length === 0 || payload.test) {
+      console.log("Shiprocket webhook test/validation request received");
+      return new Response(
+        JSON.stringify({ status: true, message: "Webhook endpoint active" }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Initialize Supabase client with service role key for full access
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Parse webhook payload
-    const payload = await req.json();
 
     console.log("Shiprocket webhook received:", {
       order_id: payload.order_id,
