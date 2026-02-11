@@ -45,7 +45,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   };
 
   return (
-    <main className="flex-grow py-8">
+    <main className="flex-grow pt-24 pb-8">
       <div className="luxury-container">
         <div className="flex flex-col lg:flex-row gap-12">
           {/* Product Image */}

@@ -30,7 +30,10 @@ interface TrackingResult {
   error?: string;
 }
 
-const OrderTracker: React.FC<OrderTrackerProps> = ({ onTrackResult, initialWaybill }) => {
+const OrderTracker: React.FC<OrderTrackerProps> = ({
+  onTrackResult,
+  initialWaybill,
+}) => {
   const [waybill, setWaybill] = useState(initialWaybill || "");
   const [loading, setLoading] = useState(false);
   const [trackingResult, setTrackingResult] = useState<TrackingResult | null>(
@@ -45,13 +48,25 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ onTrackResult, initialWaybi
 
     setLoading(true);
     try {
-      const response = await fetch("/api/track-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ waybill }),
-      });
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Supabase configuration is missing");
+      }
+
+      // Use Shiprocket tracking Edge Function
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/track-shiprocket-order`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({ awb: waybill }),
+        }
+      );
 
       const result = await response.json();
       setTrackingResult(result);

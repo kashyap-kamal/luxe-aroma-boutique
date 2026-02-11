@@ -14,7 +14,7 @@ const Cart = () => {
   const isEmpty = cartItems.length === 0;
 
   return (
-    <main className="flex-grow py-8">
+    <main className="flex-grow pt-24 pb-8">
       <div className="luxury-container">
         <h1 className="text-3xl font-serif font-bold mb-8">Shopping Cart</h1>
 

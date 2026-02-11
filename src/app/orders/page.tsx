@@ -25,7 +25,6 @@ import {
   Clock,
   XCircle,
 } from "lucide-react";
-import Link from "next/link";
 
 interface Order {
   id: string;
@@ -45,8 +44,20 @@ interface Order {
     quantity: number;
     total: number;
   }>;
-  shipping_address: any;
-  billing_address: any;
+  shipping_address: {
+    address_line1?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    country?: string;
+  } | null;
+  billing_address: {
+    address_line1?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    country?: string;
+  } | null;
   created_at: string;
   updated_at: string;
 }
@@ -138,7 +149,7 @@ const OrdersPage = () => {
 
   return (
     <ProtectedRoute>
-      <main className="flex-grow py-8">
+      <main className="flex-grow pt-24 pb-8">
         <div className="luxury-container">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -201,13 +212,19 @@ const OrdersPage = () => {
           {!loading && !error && orders.length > 0 && (
             <div className="space-y-6">
               {orders.map((order) => (
-                <Card key={order.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={order.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
                   <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           Order #{order.cashfree_order_id}
-                          {getStatusBadge(order.order_status, order.payment_status)}
+                          {getStatusBadge(
+                            order.order_status,
+                            order.payment_status
+                          )}
                         </CardTitle>
                         <CardDescription className="flex items-center gap-2 mt-2">
                           <Calendar className="h-4 w-4" />
@@ -220,7 +237,8 @@ const OrdersPage = () => {
                           {order.order_amount.toFixed(2)}
                         </div>
                         <p className="text-sm text-gray-600">
-                          {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+                          {order.items.length} item
+                          {order.items.length !== 1 ? "s" : ""}
                         </p>
                       </div>
                     </div>
@@ -238,7 +256,8 @@ const OrdersPage = () => {
                             <div className="flex-grow">
                               <p className="font-medium">{item.product_name}</p>
                               <p className="text-sm text-gray-600">
-                                Quantity: {item.quantity} × ₹{item.price.toFixed(2)}
+                                Quantity: {item.quantity} × ₹
+                                {item.price.toFixed(2)}
                               </p>
                             </div>
                             <p className="font-medium">
@@ -322,4 +341,3 @@ const OrdersPage = () => {
 };
 
 export default OrdersPage;
-

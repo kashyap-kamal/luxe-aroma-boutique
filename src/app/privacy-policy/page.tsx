@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pt-20">
       {/* Header */}
       <div className="bg-luxe-aliceBlue py-8">
         <div className="luxury-container">

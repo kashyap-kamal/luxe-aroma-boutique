@@ -12,13 +12,9 @@ const getBaseUrl = (): string => {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-  // For localhost development
-  if (process.env.NODE_ENV === 'development') {
-    // Note: OG images won't work on localhost for social media previews
-    // but this ensures the site works correctly in development
-    return 'http://localhost:3000';
-  }
-  // Default fallback for production
+  // Always use production URL for static export
+  // Since this is a static site deployed to Hostinger, we should always use the production URL
+  // to ensure proper link behavior and metadata generation
   return 'https://aromeluxe.in';
 };
 

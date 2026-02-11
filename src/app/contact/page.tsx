@@ -90,10 +90,10 @@ const Contact = () => {
   };
 
   return (
-    <main className="flex-grow bg-white">
+    <main className="flex-grow pt-20 bg-white">
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[400px] overflow-hidden">
-        <motion.div 
+        <motion.div
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
           transition={{ duration: 1.5 }}
@@ -109,7 +109,7 @@ const Contact = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
         </motion.div>
-        
+
         <div className="relative h-full luxury-container flex flex-col justify-center items-start text-white">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -127,7 +127,7 @@ const Contact = () => {
               </Button>
             </Link>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -136,7 +136,7 @@ const Contact = () => {
           >
             Get in Touch
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -164,16 +164,32 @@ const Contact = () => {
                 Contact Info
               </span>
               <h2 className="text-4xl font-serif font-bold text-gray-900 mb-10">
-                We're Here to Help
+                We&apos;re Here to Help
               </h2>
 
               <div className="space-y-10">
                 {[
-                  { icon: Mail, title: "Email", content: "contact@aromeluxe.in", sub: "We'll get back to you within 24 hours" },
-                  { icon: Phone, title: "Phone", content: "+91-9711562006", sub: "Available for urgent inquiries and support" },
-                  { icon: MapPin, title: "Address", content: "A5/901, Olive County, Vasundhara, Sector-5, Ghaziabad, U.P.", sub: "PIN: 201012 • Visit our boutique" }
+                  {
+                    icon: Mail,
+                    title: "Email",
+                    content: "contact@aromeluxe.in",
+                    sub: "We'll get back to you within 24 hours",
+                  },
+                  {
+                    icon: Phone,
+                    title: "Phone",
+                    content: "+91-9711562006",
+                    sub: "Available for urgent inquiries and support",
+                  },
+                  {
+                    icon: MapPin,
+                    title: "Address",
+                    content:
+                      "A5/901, Olive County, Vasundhara, Sector-5, Ghaziabad, U.P.",
+                    sub: "PIN: 201012 • Visit our boutique",
+                  },
                 ].map((item, index) => (
-                  <motion.div 
+                  <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -183,22 +199,20 @@ const Contact = () => {
                   >
                     <div className="w-14 h-14 bg-luxe-cream rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-luxe-gold transition-colors duration-300">
                       <item.icon className="h-6 w-6 text-gray-900 group-hover:text-white transition-colors duration-300" />
-                  </div>
-                  <div>
+                    </div>
+                    <div>
                       <h3 className="text-lg font-serif font-bold text-gray-900 mb-1">
                         {item.title}
-                    </h3>
+                      </h3>
                       <p className="text-gray-700 font-medium text-lg mb-1">
                         {item.content}
-                    </p>
-                      <p className="text-gray-500 text-sm">
-                        {item.sub}
-                    </p>
-                  </div>
+                      </p>
+                      <p className="text-gray-500 text-sm">{item.sub}</p>
+                    </div>
                   </motion.div>
                 ))}
 
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -227,7 +241,7 @@ const Contact = () => {
               className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-gray-100 relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-luxe-gold/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-              
+
               <h2 className="text-3xl font-serif font-bold text-gray-900 mb-8 relative z-10">
                 Send us a Message
               </h2>
@@ -374,17 +388,26 @@ const Contact = () => {
             className="text-center mb-16"
           >
             <h2 className="text-3xl font-serif font-bold text-gray-900 mb-4">
-            Frequently Asked Questions
-          </h2>
+              Frequently Asked Questions
+            </h2>
             <div className="w-20 h-1 bg-luxe-gold mx-auto rounded-full" />
           </motion.div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             <div className="space-y-8">
               {[
-                { q: "How can I track my order?", a: "Once your order ships, you'll receive a tracking number via email. You can also track your order through your account dashboard." },
-                { q: "What is your return policy?", a: "We offer a 30-day return policy for unused items in original packaging. Return shipping costs are the responsibility of the customer." },
-                { q: "Do you ship internationally?", a: "Yes, we ship to most countries worldwide. International shipping rates and delivery times vary by location." }
+                {
+                  q: "How can I track my order?",
+                  a: "Once your order ships, you'll receive a tracking number via email. You can also track your order through your account dashboard.",
+                },
+                {
+                  q: "What is your return policy?",
+                  a: "We offer a 30-day return policy for unused items in original packaging. Return shipping costs are the responsibility of the customer.",
+                },
+                {
+                  q: "Do you ship internationally?",
+                  a: "Yes, we ship to most countries worldwide. International shipping rates and delivery times vary by location.",
+                },
               ].map((faq, index) => (
                 <motion.div
                   key={index}
@@ -395,19 +418,26 @@ const Contact = () => {
                 >
                   <h3 className="text-lg font-serif font-bold text-gray-900 mb-2">
                     {faq.q}
-                </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    {faq.a}
-                  </p>
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">{faq.a}</p>
                 </motion.div>
               ))}
             </div>
 
             <div className="space-y-8">
               {[
-                { q: "How do I choose the right fragrance?", a: "Consider your personal style, the occasion, and your skin chemistry. We recommend trying samples or visiting our boutique for a personalized consultation." },
-                { q: "Are your fragrances cruelty-free?", a: "Yes, all our fragrances are cruelty-free and we never test on animals. We're committed to ethical and sustainable practices." },
-                { q: "Can I schedule a private consultation?", a: "Absolutely! We offer private consultations by appointment. Contact us to schedule your personalized fragrance experience." }
+                {
+                  q: "How do I choose the right fragrance?",
+                  a: "Consider your personal style, the occasion, and your skin chemistry. We recommend trying samples or visiting our boutique for a personalized consultation.",
+                },
+                {
+                  q: "Are your fragrances cruelty-free?",
+                  a: "Yes, all our fragrances are cruelty-free and we never test on animals. We're committed to ethical and sustainable practices.",
+                },
+                {
+                  q: "Can I schedule a private consultation?",
+                  a: "Absolutely! We offer private consultations by appointment. Contact us to schedule your personalized fragrance experience.",
+                },
               ].map((faq, index) => (
                 <motion.div
                   key={index}
@@ -418,10 +448,8 @@ const Contact = () => {
                 >
                   <h3 className="text-lg font-serif font-bold text-gray-900 mb-2">
                     {faq.q}
-                </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    {faq.a}
-                  </p>
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">{faq.a}</p>
                 </motion.div>
               ))}
             </div>

@@ -11,7 +11,7 @@ import {
 
 const CancellationRefund: React.FC = () => {
   return (
-    <main className="flex-grow py-8">
+    <main className="flex-grow pt-24 pb-8">
       <div className="luxury-container">
         {/* Header */}
         <div className="text-center mb-8">

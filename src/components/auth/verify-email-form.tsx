@@ -207,7 +207,7 @@ export function VerifyEmailForm() {
         {/* Resend Code */}
         <div className="mt-4 space-y-2">
           <div className="text-center text-sm text-muted-foreground">
-            Didn't receive the code?
+            Didn&apos;t receive the code?
           </div>
           <Button
             type="button"

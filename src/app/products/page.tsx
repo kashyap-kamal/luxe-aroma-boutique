@@ -64,7 +64,7 @@ const ProductsContent = () => {
     <div className="flex flex-col lg:flex-row gap-10 relative">
       {/* Mobile Filter Button */}
       <div className="lg:hidden mb-6">
-        <Button 
+        <Button
           onClick={() => setIsMobileFilterOpen(true)}
           variant="outline"
           className="w-full flex items-center justify-center gap-2 border-gray-300"
@@ -75,25 +75,25 @@ const ProductsContent = () => {
       </div>
 
       {/* Filters Sidebar - Desktop */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
         className="hidden lg:block w-64 flex-shrink-0"
       >
         <div className="sticky top-24">
-        <ProductFilter
-          categories={categories}
-          selectedCategory={selectedCategory}
-          priceRange={priceRange}
-          maxPrice={maxPrice}
-          sortBy={sortBy}
-          onCategoryChange={setSelectedCategory}
-          onPriceChange={setPriceRange}
-          onSortChange={setSortBy}
-          onReset={handleReset}
-        />
-      </div>
+          <ProductFilter
+            categories={categories}
+            selectedCategory={selectedCategory}
+            priceRange={priceRange}
+            maxPrice={maxPrice}
+            sortBy={sortBy}
+            onCategoryChange={setSelectedCategory}
+            onPriceChange={setPriceRange}
+            onSortChange={setSortBy}
+            onReset={handleReset}
+          />
+        </div>
       </motion.div>
 
       {/* Mobile Filter Sidebar (Drawer) */}
@@ -116,7 +116,11 @@ const ProductsContent = () => {
             >
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-serif font-bold">Filters</h2>
-                <Button variant="ghost" size="icon" onClick={() => setIsMobileFilterOpen(false)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMobileFilterOpen(false)}
+                >
                   <X className="h-5 w-5" />
                 </Button>
               </div>
@@ -143,40 +147,46 @@ const ProductsContent = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-        {filteredProducts.length > 0 ? (
-          <>
+          {filteredProducts.length > 0 ? (
+            <>
               <p className="mb-6 text-gray-500 text-sm uppercase tracking-wider">
-                Showing <span className="text-gray-900 font-bold">{filteredProducts.length}</span>{" "}
+                Showing{" "}
+                <span className="text-gray-900 font-bold">
+                  {filteredProducts.length}
+                </span>{" "}
                 {filteredProducts.length === 1 ? "fragrance" : "fragrances"}
               </p>
-              
+
               {/* We wrap ProductGrid in a motion component for staggering children if possible, 
                   but ProductGrid currently maps directly. 
                   Ideally, update ProductGrid to use framer-motion or wrap it here.
                   For now, simple fade in.
               */}
-            <ProductGrid products={filteredProducts} />
-          </>
-        ) : (
-            <motion.div 
+              <ProductGrid products={filteredProducts} />
+            </>
+          ) : (
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="text-center py-20 bg-gray-50 rounded-2xl"
             >
               <div className="text-6xl mb-4 opacity-20">🔍</div>
-              <h3 className="text-2xl font-serif font-medium mb-2 text-gray-900">No fragrances found</h3>
+              <h3 className="text-2xl font-serif font-medium mb-2 text-gray-900">
+                No fragrances found
+              </h3>
               <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                We couldn't find any perfumes matching your current filters. Try adjusting your search criteria.
+                We couldn&apos;t find any perfumes matching your current
+                filters. Try adjusting your search criteria.
               </p>
               <Button
                 onClick={handleReset}
                 variant="default"
                 className="bg-luxe-gold text-black hover:bg-amber-400"
-            >
-              Reset all filters
+              >
+                Reset all filters
               </Button>
             </motion.div>
-        )}
+          )}
         </motion.div>
       </div>
     </div>
@@ -218,7 +228,7 @@ const Products = () => {
         {/* Decorative background elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-luxe-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-luxe-blue/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
-        
+
         <div className="luxury-container relative z-10 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -232,13 +242,14 @@ const Products = () => {
               Exquisite Fragrances
             </h1>
             <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-              Discover our curated selection of premium perfumes, crafted to evoke emotion and capture memories.
+              Discover our curated selection of premium perfumes, crafted to
+              evoke emotion and capture memories.
             </p>
           </motion.div>
         </div>
       </div>
 
-      <main className="flex-grow py-12 md:py-16">
+      <main className="flex-grow pt-24 pb-12 md:pt-28 md:pb-16">
         <div className="luxury-container">
           <Suspense fallback={<ProductsLoading />}>
             <ProductsContent />

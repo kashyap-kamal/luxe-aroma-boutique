@@ -13,7 +13,7 @@ export const products: Product[] = productsData.products.map((product) => ({
   },
   image: `/assets/perfumes/${product.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace('-edp', '')}.png`,
   category: product.category,
-  size: "100ml", // Default size since not specified in JSON
+  size: "50ml", // Default size since not specified in JSON
   description: `Premium ${product.name} fragrance - a luxurious scent perfect for any occasion.`,
   tags: product.tags || [],
   rating: product.rating,

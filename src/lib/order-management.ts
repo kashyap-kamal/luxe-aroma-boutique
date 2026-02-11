@@ -35,8 +35,10 @@ export interface Order {
   };
   shipping: {
     status: 'pending' | 'confirmed' | 'picked_up' | 'in_transit' | 'delivered' | 'failed';
-    delhiveryOrderId?: string;
-    waybill?: string;
+    shiprocketOrderId?: string;
+    shiprocketShipmentId?: string;
+    awb?: string;
+    courierName?: string;
     trackingUrl?: string;
     estimatedDelivery?: string;
     actualDelivery?: string;
@@ -60,8 +62,10 @@ export interface OrderUpdateRequest {
   paymentStatus?: Order['payment']['status'];
   shippingStatus?: Order['shipping']['status'];
   cashfreePaymentId?: string;
-  delhiveryOrderId?: string;
-  waybill?: string;
+  shiprocketOrderId?: string;
+  shiprocketShipmentId?: string;
+  awb?: string;
+  courierName?: string;
   trackingUrl?: string;
   notes?: string;
 }
@@ -132,12 +136,20 @@ class OrderManager {
       updatedOrder.payment.cashfreePaymentId = updates.cashfreePaymentId;
     }
     
-    if (updates.delhiveryOrderId) {
-      updatedOrder.shipping.delhiveryOrderId = updates.delhiveryOrderId;
+    if (updates.shiprocketOrderId) {
+      updatedOrder.shipping.shiprocketOrderId = updates.shiprocketOrderId;
+    }
+
+    if (updates.shiprocketShipmentId) {
+      updatedOrder.shipping.shiprocketShipmentId = updates.shiprocketShipmentId;
     }
     
-    if (updates.waybill) {
-      updatedOrder.shipping.waybill = updates.waybill;
+    if (updates.awb) {
+      updatedOrder.shipping.awb = updates.awb;
+    }
+
+    if (updates.courierName) {
+      updatedOrder.shipping.courierName = updates.courierName;
     }
     
     if (updates.trackingUrl) {
@@ -216,12 +228,12 @@ class OrderManager {
   updateShippingStatus(
     orderId: string, 
     status: Order['shipping']['status'],
-    waybill?: string,
+    awb?: string,
     trackingUrl?: string
   ): Order | null {
     return this.updateOrder(orderId, {
       shippingStatus: status,
-      waybill,
+      awb,
       trackingUrl,
     });
   }

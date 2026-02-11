@@ -5,12 +5,12 @@
  */
 
 import type {
-  CashfreeOrderRequest,
+  // CashfreeOrderRequest,
   CashfreeOrderResponse,
   CashfreePaymentStatus,
   CashfreeCheckoutOptions,
   OrderDetails,
-  PaymentStatus,
+  // PaymentStatus,
 } from "@/types/cashfree";
 import ky from "ky";
 
@@ -24,17 +24,19 @@ const CASHFREE_CONFIG = {
   clientId: process.env.NEXT_PUBLIC_CASHFREE_CLIENT_ID || "",
   environment: (process.env.NEXT_PUBLIC_CASHFREE_ENVIRONMENT || "sandbox") as "sandbox" | "production",
   appName: process.env.NEXT_PUBLIC_APP_NAME || "Aromé Luxe",
-  appUrl: process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  // Updated: Use production URL as fallback instead of localhost
+  // This ensures redirects work correctly even if env vars aren't set during build
+  appUrl: process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://aromeluxe.in",
 } as const;
 
 /**
  * Get Cashfree API base URL based on environment
  */
-const getCashfreeApiUrl = (): string => {
-  return CASHFREE_CONFIG.environment === "production"
-    ? "https://api.cashfree.com"
-    : "https://sandbox.cashfree.com";
-};
+// const getCashfreeApiUrl = (): string => {
+//   return CASHFREE_CONFIG.environment === "production"
+//     ? "https://api.cashfree.com"
+//     : "https://sandbox.cashfree.com";
+// };
 
 /**
  * Validate Cashfree configuration
@@ -67,6 +69,7 @@ export const convertToRupees = (paise: number): number => {
 /**
  * Create Cashfree order
  * This calls our backend API which securely creates the order using Cashfree API
+ * Now includes shipping address for automatic Shiprocket integration
  */
 export const createCashfreeOrder = async (
   amount: number,
@@ -74,6 +77,12 @@ export const createCashfreeOrder = async (
     name: string;
     email: string;
     contact: string;
+    // Shipping address fields (mandatory for Shiprocket integration)
+    address?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
   },
   cartItems: Array<{
     productId: string;
@@ -335,6 +344,7 @@ export class CashfreePaymentService {
    * Process payment with comprehensive error handling
    * Note: With redirectTarget: "_self", Cashfree redirects the page, so we don't wait for Promise resolution
    * The payment result is handled via the return URL redirect
+   * Now includes shipping address for automatic Shiprocket integration
    */
   public async processPayment(
     amount: number,
@@ -342,6 +352,12 @@ export class CashfreePaymentService {
       name: string;
       email: string;
       contact: string;
+      // Shipping address fields (mandatory for Shiprocket integration)
+      address?: string;
+      city?: string;
+      state?: string;
+      postalCode?: string;
+      country?: string;
     },
     orderDetails: Omit<OrderDetails, "id" | "paymentStatus" | "orderDate">,
     cartItems: Array<{

@@ -14,7 +14,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Lock, CheckCircle2, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import {
+  Loader2,
+  Lock,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
 import { PasswordStrengthIndicator } from "@/components/auth/password-strength-indicator";
 import { supabase } from "@/lib/supabase";
@@ -61,18 +68,20 @@ export function ChangePasswordForm() {
       });
 
       if (updateError) {
-        setError(updateError.message || "Failed to change password. Please try again.");
+        setError(
+          updateError.message || "Failed to change password. Please try again."
+        );
         return;
       }
 
       // Success
       setSuccess(true);
-      
+
       // Redirect back to profile after delay
       setTimeout(() => {
         router.push("/profile");
       }, 2000);
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -176,9 +185,11 @@ export function ChangePasswordForm() {
                   )}
                 </button>
               </div>
-              {newPassword && confirmPassword && newPassword !== confirmPassword && (
-                <p className="text-xs text-red-500">Passwords do not match</p>
-              )}
+              {newPassword &&
+                confirmPassword &&
+                newPassword !== confirmPassword && (
+                  <p className="text-xs text-red-500">Passwords do not match</p>
+                )}
               {newPassword &&
                 confirmPassword &&
                 newPassword === confirmPassword &&
@@ -206,4 +217,3 @@ export function ChangePasswordForm() {
     </Card>
   );
 }
-

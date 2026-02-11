@@ -52,7 +52,8 @@ serve(async (req) => {
     }
 
     // Generate password reset link
-    const resetUrl = `${Deno.env.get("APP_URL") || "http://localhost:3000"}/auth/reset-password`;
+    // Updated: Use production URL as fallback instead of localhost
+    const resetUrl = `${Deno.env.get("APP_URL") || "https://aromeluxe.in"}/auth/reset-password`;
     
     // Send password reset email using resetPasswordForEmail on the regular auth client
     // Note: resetPasswordForEmail is on supabase.auth, not supabase.auth.admin

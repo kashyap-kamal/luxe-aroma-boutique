@@ -37,16 +37,18 @@ export function ResetPasswordForm() {
       try {
         // Check if there's a valid session (created when user clicks email link)
         const session = await getCurrentSession();
-        
+
         if (session) {
           // Valid token - user can reset password
           setIsValidToken(true);
         } else {
           // No valid session - token might be expired or invalid
           setIsValidToken(false);
-          setError("Invalid or expired reset link. Please request a new password reset.");
+          setError(
+            "Invalid or expired reset link. Please request a new password reset."
+          );
         }
-      } catch (err) {
+      } catch {
         setIsValidToken(false);
         setError("Failed to verify reset link. Please try again.");
       }
@@ -90,7 +92,7 @@ export function ResetPasswordForm() {
       } else {
         setError(result.error || "Failed to reset password. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -128,9 +130,7 @@ export function ResetPasswordForm() {
           </Alert>
           <div className="space-y-2">
             <Link href="/auth/forgot-password">
-              <Button className="w-full">
-                Request New Reset Link
-              </Button>
+              <Button className="w-full">Request New Reset Link</Button>
             </Link>
             <Link href="/auth/signin">
               <Button variant="outline" className="w-full">
@@ -214,9 +214,7 @@ export function ResetPasswordForm() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className={`pl-10 pr-10 ${
-                    password &&
-                    confirmPassword &&
-                    password !== confirmPassword
+                    password && confirmPassword && password !== confirmPassword
                       ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                       : password &&
                         confirmPassword &&
@@ -241,17 +239,13 @@ export function ResetPasswordForm() {
                 </button>
               </div>
               {password && confirmPassword && password !== confirmPassword && (
-                <p className="text-xs text-red-500">
-                  Passwords do not match
-                </p>
+                <p className="text-xs text-red-500">Passwords do not match</p>
               )}
               {password &&
                 confirmPassword &&
                 password === confirmPassword &&
                 validatePassword(password).isValid && (
-                  <p className="text-xs text-green-600">
-                    Passwords match ✓
-                  </p>
+                  <p className="text-xs text-green-600">Passwords match ✓</p>
                 )}
             </div>
 
@@ -275,4 +269,3 @@ export function ResetPasswordForm() {
     </Card>
   );
 }
-

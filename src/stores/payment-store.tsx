@@ -60,10 +60,18 @@ const createPaymentStore: StateCreator<
         throw new Error("Customer information is incomplete");
       }
 
+      // Include shipping address for Cashfree One Click Checkout
+      // This tells Cashfree to save the address and make it available for Shiprocket integration
       const paymentCustomerInfo = {
         name: `${customerInfo.firstName} ${customerInfo.lastName ?? ""}`.trim(),
         email: customerInfo.email,
         contact: customerInfo.phone,
+        // Shipping address fields (required for automatic Shiprocket shipment creation)
+        address: customerInfo.address,
+        city: customerInfo.city,
+        state: customerInfo.state,
+        postalCode: customerInfo.postalCode,
+        country: customerInfo.country || "India",
       };
 
       // Prepare cart items for Cashfree

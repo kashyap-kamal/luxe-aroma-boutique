@@ -50,17 +50,28 @@ const PincodeChecker: React.FC<PincodeCheckerProps> = ({
 
     setLoading(true);
     try {
-      const response = await fetch("/api/check-pincode", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          pincode,
-          weight: 0.5, // Default weight for perfume
-          cod: true, // Check both COD and prepaid
-        }),
-      });
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Supabase configuration is missing");
+      }
+
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/check-shiprocket-pincode`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({
+            pincode,
+            weight: 0.5, // Default weight for perfume
+            cod: true, // Check both COD and prepaid
+          }),
+        }
+      );
 
       const result = await response.json();
       setDeliveryInfo(result);

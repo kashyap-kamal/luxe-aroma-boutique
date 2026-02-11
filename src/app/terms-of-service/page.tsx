@@ -4,8 +4,8 @@ import { ArrowLeft } from "lucide-react";
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen bg-luxe-aliceBlue">
-      <div className="luxury-container py-12">
+    <div className="min-h-screen bg-luxe-aliceBlue pt-24">
+      <div className="luxury-container pb-12">
         {/* Back to Home Button */}
         <div className="mb-8">
           <Link href="/">

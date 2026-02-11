@@ -138,7 +138,7 @@ export class BillingCalculator {
   }
 
   /**
-   * Generate invoice line items for Delhivery
+   * Generate invoice line items for Shiprocket
    */
   generateInvoiceItems(items: BillingItem[]): Array<{
     name: string;

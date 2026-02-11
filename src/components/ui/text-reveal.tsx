@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, AnimationControls, useAnimation } from "framer-motion";
+import { motion, useInView, useAnimation, Variants } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +31,7 @@ export const TextReveal = ({
 
   const items = type === "words" ? text.split(" ") : text.split("");
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -42,20 +42,20 @@ export const TextReveal = ({
     },
   };
 
-  const childVariants = {
-    hidden: { 
-      opacity: 0, 
+  const childVariants: Variants = {
+    hidden: {
+      opacity: 0,
       y: 20,
-      transition: { type: "spring", damping: 12, stiffness: 100 } 
+      transition: { type: "spring", damping: 12, stiffness: 100 },
     },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { 
-        type: "spring", 
-        damping: 12, 
+      transition: {
+        type: "spring",
+        damping: 12,
         stiffness: 100,
-        duration: duration 
+        duration: duration,
       },
     },
   };
@@ -80,5 +80,3 @@ export const TextReveal = ({
     </motion.span>
   );
 };
-
-

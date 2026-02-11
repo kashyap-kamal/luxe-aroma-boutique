@@ -81,7 +81,7 @@ export default function StorySection() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-luxe-gold/10 via-transparent to-luxe-blue/10 group-hover:scale-110 transition-transform duration-[2s]" />
                 
                 <div className="text-center relative z-10 max-w-md">
-                  <div className="text-6xl text-luxe-gold opacity-50 font-serif mb-6">"</div>
+                  <div className="text-6xl text-luxe-gold opacity-50 font-serif mb-6">&quot;</div>
                   <h3 className="text-4xl font-serif italic mb-8 text-white font-light leading-tight">
                     Perfume is the art that makes memory speak.
                   </h3>

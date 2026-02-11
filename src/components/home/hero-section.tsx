@@ -60,19 +60,19 @@ export default function HeroSection() {
 
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-bold text-white mb-8 leading-[0.9]">
             <div className="overflow-hidden">
-              <TextReveal 
-                text="Essence of" 
-                duration={0.8} 
-                className="block" 
+              <TextReveal
+                text="Essence of"
+                duration={0.8}
+                className="block"
                 type="words"
               />
             </div>
             <div className="overflow-visible text-luxe-gold italic">
-              <TextReveal 
-                text="Elegance" 
-                delay={0.4} 
-                duration={1} 
-                className="block" 
+              <TextReveal
+                text="Elegance"
+                delay={0.4}
+                duration={1}
+                className="block"
                 type="chars"
               />
             </div>
@@ -84,7 +84,7 @@ export default function HeroSection() {
             transition={{ delay: 1, duration: 1 }}
             className="text-lg md:text-2xl text-gray-200 mb-12 max-w-xl font-light leading-relaxed border-l-2 border-luxe-gold pl-6"
           >
-            Discover a symphony of scents crafted for the modern connoisseur. 
+            Discover a symphony of scents crafted for the modern connoisseur.
             Elevate your presence with our signature collection.
           </motion.p>
 
@@ -100,7 +100,7 @@ export default function HeroSection() {
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </MagnetButton>
             </Link>
-            
+
             <Link href="/about">
               <MagnetButton className="bg-transparent border border-white/30 text-white hover:bg-white/10 backdrop-blur-sm">
                 Our Story
@@ -117,9 +117,11 @@ export default function HeroSection() {
         transition={{ delay: 2, duration: 1 }}
         className="absolute bottom-12 right-12 md:right-20 z-20 hidden md:flex items-center gap-4 text-white/50"
       >
-        <span className="text-xs uppercase tracking-[0.2em] rotate-90 origin-right translate-x-2">Scroll</span>
+        <span className="text-xs uppercase tracking-[0.2em] rotate-90 origin-right translate-x-2">
+          Scroll
+        </span>
         <div className="w-[1px] h-24 bg-white/20 overflow-hidden">
-          <motion.div 
+          <motion.div
             className="w-full h-1/2 bg-white"
             animate={{ y: ["-100%", "200%"] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}

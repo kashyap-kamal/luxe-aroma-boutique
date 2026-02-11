@@ -53,7 +53,7 @@ export default function RootLayout({
 
         {/* DNS prefetch for external resources */}
         <link rel="dns-prefetch" href="//sdk.cashfree.com" />
-        <link rel="dns-prefetch" href="//track.delhivery.com" />
+        <link rel="dns-prefetch" href="//apiv2.shiprocket.in" />
 
         {/* Preload critical resources */}
         <link

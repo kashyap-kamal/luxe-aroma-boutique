@@ -17,7 +17,8 @@ const RAZORPAY_CONFIG = {
   keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
   testMode: process.env.RAZORPAY_TEST_MODE === "true",
   appName: process.env.NEXT_PUBLIC_APP_NAME || "Luxe Aroma Boutique",
-  appUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:5173",
+  // Updated: Use production URL as fallback instead of localhost
+  appUrl: process.env.NEXT_PUBLIC_APP_URL || "https://aromeluxe.in",
 } as const;
 
 /**

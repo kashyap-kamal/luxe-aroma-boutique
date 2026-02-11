@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { Category } from "@/lib/data-service";
@@ -10,7 +10,7 @@ interface CollectionsSectionProps {
   categories: Category[];
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 50 },
   visible: (i: number) => ({
     opacity: 1,
@@ -18,7 +18,7 @@ const cardVariants = {
     transition: {
       delay: i * 0.2,
       duration: 0.8,
-      ease: [0.215, 0.61, 0.355, 1], // easeOutCubic
+      ease: [0.215, 0.61, 0.355, 1],
     },
   }),
 };

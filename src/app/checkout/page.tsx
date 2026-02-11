@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -66,11 +66,16 @@ const OrderSummary: React.FC<{
   </div>
 );
 
-const Checkout: React.FC = () => {
+const CheckoutContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { cartItems, clearCart, getBillingBreakdown } = useCartStore();
-  const { processPayment, isProcessing, clearPaymentState } = usePaymentStore();
+  const {
+    processPayment,
+    isProcessing,
+    clearPaymentState,
+    error: paymentError,
+  } = usePaymentStore();
 
   // Check if user was redirected back from cancelled payment
   useEffect(() => {
@@ -84,16 +89,16 @@ const Checkout: React.FC = () => {
     }
   }, [searchParams, router]);
 
-  // Form state
+  // Form state - empty initial values for production
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    firstName: "test",
-    lastName: "test",
-    email: "test@gmail.com",
-    phone: "9123456780",
-    address: "test",
-    city: "test",
-    state: "test",
-    postalCode: "test",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    postalCode: "",
     country: "India",
   });
 
@@ -102,7 +107,7 @@ const Checkout: React.FC = () => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [upiId, setUpiId] = useState("");
   const [isPincodeServiceable, setIsPincodeServiceable] = useState(false);
-  
+
   // Billing state - initialized after hydration to prevent SSR mismatch
   // Cart data comes from sessionStorage which is not available during SSR
   const [billing, setBilling] = useState<BillingBreakdown>({
@@ -124,6 +129,7 @@ const Checkout: React.FC = () => {
     // Calculate billing breakdown after mount
     const breakdown = getBillingBreakdown();
     setBilling(breakdown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
   // Update billing whenever cart items change (after mount)
@@ -132,6 +138,7 @@ const Checkout: React.FC = () => {
       const breakdown = getBillingBreakdown();
       setBilling(breakdown);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cartItems, isMounted]); // Update when cart items change
 
   // Handle pincode serviceability change
@@ -369,7 +376,7 @@ const Checkout: React.FC = () => {
         // Payment initialization failed
         toast.error("Payment Failed", {
           description:
-            result.error ||
+            paymentError ||
             "Please try again or contact support if the issue persists.",
         });
       }
@@ -383,7 +390,7 @@ const Checkout: React.FC = () => {
 
   return (
     <>
-      <main className="flex-grow py-8">
+      <main className="flex-grow pt-24 pb-8">
         <div className="luxury-container">
           <div className="flex items-center gap-2 mb-6">
             <ShoppingBag className="h-6 w-6" />
@@ -791,6 +798,23 @@ const Checkout: React.FC = () => {
       </main>
       <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" />
     </>
+  );
+};
+
+const Checkout: React.FC = () => {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex-grow flex items-center justify-center py-8">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-brown-600 mx-auto mb-4" />
+            <p>Loading checkout...</p>
+          </div>
+        </main>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 };
 

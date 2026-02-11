@@ -19,27 +19,29 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import type { OrderDetails } from "@/types/cashfree";
+import { PaymentStatus } from "@/types/cashfree";
 import OrderTracker from "@/components/order-tracker";
-import { toast } from "sonner";
 
 interface OrderSuccessClientProps {
   orderId: string | null;
 }
 
-const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initialOrderId }) => {
+const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({
+  orderId: initialOrderId,
+}) => {
   const router = useRouter();
   const { getOrderById } = usePaymentStore();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(initialOrderId);
-  const [delhiveryWaybill, setDelhiveryWaybill] = useState<string | null>(null);
-  const [delhiveryStatus, setDelhiveryStatus] = useState<string | null>(null);
+  const [shiprocketAwb, setShiprocketAwb] = useState<string | null>(null);
+  const [shiprocketStatus, setShiprocketStatus] = useState<string | null>(null);
 
   // Extract order ID from URL or sessionStorage
   useEffect(() => {
     let id = initialOrderId;
-    
+
     // If no order ID in URL, try to get from sessionStorage
     if (!id && typeof window !== "undefined") {
       const storedOrderId = sessionStorage.getItem("pending_cashfree_order_id");
@@ -48,7 +50,7 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
         setOrderId(storedOrderId);
       }
     }
-    
+
     // If still no order ID, check URL params directly (fallback)
     if (!id && typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
@@ -64,14 +66,16 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
     const fetchOrderData = async () => {
       if (!orderId) {
         setLoading(false);
-        setError("Order ID is missing. Please check your order confirmation email.");
+        setError(
+          "Order ID is missing. Please check your order confirmation email."
+        );
         return;
       }
 
       try {
         // First, try to get order from localStorage (if available from checkout)
         const orderDetails = getOrderById(orderId);
-        
+
         if (orderDetails) {
           setOrder(orderDetails);
           setLoading(false);
@@ -91,7 +95,8 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
             id: dbOrder.cashfree_order_id,
             customerInfo: {
               firstName: dbOrder.customer_name?.split(" ")[0] || "",
-              lastName: dbOrder.customer_name?.split(" ").slice(1).join(" ") || "",
+              lastName:
+                dbOrder.customer_name?.split(" ").slice(1).join(" ") || "",
               email: dbOrder.customer_email || "",
               phone: dbOrder.customer_phone || "",
               address: dbOrder.shipping_address?.address_line1 || "",
@@ -100,27 +105,38 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
               postalCode: dbOrder.shipping_address?.pincode || "",
               country: dbOrder.shipping_address?.country || "India",
             },
-            items: (dbOrder.items || []).map((item: any) => ({
-              productId: item.product_id || "",
-              productName: item.product_name || "",
-              price: item.price || 0,
-              quantity: item.quantity || 0,
-              total: item.total || 0,
-            })),
+            items: (dbOrder.items || []).map(
+              (item: {
+                product_id?: string;
+                product_name?: string;
+                price?: number;
+                quantity?: number;
+                total?: number;
+              }) => ({
+                productId: item.product_id || "",
+                productName: item.product_name || "",
+                price: item.price || 0,
+                quantity: item.quantity || 0,
+                total: item.total || 0,
+              })
+            ),
             subtotal: dbOrder.order_amount || 0,
             tax: 0, // Calculate from items if needed
             shipping: 0,
             total: dbOrder.order_amount || 0,
             paymentMethod: dbOrder.payment_method || "online",
-            paymentStatus: dbOrder.payment_status === "SUCCESS" ? "success" : "pending",
+            paymentStatus:
+              dbOrder.payment_status === "SUCCESS"
+                ? PaymentStatus.SUCCESS
+                : PaymentStatus.PENDING,
             orderDate: new Date(dbOrder.created_at),
             notes: dbOrder.notes,
           };
 
-          // Set Delhivery tracking info if available
-          if (dbOrder.delhivery_waybill) {
-            setDelhiveryWaybill(dbOrder.delhivery_waybill);
-            setDelhiveryStatus(dbOrder.delhivery_status || "created");
+          // Set Shiprocket tracking info if available
+          if (dbOrder.shiprocket_awb) {
+            setShiprocketAwb(dbOrder.shiprocket_awb);
+            setShiprocketStatus(dbOrder.shiprocket_status || "created");
           }
 
           setOrder(orderDetails);
@@ -131,14 +147,21 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
         // If not in database, verify payment status with Cashfree
         try {
           const paymentStatus = await verifyPaymentStatus(orderId);
-          
+
           if (paymentStatus.order_status === "PAID") {
             // Payment successful - create order details from Cashfree response
             const orderDetails: OrderDetails = {
               id: paymentStatus.order_id,
               customerInfo: {
-                firstName: paymentStatus.customer_details?.customer_name?.split(" ")[0] || "",
-                lastName: paymentStatus.customer_details?.customer_name?.split(" ").slice(1).join(" ") || "",
+                firstName:
+                  paymentStatus.customer_details?.customer_name?.split(
+                    " "
+                  )[0] || "",
+                lastName:
+                  paymentStatus.customer_details?.customer_name
+                    ?.split(" ")
+                    .slice(1)
+                    .join(" ") || "",
                 email: paymentStatus.customer_details?.customer_email || "",
                 phone: paymentStatus.customer_details?.customer_phone || "",
                 address: paymentStatus.shipping_address?.address_line1 || "",
@@ -154,8 +177,9 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
               tax: 0,
               shipping: 0,
               total: paymentStatus.order_amount / 100,
-              paymentMethod: paymentStatus.payment_details?.payment_method || "online",
-              paymentStatus: "success",
+              paymentMethod:
+                paymentStatus.payment_details?.payment_method || "online",
+              paymentStatus: PaymentStatus.SUCCESS,
               orderDate: new Date(),
             };
 
@@ -202,12 +226,11 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
             {error ? "Order Verification Failed" : "Order Not Found"}
           </h1>
           <p className="text-gray-600 mb-4">
-            {error || "The order you're looking for doesn't exist or has been removed."}
+            {error ||
+              "The order you're looking for doesn't exist or has been removed."}
           </p>
           {error && orderId && (
-            <p className="text-sm text-gray-500 mb-4">
-              Order ID: {orderId}
-            </p>
+            <p className="text-sm text-gray-500 mb-4">Order ID: {orderId}</p>
           )}
           <div className="flex gap-4 justify-center">
             <Button onClick={() => router.push("/")}>
@@ -223,8 +246,13 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
     );
   }
 
+  // Type guard: ensure order is not null before rendering
+  if (!order) {
+    return null;
+  }
+
   return (
-    <main className="flex-grow py-8">
+    <main className="flex-grow pt-24 pb-8">
       <div className="luxury-container">
         {/* Success Header */}
         <div className="text-center mb-8">
@@ -430,8 +458,8 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
           </Button>
         </div>
 
-        {/* Delhivery Shipment Info */}
-        {delhiveryWaybill && (
+        {/* Shiprocket Shipment Info */}
+        {shiprocketAwb && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
             <div className="flex items-start gap-3">
               <div className="bg-green-100 rounded-full p-2 flex-shrink-0">
@@ -442,20 +470,25 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
                   Shipment Created
                 </h3>
                 <p className="text-sm text-gray-700 mb-2">
-                  Your order has been shipped via Delhivery. Use the waybill number below to track your shipment.
+                  Your order has been shipped via Shiprocket. Use the AWB
+                  number below to track your shipment.
                 </p>
                 <div className="bg-white rounded-lg p-3 border border-green-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Waybill Number</p>
+                      <p className="text-xs text-gray-500 mb-1">
+                        AWB Number
+                      </p>
                       <p className="font-mono font-semibold text-lg text-green-700">
-                        {delhiveryWaybill}
+                        {shiprocketAwb}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-500 mb-1">Status</p>
                       <p className="text-sm font-medium capitalize text-green-700">
-                        {delhiveryStatus === "created" ? "Shipment Created" : delhiveryStatus || "Processing"}
+                        {shiprocketStatus === "created"
+                          ? "Shipment Created"
+                          : shiprocketStatus || "Processing"}
                       </p>
                     </div>
                   </div>
@@ -471,19 +504,20 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
             <Truck className="h-5 w-5" />
             Track Your Order
           </h3>
-          {delhiveryWaybill ? (
+          {shiprocketAwb ? (
             <>
               <p className="text-sm text-gray-600 mb-4">
-                Your waybill number is pre-filled below. Click Track to see the latest status.
+                Your AWB number is pre-filled below. Click Track to see the
+                latest status.
               </p>
-              <OrderTracker initialWaybill={delhiveryWaybill} />
+              <OrderTracker initialWaybill={shiprocketAwb} />
             </>
           ) : (
             <>
               <p className="text-sm text-gray-600 mb-4">
-                {delhiveryStatus === "failed" 
-                  ? "Shipment creation is in progress. Please check back in a few minutes or enter your waybill number manually once you receive it."
-                  : "Your shipment is being prepared. Enter your waybill number once you receive it to track your order status."}
+                {shiprocketStatus === "failed"
+                  ? "Shipment creation is in progress. Please check back in a few minutes or enter your AWB number manually once you receive it."
+                  : "Your shipment is being prepared. Enter your AWB number once you receive it to track your order status."}
               </p>
               <OrderTracker />
             </>
@@ -508,4 +542,3 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({ orderId: initia
 };
 
 export default OrderSuccessClient;
-

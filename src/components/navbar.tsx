@@ -9,7 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/stores/cart-store";
 import { UserMenu } from "@/components/auth/user-menu";
 import Image from "next/image";
-import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useMotionValueEvent,
+  AnimatePresence,
+} from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
@@ -43,7 +48,8 @@ const Navbar = () => {
 
   // Check if we're on a page with light background
   // These pages need dark navbar colors since they have light backgrounds
-  const isLightBackgroundPage = pathname?.startsWith("/auth") || pathname?.startsWith("/profile");
+  // Only homepage has dark hero background, all other pages have white/light backgrounds
+  const isLightBackgroundPage = pathname !== "/";
 
   // Determine if we should use light (white) or dark styling
   // Use dark styling when: scrolled OR on light background pages
@@ -59,8 +65,8 @@ const Navbar = () => {
           isScrolled
             ? "bg-white/80 backdrop-blur-2xl border-b border-white/40 shadow-[0_4px_30px_rgba(0,0,0,0.03)] py-3"
             : isLightBackgroundPage
-              ? "bg-white/60 backdrop-blur-xl py-4" // Light background pages: subtle white background
-              : "bg-transparent py-6" // Other pages: transparent at top
+            ? "bg-white/60 backdrop-blur-xl py-4" // Light background pages: subtle white background
+            : "bg-transparent py-6" // Other pages: transparent at top
         )}
       >
         <div className="luxury-container">
@@ -68,7 +74,11 @@ const Navbar = () => {
             {/* Logo */}
             <Link href="/" className="flex items-center z-50">
               <Image
-                src={isAtTop ? "/assets/arome-luxe-logo-white.png" : "/assets/arome-luxe-logo.png"}
+                src={
+                  isAtTop
+                    ? "/assets/arome-luxe-logo-white.png"
+                    : "/assets/arome-luxe-logo.png"
+                }
                 alt="Aromé Luxe"
                 width={150}
                 height={50}
@@ -88,14 +98,18 @@ const Navbar = () => {
                   href={link.href}
                   className={cn(
                     "relative font-medium text-sm uppercase tracking-wider transition-colors group py-2",
-                    isAtTop ? "text-white hover:text-luxe-gold" : "text-gray-900 hover:text-luxe-gold"
+                    isAtTop
+                      ? "text-white hover:text-luxe-gold"
+                      : "text-gray-900 hover:text-luxe-gold"
                   )}
                 >
                   {link.label}
-                  <span className={cn(
-                    "absolute bottom-0 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full",
-                    isAtTop ? "bg-luxe-gold" : "bg-gray-900"
-                  )} />
+                  <span
+                    className={cn(
+                      "absolute bottom-0 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full",
+                      isAtTop ? "bg-luxe-gold" : "bg-gray-900"
+                    )}
+                  />
                 </Link>
               ))}
             </nav>
@@ -129,10 +143,8 @@ const Navbar = () => {
                   )}
                 </Button>
               </Link>
-              
-              <div className={cn(
-                isAtTop ? "text-white" : "text-gray-900"
-              )}>
+
+              <div className={cn(isAtTop ? "text-white" : "text-gray-900")}>
                 <UserMenu />
               </div>
 
@@ -172,13 +184,13 @@ const Navbar = () => {
               className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-white z-50 md:hidden shadow-2xl flex flex-col"
             >
               <div className="p-4 flex justify-between items-center border-b border-gray-100">
-                 <Image
-                    src="/assets/arome-luxe-logo.png"
-                    alt="Aromé Luxe"
-                    width={120}
-                    height={40}
-                    className="h-8 w-auto object-contain"
-                  />
+                <Image
+                  src="/assets/arome-luxe-logo.png"
+                  alt="Aromé Luxe"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto object-contain"
+                />
                 <Button
                   variant="ghost"
                   size="icon"

@@ -256,10 +256,10 @@ serve(async (req) => {
           console.error("Error updating order:", updateError);
         }
 
-        // Automatically create Delhivery shipment order after payment success
-        if (orderData && !orderData.delhivery_waybill) {
+        // Automatically create Shiprocket shipment order after payment success
+        if (orderData && !orderData.shiprocket_awb) {
           try {
-            console.log(`Creating Delhivery order for ${order_id}`);
+            console.log(`Creating Shiprocket order for ${order_id}`);
             
             // Extract shipping address details
             const shipAddr = shipping_address || orderData.shipping_address || {};
@@ -283,93 +283,235 @@ serve(async (req) => {
             const paymentMode = payment_details?.payment_method === "cod" || 
                               payment_details?.payment_method_type === "COD" ? "COD" : "Prepaid";
             
-            // Prepare Delhivery order request
-            const delhiveryRequest = {
+            // Extract address fields with validation
+            const addressLine = shipAddr.address_line1 || shipAddr.address || orderData.shipping_address?.address || "";
+            const pincode = shipAddr.pincode || shipAddr.postal_code || shipAddr.zip_code || orderData.shipping_address?.pincode || "";
+            const city = shipAddr.city || orderData.shipping_address?.city || "";
+            const state = shipAddr.state || orderData.shipping_address?.state || "";
+            const phone = customerPhone;
+            
+            // Validate required fields before calling Shiprocket
+            const missingFields = [];
+            if (!addressLine || addressLine.trim() === "") missingFields.push("address");
+            if (!pincode || pincode.trim() === "") missingFields.push("pincode");
+            if (!city || city.trim() === "") missingFields.push("city");
+            if (!state || state.trim() === "") missingFields.push("state");
+            if (!phone || phone.trim() === "") missingFields.push("phone");
+            if (!customerName || customerName.trim() === "") missingFields.push("name");
+            
+            if (missingFields.length > 0) {
+              console.warn(`Missing required address fields for Shiprocket: ${missingFields.join(", ")}`);
+              console.log("Address data received:", { shipAddr, orderDataAddress: orderData.shipping_address });
+              
+              // Set status to pending_address instead of failed
+              await supabase
+                .from("orders")
+                .update({
+                  shiprocket_status: "pending_address",
+                  notes: `Awaiting complete shipping address. Missing: ${missingFields.join(", ")}`,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("cashfree_order_id", order_id);
+              
+              console.log(`Skipping Shiprocket creation - missing fields: ${missingFields.join(", ")}`);
+              // Don't throw error - continue webhook processing
+              break;
+            }
+            
+            // Validate pincode format (must be 6 digits)
+            if (!/^\d{6}$/.test(pincode.trim())) {
+              console.error(`Invalid pincode format: ${pincode}. Must be 6 digits.`);
+              await supabase
+                .from("orders")
+                .update({
+                  shiprocket_status: "failed",
+                  notes: `Invalid pincode format: ${pincode}. Required: 6 digits`,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("cashfree_order_id", order_id);
+              break;
+            }
+            
+            console.log("Validated address for Shiprocket:", { addressLine, city, state, pincode, phone });
+            
+            // Build Shiprocket order items from order data
+            const shiprocketItems = items.map((item: any) => ({
+              name: item.product_name || item.name || "Product",
+              sku: item.product_id || `SKU-${order_id}`,
+              units: item.quantity || 1,
+              selling_price: item.price || item.total || 0,
+              hsn: "",
+            }));
+
+            // Prepare Shiprocket order request with validated fields
+            const shiprocketRequest = {
               name: customerName,
-              add: shipAddr.address_line1 || shipAddr.address || orderData.shipping_address?.address || "",
-              phone: customerPhone,
-              pin: shipAddr.pincode || shipAddr.postal_code || orderData.shipping_address?.pincode || "",
-              city: shipAddr.city || orderData.shipping_address?.city || "",
-              state: shipAddr.state || orderData.shipping_address?.state || "",
+              email: customerEmail,
+              phone: phone,
+              address: addressLine,
+              pincode: pincode,
+              city: city,
+              state: state,
               country: shipAddr.country || orderData.shipping_address?.country || "India",
-              order: order_id, // Use Cashfree order ID as Delhivery order reference
-              payment_mode: paymentMode,
+              order_id: order_id, // Use Cashfree order ID as Shiprocket order reference
+              payment_mode: paymentMode as "COD" | "Prepaid",
               products_desc: productsDesc,
               cod_amount: paymentMode === "COD" ? Number(orderData.order_amount) : undefined,
               total_amount: Number(orderData.order_amount),
               quantity: items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0),
               weight: totalWeight,
-              address_type: "home",
-              shipping_mode: "Surface",
-              fragile_shipment: false,
-              dangerous_good: false,
-              plastic_packaging: false,
+              items: shiprocketItems,
             };
 
-            // Call Delhivery Edge Function to create shipment
-            const delhiveryFunctionUrl = `${supabaseUrl}/functions/v1/create-delhivery-order`;
-            const delhiveryResponse = await fetch(delhiveryFunctionUrl, {
+            // Log Shiprocket request for debugging
+            console.log("Calling Shiprocket API with request:", JSON.stringify(shiprocketRequest));
+            
+            // Call Shiprocket Edge Function to create shipment
+            const shiprocketFunctionUrl = `${supabaseUrl}/functions/v1/create-shiprocket-order`;
+            const shiprocketResponse = await fetch(shiprocketFunctionUrl, {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${supabaseServiceKey}`,
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify(delhiveryRequest),
+              body: JSON.stringify(shiprocketRequest),
             });
 
-            if (delhiveryResponse.ok) {
-              const delhiveryResult = await delhiveryResponse.json();
+            if (shiprocketResponse.ok) {
+              const shiprocketResult = await shiprocketResponse.json();
               
-              if (delhiveryResult.success && delhiveryResult.waybill) {
-                // Update order with Delhivery waybill and order ID
+              if (shiprocketResult.success) {
+                // Update order with Shiprocket details
                 await supabase
                   .from("orders")
                   .update({
-                    delhivery_order_id: delhiveryResult.order_id || order_id,
-                    delhivery_waybill: delhiveryResult.waybill,
-                    delhivery_status: "created",
+                    shiprocket_order_id: shiprocketResult.order_id || order_id,
+                    shiprocket_shipment_id: shiprocketResult.shipment_id || "",
+                    shiprocket_awb: shiprocketResult.awb || "",
+                    shiprocket_courier_name: shiprocketResult.courier_name || "",
+                    shiprocket_courier_id: shiprocketResult.courier_id || "",
+                    shiprocket_status: shiprocketResult.awb ? "created" : "pending",
                     updated_at: new Date().toISOString(),
                   })
                   .eq("cashfree_order_id", order_id);
 
-                console.log(`Delhivery order created successfully. Waybill: ${delhiveryResult.waybill}`);
+                console.log(`Shiprocket order created successfully. AWB: ${shiprocketResult.awb || "pending"}`);
               } else {
-                console.error("Delhivery order creation failed:", delhiveryResult.error);
+                console.error("Shiprocket order creation failed:", shiprocketResult.error);
+
+                // Log error to order_errors table
+                await supabase.from("order_errors").insert({
+                  order_id: orderData.id,
+                  cashfree_order_id: order_id,
+                  error_type: "shipment_failed",
+                  error_message: shiprocketResult.error || "Shiprocket order creation failed",
+                  error_details: {
+                    shiprocket_response: shiprocketResult,
+                    request_data: shiprocketRequest,
+                  },
+                  error_source: "cashfree-webhook",
+                });
+
                 // Update status to indicate failure (but don't fail the webhook)
                 await supabase
                   .from("orders")
                   .update({
-                    delhivery_status: "failed",
+                    shiprocket_status: "failed",
+                    notes: `Shiprocket error: ${shiprocketResult.error}`,
                     updated_at: new Date().toISOString(),
                   })
                   .eq("cashfree_order_id", order_id);
               }
             } else {
-              const errorText = await delhiveryResponse.text();
-              console.error("Delhivery API call failed:", errorText);
+              const errorText = await shiprocketResponse.text();
+              console.error("Shiprocket API call failed:", errorText);
+
+              // Log error to order_errors table for tracking
+              await supabase.from("order_errors").insert({
+                order_id: orderData.id,
+                cashfree_order_id: order_id,
+                error_type: "shipment_failed",
+                error_message: "Shiprocket API call failed",
+                error_details: {
+                  response_status: shiprocketResponse.status,
+                  response_body: errorText,
+                  request_data: shiprocketRequest,
+                },
+                error_source: "cashfree-webhook",
+              });
+
               // Update status to indicate failure (but don't fail the webhook)
               await supabase
                 .from("orders")
                 .update({
-                  delhivery_status: "failed",
+                  shiprocket_status: "failed",
+                  notes: `Shiprocket API error: ${shiprocketResponse.status}`,
                   updated_at: new Date().toISOString(),
                 })
                 .eq("cashfree_order_id", order_id);
             }
-          } catch (delhiveryError) {
-            console.error("Error creating Delhivery order:", delhiveryError);
-            // Don't fail the webhook if Delhivery creation fails
+          } catch (shiprocketError) {
+            console.error("Error creating Shiprocket order:", shiprocketError);
+
+            // Log error to order_errors table for tracking
+            await supabase.from("order_errors").insert({
+              order_id: orderData.id,
+              cashfree_order_id: order_id,
+              error_type: "shipment_failed",
+              error_message: shiprocketError instanceof Error ? shiprocketError.message : "Unknown error creating Shiprocket order",
+              error_details: {
+                error: shiprocketError,
+                request_data: shiprocketRequest,
+                stack: shiprocketError instanceof Error ? shiprocketError.stack : undefined,
+              },
+              error_source: "cashfree-webhook",
+            });
+
+            // Don't fail the webhook if Shiprocket creation fails
             // The order can be manually processed later
             await supabase
               .from("orders")
               .update({
-                delhivery_status: "failed",
+                shiprocket_status: "failed",
+                notes: `Shiprocket creation error: ${shiprocketError instanceof Error ? shiprocketError.message : "Unknown error"}`,
                 updated_at: new Date().toISOString(),
               })
               .eq("cashfree_order_id", order_id);
           }
-        } else if (orderData?.delhivery_waybill) {
-          console.log(`Delhivery order already exists for ${order_id}. Waybill: ${orderData.delhivery_waybill}`);
+        } else if (orderData?.shiprocket_awb) {
+          console.log(`Shiprocket order already exists for ${order_id}. AWB: ${orderData.shiprocket_awb}`);
+        }
+
+        // Send order confirmation notification
+        try {
+          const notificationUrl = `${supabaseUrl}/functions/v1/send-notification`;
+          const notificationResponse = await fetch(notificationUrl, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${supabaseServiceKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: orderData?.shiprocket_awb ? "shipment_created" : "order_confirmation",
+              order_id: order_id,
+              customer_email: orderData?.customer_email || customer_details?.customer_email,
+              customer_name: orderData?.customer_name || customer_details?.customer_name,
+              customer_phone: orderData?.customer_phone || customer_details?.customer_phone,
+              order_amount: orderData?.order_amount,
+              order_items: orderData?.items,
+              awb: orderData?.shiprocket_awb,
+              courier_name: orderData?.shiprocket_courier_name,
+            }),
+          });
+
+          if (notificationResponse.ok) {
+            console.log("Order confirmation notification sent successfully");
+          } else {
+            console.warn("Failed to send notification:", await notificationResponse.text());
+          }
+        } catch (notificationError) {
+          console.error("Error sending notification:", notificationError);
+          // Don't fail webhook if notification fails
         }
 
         // Mark webhook as processed
@@ -380,7 +522,6 @@ serve(async (req) => {
           .eq("event_type", type || order_status);
 
         // TODO: Add additional logic here:
-        // - Send confirmation email to customer (with waybill number)
         // - Update inventory
         // - Notify admin
 

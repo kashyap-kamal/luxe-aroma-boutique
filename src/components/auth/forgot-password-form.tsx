@@ -41,9 +41,11 @@ export function ForgotPasswordForm() {
         // User will receive an email with reset instructions
         setSuccess(true);
       } else {
-        setError(result.error || "Failed to send reset email. Please try again.");
+        setError(
+          result.error || "Failed to send reset email. Please try again."
+        );
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -57,7 +59,8 @@ export function ForgotPasswordForm() {
           Forgot Password
         </CardTitle>
         <CardDescription className="text-center">
-          Enter your email address and we&apos;ll send you a link to reset your password
+          Enter your email address and we&apos;ll send you a link to reset your
+          password
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -67,7 +70,8 @@ export function ForgotPasswordForm() {
             <Alert className="border-green-500 bg-green-50">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
-                Password reset email sent! Please check your inbox and follow the instructions to reset your password.
+                Password reset email sent! Please check your inbox and follow
+                the instructions to reset your password.
               </AlertDescription>
             </Alert>
             <div className="space-y-2">
@@ -127,4 +131,3 @@ export function ForgotPasswordForm() {
     </Card>
   );
 }
-

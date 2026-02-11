@@ -1,10 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 import React, { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-interface MagnetButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface MagnetButtonProps extends HTMLMotionProps<"button"> {
   children: React.ReactNode;
   className?: string;
   strength?: number; // How strong the magnetic pull is
@@ -44,11 +44,9 @@ export const MagnetButton = ({
         "relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium transition-colors rounded-full",
         className
       )}
-      {...(props as any)}
+      {...props}
     >
       {children}
     </motion.button>
   );
 };
-
-
