@@ -27,7 +27,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ subtotal }) => {
           </div>
         </div>
         <div className="text-sm text-gray-500">
-          <p>* Shipping and taxes calculated at checkout</p>
+          <p>GST & shipping included</p>
         </div>
       </div>
 

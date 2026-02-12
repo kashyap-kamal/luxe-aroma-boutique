@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Menu, X, Search } from "lucide-react";
+import { ShoppingBag, Menu, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/stores/cart-store";
 import { UserMenu } from "@/components/auth/user-menu";
@@ -116,16 +116,6 @@ const Navbar = () => {
 
             {/* Icons */}
             <div className="flex items-center space-x-2 md:space-x-4 z-50">
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "hover:bg-black/5 transition-colors rounded-full",
-                  isAtTop ? "text-white hover:bg-white/10" : "text-gray-900"
-                )}
-              >
-                <Search className="h-5 w-5" />
-              </Button>
               <Link href="/cart">
                 <Button
                   variant="ghost"
@@ -214,7 +204,7 @@ const Navbar = () => {
               </nav>
               <div className="mt-auto p-8 bg-gray-50">
                 <p className="text-sm text-gray-500 text-center">
-                  © 2025 Aromé Luxe
+                  © {new Date().getFullYear()} Aromé Luxe
                 </p>
               </div>
             </motion.div>

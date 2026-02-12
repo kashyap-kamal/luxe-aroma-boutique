@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, Settings, ShoppingBag } from "lucide-react";
+import { User, LogOut, ShoppingBag } from "lucide-react";
 
 export function UserMenu() {
   const user = useUser();
@@ -89,10 +89,6 @@ export function UserMenu() {
         <DropdownMenuItem onClick={() => router.push("/orders")}>
           <ShoppingBag className="mr-2 h-4 w-4" />
           <span>Orders</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/settings")}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

@@ -21,6 +21,7 @@ interface PincodeCheckerProps {
     }
   ) => void;
   disabled?: boolean;
+  initialPincode?: string;
 }
 
 interface DeliveryInfo {
@@ -37,10 +38,24 @@ interface DeliveryInfo {
 const PincodeChecker: React.FC<PincodeCheckerProps> = ({
   onServiceabilityChange,
   disabled = false,
+  initialPincode = "",
 }) => {
-  const [pincode, setPincode] = useState("");
+  const [pincode, setPincode] = useState(initialPincode);
   const [loading, setLoading] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo | null>(null);
+
+  // Sync with external pincode changes
+  React.useEffect(() => {
+    if (initialPincode && initialPincode !== pincode && initialPincode.length === 6) {
+      setPincode(initialPincode);
+      // Clear previous results when synced pincode changes
+      if (deliveryInfo) {
+        setDeliveryInfo(null);
+        onServiceabilityChange(false);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPincode]);
 
   const checkPincode = async () => {
     if (!pincode || pincode.length !== 6) {

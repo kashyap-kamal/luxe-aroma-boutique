@@ -15,7 +15,6 @@ import {
   MapPin,
   Phone,
   Mail,
-  Download,
   ArrowLeft,
 } from "lucide-react";
 import type { OrderDetails } from "@/types/cashfree";
@@ -326,17 +325,9 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({
                 <span>Subtotal</span>
                 <span>₹{order.subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>
-                  {order.shipping === 0
-                    ? "Free"
-                    : `₹${order.shipping.toFixed(2)}`}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax (18% GST)</span>
-                <span>₹{order.tax.toFixed(2)}</span>
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>GST & Shipping</span>
+                <span>Included</span>
               </div>
               <Separator />
               <div className="flex justify-between text-lg font-medium">
@@ -344,14 +335,6 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({
                 <span>₹{order.total.toFixed(2)}</span>
               </div>
             </div>
-          </div>
-
-          {/* Payment Method */}
-          <div className="mb-6">
-            <h3 className="font-medium mb-2">Payment Method</h3>
-            <p className="text-gray-600 capitalize">
-              {order.paymentMethod} Payment
-            </p>
           </div>
 
           {/* Shipping Address */}
@@ -434,27 +417,10 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({
             Continue Shopping
           </Button>
           <Button
-            className="flex-1 bg-brown-600 hover:bg-brown-700"
-            onClick={() => {
-              // Generate a simple receipt/invoice
-              const receiptData = {
-                orderId: order.id,
-                customerName: `${order.customerInfo.firstName} ${order.customerInfo.lastName}`,
-                email: order.customerInfo.email,
-                date: order.orderDate.toLocaleDateString(),
-                items: order.items,
-                total: order.total,
-                paymentMethod: order.paymentMethod,
-              };
-
-              console.log("Receipt data:", receiptData);
-
-              // In a real app, you would generate and download a PDF
-              alert("Receipt feature will be implemented in the next update!");
-            }}
+            className="flex-1"
+            onClick={() => router.push("/orders")}
           >
-            <Download className="mr-2 h-4 w-4" />
-            Download Receipt
+            View My Orders
           </Button>
         </div>
 

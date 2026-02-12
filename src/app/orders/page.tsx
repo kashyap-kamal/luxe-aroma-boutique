@@ -304,7 +304,7 @@ const OrdersPage = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="mt-6 flex gap-4">
+                    <div className="mt-6">
                       <Button
                         variant="outline"
                         onClick={() =>
@@ -312,22 +312,10 @@ const OrdersPage = () => {
                             `/order-success?order_id=${order.cashfree_order_id}`
                           )
                         }
-                        className="flex-1"
+                        className="w-full sm:w-auto"
                       >
                         View Details
                       </Button>
-                      {order.payment_status === "SUCCESS" && (
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            // TODO: Implement download receipt
-                            alert("Receipt download feature coming soon!");
-                          }}
-                          className="flex-1"
-                        >
-                          Download Receipt
-                        </Button>
-                      )}
                     </div>
                   </CardContent>
                 </Card>

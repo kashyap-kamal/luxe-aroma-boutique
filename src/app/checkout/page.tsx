@@ -6,10 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { usePaymentStore } from "@/stores/payment-store";
-import { Loader2, CreditCard, Smartphone, ShoppingBag } from "lucide-react";
+import { Loader2, ShoppingBag } from "lucide-react";
 import type { CustomerInfo, OrderItem } from "@/types/cashfree";
 import { useCartStore } from "@/stores/cart-store";
 import { billingCalculator, type BillingBreakdown } from "@/lib/billing";
@@ -29,42 +28,51 @@ const OrderSummary: React.FC<{
     total: number;
     currency: string;
   };
-}> = ({ billing }) => (
-  <div className="bg-white rounded-lg shadow-sm p-6 h-fit">
-    <h2 className="text-xl font-medium mb-4">Order Summary</h2>
+  shippingCharge: number;
+}> = ({ billing, shippingCharge }) => {
+  const totalWithShipping = billing.total + shippingCharge;
 
-    <div className="space-y-3">
-      <div className="flex justify-between">
-        <span>Subtotal</span>
-        <span>{billingCalculator.formatCurrency(billing.subtotal)}</span>
-      </div>
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6 h-fit">
+      <h2 className="text-xl font-medium mb-4">Order Summary</h2>
 
-      {billing.discount > 0 && (
-        <div className="flex justify-between text-green-600">
-          <span>Discount ({billing.discountPercentage.toFixed(0)}%)</span>
-          <span>-{billingCalculator.formatCurrency(billing.discount)}</span>
+      <div className="space-y-3">
+        <div className="flex justify-between">
+          <span>Subtotal</span>
+          <span>{billingCalculator.formatCurrency(billing.subtotal)}</span>
         </div>
-      )}
 
-      <div className="flex justify-between text-sm text-gray-600">
-        <span>Shipping</span>
-        <span>Included</span>
-      </div>
+        {billing.discount > 0 && (
+          <div className="flex justify-between text-green-600">
+            <span>Discount ({billing.discountPercentage.toFixed(0)}%)</span>
+            <span>-{billingCalculator.formatCurrency(billing.discount)}</span>
+          </div>
+        )}
 
-      <div className="flex justify-between text-sm text-gray-600">
-        <span>GST & Shipping</span>
-        <span>Included</span>
-      </div>
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>GST</span>
+          <span>Included</span>
+        </div>
 
-      <Separator />
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>Shipping</span>
+          <span>
+            {shippingCharge > 0
+              ? billingCalculator.formatCurrency(shippingCharge)
+              : "Check pincode"}
+          </span>
+        </div>
 
-      <div className="flex justify-between text-lg font-medium">
-        <span>Total</span>
-        <span>{billingCalculator.formatCurrency(billing.total)}</span>
+        <Separator />
+
+        <div className="flex justify-between text-lg font-medium">
+          <span>Total</span>
+          <span>{billingCalculator.formatCurrency(totalWithShipping)}</span>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const CheckoutContent: React.FC = () => {
   const router = useRouter();
@@ -102,11 +110,10 @@ const CheckoutContent: React.FC = () => {
     country: "India",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("upi");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [upiId, setUpiId] = useState("");
   const [isPincodeServiceable, setIsPincodeServiceable] = useState(false);
+  const [shippingCharge, setShippingCharge] = useState(0);
 
   // Billing state - initialized after hydration to prevent SSR mismatch
   // Cart data comes from sessionStorage which is not available during SSR
@@ -157,9 +164,10 @@ const CheckoutContent: React.FC = () => {
   ) => {
     setIsPincodeServiceable(isServiceable);
 
-    // Log delivery info for debugging
-    if (info) {
-      console.log("Delivery info updated:", info);
+    if (isServiceable && info?.charges) {
+      setShippingCharge(info.charges.prepaid);
+    } else {
+      setShippingCharge(0);
     }
   };
 
@@ -239,15 +247,6 @@ const CheckoutContent: React.FC = () => {
       errors.pincode = "Please check pincode serviceability before proceeding";
     }
 
-    // UPI ID validation (only if UPI payment method is selected and UPI ID is provided)
-    if (paymentMethod === "upi" && upiId.trim()) {
-      const upiRegex = /^[\w.-]+@[\w.-]+$/;
-      if (!upiRegex.test(upiId.trim())) {
-        errors.upiId =
-          "Please enter a valid UPI ID (e.g., user@paytm, user@phonepe)";
-      }
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -322,24 +321,25 @@ const CheckoutContent: React.FC = () => {
         total: item.product.price.current * item.quantity,
       }));
 
-      // Prepare order details
+      // Prepare order details with shipping from Shiprocket
+      const totalWithShipping = billing.total + shippingCharge;
       const orderDetails = {
         customerInfo,
         items: orderItems,
         subtotal: billing.subtotal,
         discount: billing.discount,
         tax: billing.tax,
-        shipping: billing.shipping,
-        total: billing.total,
-        paymentMethod,
-        notes: `Payment method: ${paymentMethod}. Order placed via web checkout.`,
+        shipping: shippingCharge,
+        total: totalWithShipping,
+        paymentMethod: "online",
+        notes: "Order placed via web checkout.",
       };
 
-      // Process payment
+      // Process payment with shipping included in total
       // Note: With Cashfree redirectTarget: "_self", the page will redirect to Cashfree checkout
       // The Promise returns immediately after opening checkout, not after payment completes
       const result = await processPayment(
-        billing.total,
+        totalWithShipping,
         customerInfo,
         orderDetails
       );
@@ -354,8 +354,11 @@ const CheckoutContent: React.FC = () => {
               orderId: result.orderId,
               customerInfo,
               orderItems,
-              billing,
-              paymentMethod,
+              billing: {
+                ...billing,
+                shipping: shippingCharge,
+                total: billing.total + shippingCharge,
+              },
             })
           );
         }
@@ -618,7 +621,7 @@ const CheckoutContent: React.FC = () => {
                         onServiceabilityChange={
                           handlePincodeServiceabilityChange
                         }
-                        disabled={!customerInfo.postalCode}
+                        initialPincode={customerInfo.postalCode}
                       />
                       {formErrors.pincode && (
                         <p className="text-sm text-red-500 mt-2">
@@ -628,87 +631,15 @@ const CheckoutContent: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Payment Information */}
+                  {/* Payment Info */}
                   <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <h2 className="text-xl font-medium mb-4">Payment Method</h2>
-
-                    <RadioGroup
-                      value={paymentMethod}
-                      onValueChange={setPaymentMethod}
-                      className="space-y-3"
-                    >
-                      <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-gray-50">
-                        <RadioGroupItem value="upi" id="payment-upi" />
-                        <Label
-                          htmlFor="payment-upi"
-                          className="flex-grow cursor-pointer flex items-center gap-2"
-                        >
-                          <Smartphone className="h-4 w-4" />
-                          UPI Payment (Recommended)
-                        </Label>
-                      </div>
-
-                      <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-gray-50">
-                        <RadioGroupItem value="card" id="payment-card" />
-                        <Label
-                          htmlFor="payment-card"
-                          className="flex-grow cursor-pointer flex items-center gap-2"
-                        >
-                          <CreditCard className="h-4 w-4" />
-                          Credit/Debit Card
-                        </Label>
-                      </div>
-
-                      <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-gray-50">
-                        <RadioGroupItem
-                          value="netbanking"
-                          id="payment-netbanking"
-                        />
-                        <Label
-                          htmlFor="payment-netbanking"
-                          className="flex-grow cursor-pointer"
-                        >
-                          Net Banking
-                        </Label>
-                      </div>
-                    </RadioGroup>
-
-                    {/* Payment method info */}
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                    <div className="p-4 bg-blue-50 rounded-lg">
                       <p className="text-sm text-blue-800">
                         <strong>Secure Payment:</strong> All payments are
-                        processed securely through Cashfree One Click Checkout.
-                        {paymentMethod === "upi" &&
-                          " You can pay using any UPI app like Google Pay, PhonePe, or Paytm."}
+                        processed securely through Cashfree. You&apos;ll be able to choose
+                        your preferred payment method (UPI, Card, Net Banking) on the next page.
                       </p>
                     </div>
-
-                    {/* UPI ID Input (Optional) */}
-                    {paymentMethod === "upi" && (
-                      <div className="mt-4">
-                        <Label htmlFor="upiId" className="text-sm font-medium">
-                          UPI ID (Optional)
-                        </Label>
-                        <Input
-                          id="upiId"
-                          value={upiId}
-                          onChange={(e) => setUpiId(e.target.value)}
-                          placeholder="yourname@paytm, yourname@phonepe"
-                          className={`mt-1 ${
-                            formErrors.upiId ? "border-red-500" : ""
-                          }`}
-                        />
-                        {formErrors.upiId && (
-                          <p className="text-sm text-red-500 mt-1">
-                            {formErrors.upiId}
-                          </p>
-                        )}
-                        <p className="text-xs text-gray-500 mt-1">
-                          If provided, we&apos;ll pre-fill this in the payment
-                          page for your convenience.
-                        </p>
-                      </div>
-                    )}
                   </div>
 
                   {/* Terms and Conditions */}
@@ -750,7 +681,7 @@ const CheckoutContent: React.FC = () => {
 
                   {/* Mobile Order Summary */}
                   <div className="lg:hidden mb-6">
-                    <OrderSummary billing={billing} />
+                    <OrderSummary billing={billing} shippingCharge={shippingCharge} />
                   </div>
 
                   {/* Action Buttons */}
@@ -781,7 +712,7 @@ const CheckoutContent: React.FC = () => {
                           Processing Payment...
                         </>
                       ) : (
-                        `Pay ${billingCalculator.formatCurrency(billing.total)}`
+                        `Pay ${billingCalculator.formatCurrency(billing.total + shippingCharge)}`
                       )}
                     </Button>
                   </div>
@@ -791,7 +722,7 @@ const CheckoutContent: React.FC = () => {
 
             {/* Desktop Order Summary */}
             <div className="hidden lg:block w-1/3">
-              <OrderSummary billing={billing} />
+              <OrderSummary billing={billing} shippingCharge={shippingCharge} />
             </div>
           </div>
         </div>

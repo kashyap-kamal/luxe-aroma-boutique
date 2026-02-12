@@ -12,28 +12,14 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Calendar, Shield, Lock, Bell, ShieldCheck, Pencil } from "lucide-react";
-import { toast } from "sonner";
+import { User, Mail, Calendar, Shield, Lock, ShoppingBag } from "lucide-react";
 
 export function UserProfile() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
 
-  // Handle account actions
   const handleChangePassword = () => {
     router.push("/profile/change-password");
-  };
-
-  const handleEditProfile = () => {
-    toast.info("Edit Profile feature coming soon!");
-  };
-
-  const handleNotificationSettings = () => {
-    toast.info("Notification settings coming soon!");
-  };
-
-  const handlePrivacySettings = () => {
-    toast.info("Privacy settings coming soon!");
   };
 
   if (!isAuthenticated || !user) {
@@ -121,7 +107,13 @@ export function UserProfile() {
               </label>
               <p className="text-sm flex items-center">
                 <Calendar className="w-4 h-4 mr-2" />
-                {new Date().toLocaleDateString()}
+                {user.created_at
+                  ? new Date(user.created_at).toLocaleDateString("en-IN", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "N/A"}
               </p>
             </div>
           </CardContent>
@@ -135,64 +127,26 @@ export function UserProfile() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={handleEditProfile}
-            >
-              <Pencil className="w-4 h-4 mr-2" />
-              Edit Profile
-            </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full justify-start"
               onClick={handleChangePassword}
             >
               <Lock className="w-4 h-4 mr-2" />
               Change Password
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full justify-start"
-              onClick={handleNotificationSettings}
+              onClick={() => router.push("/orders")}
             >
-              <Bell className="w-4 h-4 mr-2" />
-              Notification Settings
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={handlePrivacySettings}
-            >
-              <ShieldCheck className="w-4 h-4 mr-2" />
-              Privacy Settings
+              <ShoppingBag className="w-4 h-4 mr-2" />
+              View Orders
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Stats */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-2xl font-bold text-luxe-blue">0</p>
-              <p className="text-sm text-muted-foreground">Orders</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-luxe-blue">0</p>
-              <p className="text-sm text-muted-foreground">Favorites</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-luxe-blue">0</p>
-              <p className="text-sm text-muted-foreground">Reviews</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
