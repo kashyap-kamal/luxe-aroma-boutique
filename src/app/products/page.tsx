@@ -3,13 +3,14 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { fetchProducts } from "@/lib/product-service";
+import { Product } from "@/stores/cart-store";
 import {
-  filterProducts,
-  getProductCategories,
-  getMaxPrice,
+  products as staticProducts,
+  getProductCategories as getStaticCategories,
+  getMaxPrice as getStaticMaxPrice,
   sortProducts,
   SortOption,
-  products as allProducts,
 } from "@/lib/mock-data";
 import ProductGrid from "@/components/product-grid";
 import ProductFilter from "@/components/product-filter";
@@ -23,18 +24,39 @@ const ProductsContent = () => {
   const pathname = usePathname();
   const initialCategory = searchParams.get("category") || "";
 
-  const categories = getProductCategories();
-  const maxPrice = getMaxPrice();
+  const [allProducts, setAllProducts] = useState<Product[]>(staticProducts);
+  const [categories, setCategories] = useState<string[]>(getStaticCategories());
+  const [maxPrice, setMaxPrice] = useState(getStaticMaxPrice());
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
   const [sortBy, setSortBy] = useState<SortOption>("default");
-  const [filteredProducts, setFilteredProducts] = useState(allProducts);
+  const [filteredProducts, setFilteredProducts] = useState(staticProducts);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  // Fetch products from Supabase on mount (shows latest catalog in real-time)
+  useEffect(() => {
+    fetchProducts().then((products) => {
+      if (products.length > 0) {
+        setAllProducts(products);
+        const cats = [...new Set(products.map((p) => p.category))];
+        setCategories(cats);
+        const max = Math.max(...products.map((p) => p.price.current));
+        setMaxPrice(max);
+        setPriceRange((prev) => [prev[0], max]);
+      }
+    });
+  }, []);
 
   // Update filtered products when filters change
   useEffect(() => {
-    const filtered = filterProducts(selectedCategory, priceRange);
+    let filtered = allProducts;
+    if (selectedCategory) {
+      filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+    filtered = filtered.filter(
+      (p) => p.price.current >= priceRange[0] && p.price.current <= priceRange[1]
+    );
     const sorted = sortProducts(filtered, sortBy);
     setFilteredProducts(sorted);
 
@@ -51,7 +73,7 @@ const ProductsContent = () => {
       params.delete("sort");
     }
     replace(`${pathname}?${params.toString()}`);
-  }, [selectedCategory, priceRange, sortBy, searchParams, replace, pathname]);
+  }, [selectedCategory, priceRange, sortBy, allProducts, replace, pathname]);
 
   // Reset filters
   const handleReset = () => {

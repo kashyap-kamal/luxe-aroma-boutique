@@ -170,12 +170,11 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({
                 country: paymentStatus.shipping_address?.country || "India",
               },
               items: [], // Items not available from payment status
-              // Cashfree ALWAYS returns order_amount in paise, so always convert to rupees
-              // Divide by 100 to convert paise to rupees (e.g., 39900 paise = ₹399)
-              subtotal: paymentStatus.order_amount / 100,
+              // Cashfree returns order_amount in rupees (not paise)
+              subtotal: paymentStatus.order_amount,
               tax: 0,
               shipping: 0,
-              total: paymentStatus.order_amount / 100,
+              total: paymentStatus.order_amount,
               paymentMethod:
                 paymentStatus.payment_details?.payment_method || "online",
               paymentStatus: PaymentStatus.SUCCESS,

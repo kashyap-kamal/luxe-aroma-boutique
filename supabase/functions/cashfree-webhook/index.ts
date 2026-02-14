@@ -98,15 +98,27 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get Cashfree webhook secret for signature verification
-    // Priority: CASHFREE_WEBHOOK_SECRET (if set) > CASHFREE_SECRET_KEY (fallback)
-    // Cashfree uses HMAC-SHA256 with the secret key to sign webhooks
-    const WEBHOOK_SECRET = Deno.env.get("CASHFREE_WEBHOOK_SECRET") || 
-                           Deno.env.get("CASHFREE_SECRET_KEY") || 
-                           "";
+    // Cashfree signs webhooks using the Client Secret (from API Keys in dashboard)
+    // Note: Use the secret from the OLDEST active key pair if multiple exist
+    const webhookSecret = (Deno.env.get("CASHFREE_WEBHOOK_SECRET") || "").trim();
+    const clientSecret = (Deno.env.get("CASHFREE_SECRET_KEY") || "").trim();
+
+    // Collect available secrets to try (primary first, then fallback)
+    const secretsToTry: { name: string; value: string }[] = [];
+    if (webhookSecret) secretsToTry.push({ name: "CASHFREE_WEBHOOK_SECRET", value: webhookSecret });
+    if (clientSecret && clientSecret !== webhookSecret) secretsToTry.push({ name: "CASHFREE_SECRET_KEY", value: clientSecret });
+
+    console.log("Webhook secret config:", {
+      CASHFREE_WEBHOOK_SECRET_set: !!webhookSecret,
+      CASHFREE_WEBHOOK_SECRET_len: webhookSecret.length,
+      CASHFREE_SECRET_KEY_set: !!clientSecret,
+      CASHFREE_SECRET_KEY_len: clientSecret.length,
+      secrets_to_try: secretsToTry.length,
+    });
 
     // CRITICAL: Verify webhook secret is configured
-    if (!WEBHOOK_SECRET) {
-      console.error("Webhook secret not configured - rejecting request");
+    if (secretsToTry.length === 0) {
+      console.error("No webhook secret configured - set CASHFREE_WEBHOOK_SECRET or CASHFREE_SECRET_KEY");
       return new Response(
         JSON.stringify({ error: "Webhook secret not configured" }),
         {
@@ -117,14 +129,9 @@ serve(async (req) => {
     }
 
     // Get webhook signature and timestamp from headers
-    // Cashfree sends these headers:
-    // - x-webhook-signature: HMAC-SHA256 signature (base64 encoded)
-    // - x-webhook-timestamp: Unix timestamp of the webhook event
     const signature = req.headers.get("x-webhook-signature");
     const timestamp = req.headers.get("x-webhook-timestamp");
 
-    // CRITICAL: Always verify signature BEFORE processing
-    // This ensures the webhook is actually from Cashfree and hasn't been tampered with
     if (!signature || !timestamp) {
       console.error("Webhook signature or timestamp missing - rejecting request");
       return new Response(
@@ -137,20 +144,29 @@ serve(async (req) => {
     }
 
     // Get raw payload text BEFORE parsing (required for signature verification)
-    // The signature is calculated on the raw body, so we must verify before parsing
     const payloadText = await req.text();
 
-    // Verify webhook signature BEFORE any processing
-    // This is a security requirement - never process webhooks without verification
-    const isValid = await verifyWebhookSignature(
-      payloadText,
-      timestamp,
-      signature,
-      WEBHOOK_SECRET
-    );
+    // Try verifying with each available secret (handles cases where
+    // CASHFREE_WEBHOOK_SECRET is stale but CASHFREE_SECRET_KEY is correct)
+    let isValid = false;
+    let usedSecret = "";
+    for (const secret of secretsToTry) {
+      const valid = await verifyWebhookSignature(
+        payloadText,
+        timestamp,
+        signature,
+        secret.value
+      );
+      if (valid) {
+        isValid = true;
+        usedSecret = secret.name;
+        break;
+      }
+      console.warn(`Signature verification failed with ${secret.name} (len=${secret.value.length})`);
+    }
 
     if (!isValid) {
-      console.error("Invalid webhook signature - rejecting request");
+      console.error("Invalid webhook signature - none of the configured secrets matched");
       return new Response(
         JSON.stringify({ error: "Invalid webhook signature" }),
         {
@@ -160,7 +176,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Webhook signature verified successfully - processing webhook");
+    console.log(`Webhook signature verified successfully using ${usedSecret}`);
 
     // Now parse the payload after signature verification
     let webhookData: any;
@@ -177,29 +193,45 @@ serve(async (req) => {
       );
     }
 
+    // Cashfree v2023-08-01 webhook format nests data under "data" key
+    // Support both new nested format and legacy flat format
+    const eventType = webhookData.type; // e.g. "PAYMENT_SUCCESS_WEBHOOK"
+    const nestedData = webhookData.data;
+
+    // Extract fields from nested v2023-08-01 format, falling back to legacy flat format
+    const order_id = nestedData?.order?.order_id || webhookData.order_id;
+    const order_amount = nestedData?.order?.order_amount || webhookData.order_amount;
+    const order_currency = nestedData?.order?.order_currency || webhookData.order_currency;
+    const payment_details = nestedData?.payment || webhookData.payment_details;
+    const customer_details = nestedData?.customer_details || webhookData.customer_details;
+    const shipping_address = webhookData.shipping_address;
+    const billing_address = webhookData.billing_address;
+
+    // Derive order_status from webhook type or payment status
+    // v2023-08-01 format uses event type to indicate status
+    let order_status: string;
+    if (nestedData?.payment?.payment_status === "SUCCESS" || eventType === "PAYMENT_SUCCESS_WEBHOOK") {
+      order_status = "PAID";
+    } else if (eventType === "PAYMENT_FAILED_WEBHOOK" || nestedData?.payment?.payment_status === "FAILED") {
+      order_status = "CANCELLED";
+    } else if (eventType === "PAYMENT_USER_DROPPED_WEBHOOK") {
+      order_status = "CANCELLED";
+    } else {
+      // Fallback to legacy flat format field
+      order_status = webhookData.order_status || "UNKNOWN";
+    }
+
     console.log("Cashfree webhook received:", {
-      order_id: webhookData.order_id,
-      order_status: webhookData.order_status,
-      event_type: webhookData.type || webhookData.event_type,
+      order_id,
+      order_status,
+      event_type: eventType,
+      payment_status: nestedData?.payment?.payment_status,
     });
 
-    // Extract order and payment information
-    const {
-      order_id,
-      order_amount,
-      order_currency,
-      order_status,
-      payment_details,
-      customer_details,
-      shipping_address,
-      billing_address,
-      type, // Event type (e.g., "PAYMENT_SUCCESS_WEBHOOK")
-    } = webhookData;
-
     // Validate required fields
-    if (!order_id || !order_status) {
+    if (!order_id) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: order_id or order_status" }),
+        JSON.stringify({ error: "Missing required field: order_id" }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -212,7 +244,7 @@ serve(async (req) => {
       .from("webhooks")
       .insert({
         order_id,
-        event_type: type || order_status,
+        event_type: eventType || order_status,
         payload: webhookData,
         processed: false,
       });
@@ -244,7 +276,7 @@ serve(async (req) => {
           .update({
             order_status: "PAID",
             payment_status: "SUCCESS",
-            payment_method: payment_details?.payment_method || payment_details?.payment_method_type,
+            payment_method: payment_details?.payment_group || payment_details?.payment_method || payment_details?.payment_method_type,
             payment_details: payment_details || {},
             shipping_address: shipping_address || {},
             billing_address: billing_address || {},
@@ -519,7 +551,7 @@ serve(async (req) => {
           .from("webhooks")
           .update({ processed: true })
           .eq("order_id", order_id)
-          .eq("event_type", type || order_status);
+          .eq("event_type", eventType || order_status);
 
         // TODO: Add additional logic here:
         // - Update inventory
@@ -589,7 +621,7 @@ serve(async (req) => {
       .from("webhooks")
       .update({ processed: true })
       .eq("order_id", order_id)
-      .eq("event_type", type || order_status);
+      .eq("event_type", eventType || order_status);
 
     // Return success response to Cashfree
     // Cashfree expects 200 status code to acknowledge webhook receipt

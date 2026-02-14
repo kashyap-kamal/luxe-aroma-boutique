@@ -40,4 +40,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-dummy-db/
+# image optimization backups
+.image-backups/
+
+# deploy archives
+aromeluxe_deploy*.zip
+aromeluxe_deploy*.tar.gz
+aromeluxe-deploy-*.tar.gz
+aromeluxe_src*.zip
+
+# supabase temp
+supabase/.temp/

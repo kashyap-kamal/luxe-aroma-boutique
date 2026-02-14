@@ -95,6 +95,14 @@ serve(async (req) => {
       );
     }
 
+    // Normalize phone number: Shiprocket expects 10-digit Indian mobile number
+    // Strip +91, 91, 0 prefixes
+    let normalizedPhone = request.phone.replace(/\s+/g, "");
+    if (normalizedPhone.startsWith("+91")) normalizedPhone = normalizedPhone.slice(3);
+    else if (normalizedPhone.startsWith("91") && normalizedPhone.length > 10) normalizedPhone = normalizedPhone.slice(2);
+    else if (normalizedPhone.startsWith("0")) normalizedPhone = normalizedPhone.slice(1);
+    request.phone = normalizedPhone;
+
     // Validate total_amount
     if (!request.total_amount || isNaN(Number(request.total_amount)) || Number(request.total_amount) <= 0) {
       return new Response(
@@ -126,7 +134,7 @@ serve(async (req) => {
     const orderPayload = {
       order_id: request.order_id,
       order_date: new Date().toISOString().split("T")[0], // YYYY-MM-DD format
-      pickup_location: "Primary", // Default pickup location name in Shiprocket
+      pickup_location: Deno.env.get("SHIPROCKET_PICKUP_LOCATION") || "Home",
       billing_customer_name: request.name.split(" ")[0] || request.name,
       billing_last_name: request.name.split(" ").slice(1).join(" ") || "",
       billing_address: request.address,
@@ -165,13 +173,15 @@ serve(async (req) => {
     }
 
     const createData = await createResponse.json();
-    console.log("Shiprocket order created:", JSON.stringify(createData));
+    console.log("Shiprocket order response:", JSON.stringify(createData));
 
-    const shiprocketOrderId = createData.order_id;
+    // Shiprocket returns order_id at top level or inside nested response
+    const shiprocketOrderId = createData.order_id || createData.id;
     const shipmentId = createData.shipment_id;
 
     if (!shiprocketOrderId) {
-      throw new Error("Shiprocket did not return an order_id");
+      console.error("Shiprocket response missing order_id. Full response:", JSON.stringify(createData));
+      throw new Error(`Shiprocket did not return an order_id. Response: ${JSON.stringify(createData).substring(0, 200)}`);
     }
 
     // Step 2: Auto-assign courier using Shiprocket's recommendation

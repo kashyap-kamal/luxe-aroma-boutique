@@ -13,7 +13,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 })
 
-// Database types (you can generate these from your Supabase dashboard)
+// Database types
 export interface Database {
   public: {
     Tables: {
@@ -23,6 +23,7 @@ export interface Database {
           email: string
           full_name: string | null
           avatar_url: string | null
+          role: 'customer' | 'admin'
           created_at: string
           updated_at: string
         }
@@ -31,6 +32,7 @@ export interface Database {
           email: string
           full_name?: string | null
           avatar_url?: string | null
+          role?: 'customer' | 'admin'
           created_at?: string
           updated_at?: string
         }
@@ -39,8 +41,74 @@ export interface Database {
           email?: string
           full_name?: string | null
           avatar_url?: string | null
+          role?: 'customer' | 'admin'
           created_at?: string
           updated_at?: string
+        }
+      }
+      products: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          description: string | null
+          short_description: string | null
+          price_original: number
+          price_current: number
+          currency: string
+          on_sale: boolean
+          category: 'men' | 'women' | 'unisex'
+          tags: string[]
+          size: string
+          fragrance_notes: { top: string[]; middle: string[]; base: string[] }
+          image_url: string | null
+          image_urls: string[]
+          status: 'in_stock' | 'out_of_stock' | 'discontinued'
+          featured: boolean
+          display_order: number
+          rating_stars: number
+          rating_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          description?: string | null
+          short_description?: string | null
+          price_original: number
+          price_current: number
+          currency?: string
+          on_sale?: boolean
+          category: 'men' | 'women' | 'unisex'
+          tags?: string[]
+          size?: string
+          fragrance_notes?: { top: string[]; middle: string[]; base: string[] }
+          image_url?: string | null
+          image_urls?: string[]
+          status?: 'in_stock' | 'out_of_stock' | 'discontinued'
+          featured?: boolean
+          display_order?: number
+        }
+        Update: {
+          name?: string
+          slug?: string
+          description?: string | null
+          short_description?: string | null
+          price_original?: number
+          price_current?: number
+          currency?: string
+          on_sale?: boolean
+          category?: 'men' | 'women' | 'unisex'
+          tags?: string[]
+          size?: string
+          fragrance_notes?: { top: string[]; middle: string[]; base: string[] }
+          image_url?: string | null
+          image_urls?: string[]
+          status?: 'in_stock' | 'out_of_stock' | 'discontinued'
+          featured?: boolean
+          display_order?: number
         }
       }
       contact_messages: {
@@ -77,7 +145,21 @@ export interface Database {
       }
     }
     Views: {
-      [_ in never]: never
+      product_statistics: {
+        Row: {
+          total_products: number
+          in_stock_count: number
+          out_of_stock_count: number
+          on_sale_count: number
+          featured_count: number
+          men_count: number
+          women_count: number
+          unisex_count: number
+          average_price: number
+          min_price: number
+          max_price: number
+        }
+      }
     }
     Functions: {
       [_ in never]: never

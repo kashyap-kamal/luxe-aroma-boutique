@@ -4,18 +4,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Aromé Luxe is a premium e-commerce perfume boutique. The frontend is a Next.js 15 static site deployed to Hostinger. The backend uses Supabase (PostgreSQL + Deno Edge Functions) for auth, orders, payments, and shipping.
+Arome Luxe is a premium e-commerce perfume boutique. The frontend is a Next.js 15 static site deployed to Hostinger. The backend uses Supabase (PostgreSQL + Deno Edge Functions) for auth, orders, payments, and shipping.
 
 ## Commands
 
 ```bash
-npm run dev          # Dev server with Turbopack
-npm run build        # Static production build (output: "export")
-npm run lint         # ESLint
-npm run deploy       # Deploy to Hostinger via scripts/deploy.sh
+npm run dev              # Dev server with Turbopack
+npm run build            # Static production build (output: "export")
+npm run lint             # ESLint
+npm run deploy           # Build + create deploy archive via scripts/deploy.sh
+npm run optimize-images  # Optimize images in public/assets/ (tinify-style, visually lossless)
+npm run optimize-images:dry  # Preview optimization savings without modifying files
 ```
 
 No test framework is configured.
+
+### Image Optimization
+
+`scripts/optimize-images.mjs` uses sharp to compress images. Originals are backed up to `.image-backups/`.
+
+```bash
+node scripts/optimize-images.mjs                  # default: visually-lossless
+node scripts/optimize-images.mjs --lossless        # strictly lossless
+node scripts/optimize-images.mjs --webp            # also generate .webp copies
+node scripts/optimize-images.mjs --max-width 800   # resize images wider than 800px
+node scripts/optimize-images.mjs --dry-run         # preview only
+```
+
+### Deployment to Hostinger
+
+This is a static export site. Deployment flow:
+
+1. `npm run optimize-images` — compress images (run once, or after adding new images)
+2. `npm run build` — generates static files in `out/`
+3. Create archive: `cd out && zip -r ../aromeluxe_deploy.zip .`
+4. Upload `aromeluxe_deploy.zip` to Hostinger via hPanel → File Manager → `public_html`
+5. Extract the archive on the server, then delete the zip
+6. Verify at https://aromeluxe.in
+
+The `.htaccess` file (in project root and copied to `out/` during build) handles compression, security headers, caching, and SPA routing on Hostinger.
+
+**Hostinger MCP note:** The `deployStaticWebsite` and `deployJsApplication` MCP tools currently return 400 on pre-upload. Use manual hPanel upload or FTP until resolved.
 
 ## Architecture
 
@@ -69,3 +98,11 @@ Migrations in `supabase/migrations/`. Key tables: `profiles`, `orders`, `order_e
 - `SHIPROCKET_EMAIL`, `SHIPROCKET_PASSWORD` — Shiprocket API auth
 - `CASHFREE_WEBHOOK_SECRET` — Webhook signature verification
 - Seller details: `SELLER_NAME`, `SELLER_ADDRESS`, `SELLER_CITY`, `SELLER_STATE`, `SELLER_PINCODE`, `SELLER_PHONE`
+
+## Hostinger Hosting
+
+- **Domain**: `aromeluxe.in` (main), `aromeluxe.shop` (addon)
+- **Username**: `u677900242`
+- **Root**: `/home/u677900242/domains/aromeluxe.in/public_html`
+- **Plan**: Hostinger Premium
+- **SMTP**: `smtp.hostinger.com:465`, sender `noreply@aromeluxe.in`

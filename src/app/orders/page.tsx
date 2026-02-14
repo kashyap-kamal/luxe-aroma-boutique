@@ -24,7 +24,11 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
+  Truck,
+  MapPin,
+  ExternalLink,
 } from "lucide-react";
+import OrderTracker from "@/components/order-tracker";
 
 interface Order {
   id: string;
@@ -58,6 +62,10 @@ interface Order {
     pincode?: string;
     country?: string;
   } | null;
+  shiprocket_status: string | null;
+  shiprocket_awb: string | null;
+  shiprocket_courier_name: string | null;
+  shiprocket_order_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -68,6 +76,7 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [trackingOrderId, setTrackingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -86,6 +95,7 @@ const OrdersPage = () => {
           .from("orders")
           .select("*")
           .eq("customer_email", user.email)
+          .in("order_status", ["PAID", "SHIPPED", "DELIVERED"])
           .order("created_at", { ascending: false });
 
         if (fetchError) {
@@ -132,6 +142,32 @@ const OrdersPage = () => {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
         {status}
+      </span>
+    );
+  };
+
+  const getShippingBadge = (order: Order) => {
+    const status = order.shiprocket_status;
+    if (!status || status === "pending") return null;
+
+    const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+      created: { label: "Order Created", color: "bg-blue-100 text-blue-800", icon: <Package className="h-3 w-3" /> },
+      pickup_scheduled: { label: "Pickup Scheduled", color: "bg-blue-100 text-blue-800", icon: <Package className="h-3 w-3" /> },
+      picked_up: { label: "Picked Up", color: "bg-indigo-100 text-indigo-800", icon: <Truck className="h-3 w-3" /> },
+      dispatched: { label: "Dispatched", color: "bg-orange-100 text-orange-800", icon: <Truck className="h-3 w-3" /> },
+      in_transit: { label: "In Transit", color: "bg-orange-100 text-orange-800", icon: <Truck className="h-3 w-3" /> },
+      out_for_delivery: { label: "Out for Delivery", color: "bg-purple-100 text-purple-800", icon: <MapPin className="h-3 w-3" /> },
+      delivered: { label: "Delivered", color: "bg-green-100 text-green-800", icon: <CheckCircle2 className="h-3 w-3" /> },
+      failed: { label: "Shipment Failed", color: "bg-red-100 text-red-800", icon: <XCircle className="h-3 w-3" /> },
+      rto: { label: "Returned", color: "bg-red-100 text-red-800", icon: <XCircle className="h-3 w-3" /> },
+    };
+
+    const config = statusConfig[status] || { label: status, color: "bg-gray-100 text-gray-800", icon: <Package className="h-3 w-3" /> };
+
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+        {config.icon}
+        {config.label}
       </span>
     );
   };
@@ -219,12 +255,13 @@ const OrdersPage = () => {
                   <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 flex-wrap">
                           Order #{order.cashfree_order_id}
                           {getStatusBadge(
                             order.order_status,
                             order.payment_status
                           )}
+                          {getShippingBadge(order)}
                         </CardTitle>
                         <CardDescription className="flex items-center gap-2 mt-2">
                           <Calendar className="h-4 w-4" />
@@ -303,8 +340,48 @@ const OrdersPage = () => {
                       </div>
                     </div>
 
+                    {/* Shipping & Tracking */}
+                    {order.shiprocket_status && order.shiprocket_status !== "pending" && order.shiprocket_status !== "failed" && (
+                      <>
+                        <Separator className="my-4" />
+                        <div className="space-y-3">
+                          <h3 className="font-medium flex items-center gap-2">
+                            <Truck className="h-4 w-4" />
+                            Shipping Details
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            {order.shiprocket_courier_name && (
+                              <div>
+                                <p className="font-medium mb-1">Courier</p>
+                                <p className="text-gray-600">{order.shiprocket_courier_name}</p>
+                              </div>
+                            )}
+                            {order.shiprocket_awb && (
+                              <div>
+                                <p className="font-medium mb-1">AWB / Tracking Number</p>
+                                <p className="text-gray-600 font-mono">{order.shiprocket_awb}</p>
+                              </div>
+                            )}
+                            {order.shiprocket_order_id && (
+                              <div>
+                                <p className="font-medium mb-1">Shiprocket Order</p>
+                                <p className="text-gray-600">#{order.shiprocket_order_id}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Inline tracking */}
+                          {order.shiprocket_awb && trackingOrderId === order.id && (
+                            <div className="mt-3 p-4 bg-gray-50 rounded-lg">
+                              <OrderTracker initialWaybill={order.shiprocket_awb} />
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+
                     {/* Action Buttons */}
-                    <div className="mt-6">
+                    <div className="mt-6 flex flex-wrap gap-3">
                       <Button
                         variant="outline"
                         onClick={() =>
@@ -312,10 +389,39 @@ const OrdersPage = () => {
                             `/order-success?order_id=${order.cashfree_order_id}`
                           )
                         }
-                        className="w-full sm:w-auto"
+                        className="sm:w-auto"
                       >
                         View Details
                       </Button>
+                      {order.shiprocket_awb && (
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            setTrackingOrderId(
+                              trackingOrderId === order.id ? null : order.id
+                            )
+                          }
+                          className="sm:w-auto flex items-center gap-2"
+                        >
+                          <MapPin className="h-4 w-4" />
+                          {trackingOrderId === order.id ? "Hide Tracking" : "Track Order"}
+                        </Button>
+                      )}
+                      {order.shiprocket_awb && (
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            window.open(
+                              `https://www.shiprocket.in/shipment-tracking/${order.shiprocket_awb}`,
+                              "_blank"
+                            )
+                          }
+                          className="sm:w-auto flex items-center gap-2 text-sm"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Track on Shiprocket
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

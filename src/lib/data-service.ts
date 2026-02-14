@@ -1,5 +1,6 @@
 import { cache } from 'react';
-import { products } from './mock-data';
+import { products as staticProducts } from './mock-data';
+import { fetchProducts as fetchProductsFromDb, fetchFeaturedProducts as fetchFeaturedFromDb, fetchProductById as fetchProductByIdFromDb } from './product-service';
 import { Product } from '@/stores/cart-store';
 
 // Re-export Product type for convenience
@@ -38,43 +39,67 @@ const cacheStore = new Map<string, { data: unknown; timestamp: number }>();
 function getCachedData<T>(key: string, fetcher: () => T, ttl: number): T {
   const cached = cacheStore.get(key);
   const now = Date.now();
-  
+
   if (cached && (now - cached.timestamp) < ttl * 1000) {
     return cached.data as T;
   }
-  
+
   const data = fetcher();
   cacheStore.set(key, { data, timestamp: now });
   return data;
 }
 
+// Fetch products from Supabase with static fallback
+async function resolveProducts(): Promise<Product[]> {
+  try {
+    const dbProducts = await fetchProductsFromDb();
+    if (dbProducts.length > 0) return dbProducts;
+  } catch {
+    // Supabase unavailable — use static catalog
+  }
+  return staticProducts;
+}
+
 // Data fetching functions with caching
+// Used at build time by server components (home page, generateStaticParams)
 export const getProducts = cache(async (): Promise<Product[]> => {
-  return getCachedData('products', () => products, CACHE_DURATION.PRODUCTS);
+  return resolveProducts();
 });
 
 export const getProductById = cache(async (id: string): Promise<Product | null> => {
-  const allProducts = await getProducts();
+  try {
+    const product = await fetchProductByIdFromDb(id);
+    if (product) return product;
+  } catch {
+    // Fall back to static
+  }
+  const allProducts = staticProducts;
   return allProducts.find(product => product.id === id) || null;
 });
 
 export const getProductsByCategory = cache(async (category: string): Promise<Product[]> => {
   const allProducts = await getProducts();
-  return allProducts.filter(product => 
+  return allProducts.filter(product =>
     product.category.toLowerCase().includes(category.toLowerCase())
   );
 });
 
 export const getFeaturedProducts = cache(async (limit: number = 4): Promise<Product[]> => {
+  try {
+    const featured = await fetchFeaturedFromDb(limit);
+    if (featured.length > 0) return featured;
+  } catch {
+    // Fall back to static
+  }
   const allProducts = await getProducts();
   return allProducts.slice(0, limit);
 });
 
 export const getCategories = cache(async (): Promise<Category[]> => {
   return getCachedData('categories', () => {
-    const allProducts = products;
+    const allProducts = staticProducts;
     const categoryMap = new Map<string, Category>();
-    
+
     allProducts.forEach(product => {
       const categoryName = product.category;
       if (!categoryMap.has(categoryName)) {
@@ -87,11 +112,11 @@ export const getCategories = cache(async (): Promise<Category[]> => {
           productCount: 0,
         });
       }
-      
+
       const category = categoryMap.get(categoryName)!;
       category.productCount++;
     });
-    
+
     return Array.from(categoryMap.values());
   }, CACHE_DURATION.CATEGORIES);
 });
@@ -103,8 +128,8 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
       name: "Priya Sharma",
       location: "Mumbai, Maharashtra",
       rating: 5,
-      comment: "Absolutely love the Aventus fragrance! The quality is exceptional and the scent lasts all day. Aromé Luxe has become my go-to for premium perfumes.",
-      image: "👩‍💼",
+      comment: "Absolutely love the Aventus fragrance! The quality is exceptional and the scent lasts all day. Arome Luxe has become my go-to for premium perfumes.",
+      image: "\u{1F469}\u200D\u{1F4BC}",
       verified: true,
     },
     {
@@ -113,7 +138,7 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
       location: "Delhi, NCR",
       rating: 5,
       comment: "The Cool Water perfume exceeded my expectations. Great value for money and the packaging was beautiful. Will definitely order again!",
-      image: "👨‍💼",
+      image: "\u{1F468}\u200D\u{1F4BC}",
       verified: true,
     },
     {
@@ -121,8 +146,8 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
       name: "Anita Patel",
       location: "Bangalore, Karnataka",
       rating: 5,
-      comment: "Fast delivery and amazing customer service. The Hawas fragrance is perfect for special occasions. Highly recommend Aromé Luxe!",
-      image: "👩‍🎨",
+      comment: "Fast delivery and amazing customer service. The Hawas fragrance is perfect for special occasions. Highly recommend Arome Luxe!",
+      image: "\u{1F469}\u200D\u{1F3A8}",
       verified: true,
     },
     {
@@ -131,7 +156,7 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
       location: "Hyderabad, Telangana",
       rating: 5,
       comment: "Excellent collection and competitive prices. The customer support team was very helpful in choosing the right fragrance.",
-      image: "👨‍💼",
+      image: "\u{1F468}\u200D\u{1F4BC}",
       verified: true,
     },
     {
@@ -140,7 +165,7 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
       location: "Pune, Maharashtra",
       rating: 5,
       comment: "Love the packaging and the fragrance quality. Fast shipping and great customer service. Will definitely shop again!",
-      image: "👩‍💼",
+      image: "\u{1F469}\u200D\u{1F4BC}",
       verified: true,
     },
   ], CACHE_DURATION.TESTIMONIALS);
@@ -150,7 +175,7 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
 export const searchProducts = cache(async (query: string): Promise<Product[]> => {
   const allProducts = await getProducts();
   const searchTerm = query.toLowerCase();
-  
+
   return allProducts.filter(product =>
     product.name.toLowerCase().includes(searchTerm) ||
     product.description?.toLowerCase().includes(searchTerm) ||
@@ -162,7 +187,7 @@ export const searchProducts = cache(async (query: string): Promise<Product[]> =>
 // Analytics and insights
 export const getProductInsights = cache(async () => {
   const allProducts = await getProducts();
-  
+
   return {
     totalProducts: allProducts.length,
     averagePrice: allProducts.reduce((sum, product) => sum + product.price.current, 0) / allProducts.length,

@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "deploy": "./scripts/deploy.sh",
-    "deploy:prod": "./scripts/deploy.sh"
+    "optimize-images": "node scripts/optimize-images.mjs",
+    "optimize-images:dry": "node scripts/optimize-images.mjs --dry-run",
+    "deploy:clean": "rm -rf .next out && rm -f aromeluxe-deploy-*.tar.gz aromeluxe-deploy-*.zip aromeluxe_*.zip out_*.zip aromeluxe-deploy.tar.gz && echo '✓ All build artifacts and deploy archives cleaned'"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -79,6 +81,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "sharp": "^0.34.5",
     "supabase": "^2.58.5",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6",
