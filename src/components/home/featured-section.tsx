@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import ProductGrid from "@/components/product-grid";
 import { Product } from "@/stores/cart-store";
 import { useProducts } from "@/hooks/use-products";
@@ -12,57 +13,53 @@ interface FeaturedSectionProps {
 
 export default function FeaturedSection({ products: initialProducts }: FeaturedSectionProps) {
   const { products } = useProducts(initialProducts, { featured: true, limit: 8 });
+
   return (
-    <section className="py-24 bg-white relative">
-      {/* Decorative background element */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-gray-50 -z-10" />
-      
+    <section className="py-20 md:py-24" style={{ background: "#f6f3f2" }}>
       <div className="luxury-container">
-        <div className="flex flex-col md:flex-row justify-between md:items-end gap-3 mb-8 md:mb-12">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-10">
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
-            <span className="text-luxe-gold text-xs sm:text-sm font-bold uppercase tracking-widest mb-1 block">
-              Best Sellers
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-gray-900">
+            <p
+              className="apo-chip inline-block mb-3"
+              style={{ color: "#735c00", background: "rgba(212,175,55,0.15)" }}
+            >
+              Bestsellers
+            </p>
+            <h2
+              className="font-serif font-bold leading-tight"
+              style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", color: "#1c1b1b" }}
+            >
               Featured Fragrances
             </h2>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
             <Link
               href="/products"
-              className="group inline-flex items-center text-sm text-gray-900 hover:text-luxe-gold transition-colors font-medium"
+              className="inline-flex items-center gap-1.5 font-sans text-sm font-medium transition-all duration-200 group"
+              style={{ color: "#735c00" }}
             >
-              View All Collection
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4 ml-1.5 transform transition-transform duration-300 group-hover:translate-x-1"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
-              </svg>
+              View All
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </motion.div>
         </div>
-        
+
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
         >
           <ProductGrid products={products} />
         </motion.div>
@@ -70,4 +67,3 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
     </section>
   );
 }
-

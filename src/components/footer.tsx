@@ -2,138 +2,139 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="pt-12 pb-6 text-black bg-luxe-aliceBlue">
+    <footer className="pt-12 pb-8" style={{ background: "#f6f3f2" }}>
       <div className="luxury-container">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-          {/* Logo and About Column */}
-          <div className="col-span-1">
-            <h3 className="mb-4 text-xl font-black font-poppins text-luxe-blue">
+        {/* Top row: brand + links */}
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-10 mb-10">
+          {/* Brand */}
+          <div className="max-w-xs">
+            <h3
+              className="font-serif font-bold mb-2"
+              style={{ fontSize: "1.15rem", color: "#1c1b1b" }}
+            >
               Aromé Luxe
             </h3>
-            <p className="mb-4 text-sm">
-              Experience the epitome of luxury fragrances, crafted with
-              precision and passion to elevate your presence.
+            <p
+              className="font-sans leading-relaxed"
+              style={{ fontSize: "0.82rem", color: "#7f7663" }}
+            >
+              Premium fragrances, honest prices. Curated for the modern
+              connoisseur who refuses to compromise.
             </p>
           </div>
 
-          {/* Shop Column */}
-          <div className="col-span-1">
-            <h4 className="mb-4 text-lg font-medium text-luxe-blue">Shop</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/products"
-                  className="text-black transition-colors hover:text-luxe-sandy"
-                >
-                  All Perfumes
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/products?category=men"
-                  className="text-black transition-colors hover:text-luxe-sandy"
-                >
-                  Men&apos;s Collection
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/products?category=women"
-                  className="text-black transition-colors hover:text-luxe-sandy"
-                >
-                  Women&apos;s Collection
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/products?category=unisex"
-                  className="text-black transition-colors hover:text-luxe-sandy"
-                >
-                  Unisex Collection
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Link groups */}
+          <div className="flex flex-wrap gap-10">
+            <div>
+              <p
+                className="font-sans font-semibold mb-3 uppercase tracking-[0.08em]"
+                style={{ fontSize: "0.7rem", color: "#1c1b1b" }}
+              >
+                Shop
+              </p>
+              <ul className="space-y-2">
+                {[
+                  { href: "/products", label: "All Perfumes" },
+                  { href: "/products?category=men", label: "Men" },
+                  { href: "/products?category=women", label: "Women" },
+                  { href: "/products?category=unisex", label: "Unisex" },
+                ].map((l) => (
+                  <li key={l.href}>
+                    <Link
+                      href={l.href}
+                      className="font-sans transition-colors duration-150"
+                      style={{ fontSize: "0.85rem", color: "#7f7663" }}
+                    >
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Company Column */}
-          <div className="col-span-1">
-            <h4 className="mb-4 text-lg font-medium text-luxe-blue">Company</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/about"
-                  className="text-black transition-colors hover:text-luxe-sandy"
-                >
-                  About Us
-                </Link>
-              </li>
+            <div>
+              <p
+                className="font-sans font-semibold mb-3 uppercase tracking-[0.08em]"
+                style={{ fontSize: "0.7rem", color: "#1c1b1b" }}
+              >
+                Information
+              </p>
+              <ul className="space-y-2">
+                {[
+                  { href: "/shipping-delivery", label: "Shipping" },
+                  { href: "/cancellation-refund", label: "Returns" },
+                  { href: "/privacy-policy", label: "Privacy" },
+                  { href: "/about", label: "Provenance" },
+                ].map((l) => (
+                  <li key={l.href}>
+                    <Link
+                      href={l.href}
+                      className="font-sans transition-colors duration-150"
+                      style={{ fontSize: "0.85rem", color: "#7f7663" }}
+                    >
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-black transition-colors hover:text-luxe-sandy"
-                >
-                  Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Support Column */}
-          <div className="col-span-1">
-            <h4 className="mb-4 text-lg font-medium text-luxe-blue">Support</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/shipping-delivery"
-                  className="transition-colors hover:text-luxe-sandy"
-                >
-                  Shipping & Delivery
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/cancellation-refund"
-                  className="transition-colors hover:text-luxe-sandy"
-                >
-                  Returns & Refunds
-                </Link>
-              </li>
-            </ul>
+            <div>
+              <p
+                className="font-sans font-semibold mb-3 uppercase tracking-[0.08em]"
+                style={{ fontSize: "0.7rem", color: "#1c1b1b" }}
+              >
+                Contact
+              </p>
+              <ul className="space-y-2">
+                {[
+                  { href: "/contact", label: "Get in Touch" },
+                  { href: "/terms-of-service", label: "Terms" },
+                ].map((l) => (
+                  <li key={l.href}>
+                    <Link
+                      href={l.href}
+                      className="font-sans transition-colors duration-150"
+                      style={{ fontSize: "0.85rem", color: "#7f7663" }}
+                    >
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
-        <hr className="my-8 border-gray-200" />
+        {/* Divider */}
+        <div
+          className="my-6"
+          style={{ height: "1px", background: "#e5e2e1" }}
+        />
 
-        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <p className="text-sm text-gray-600 order-2 md:order-1">
+        {/* Bottom row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <p
+            className="font-sans"
+            style={{ fontSize: "0.78rem", color: "#7f7663" }}
+          >
             &copy; {new Date().getFullYear()} Aromé Luxe. All rights reserved.
           </p>
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 order-1 md:order-2">
-            <Link
-              href="/privacy-policy"
-              className="text-sm text-gray-600 hover:text-luxe-sandy min-h-[44px] flex items-center"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms-of-service"
-              className="text-sm text-gray-600 hover:text-luxe-sandy min-h-[44px] flex items-center"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              href="/shipping-delivery"
-              className="text-sm text-gray-600 hover:text-luxe-sandy min-h-[44px] flex items-center"
-            >
-              Shipping &amp; Delivery
-            </Link>
-            <Link
-              href="/cancellation-refund"
-              className="text-sm text-gray-600 hover:text-luxe-sandy min-h-[44px] flex items-center"
-            >
-              Returns &amp; Refunds
-            </Link>
+          <div className="flex gap-5">
+            {[
+              { href: "/", label: "Home" },
+              { href: "/products", label: "Perfumes" },
+              { href: "/cart", label: "Cart" },
+            ].map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="font-sans font-medium transition-colors duration-150"
+                style={{ fontSize: "0.78rem", color: "#7f7663" }}
+              >
+                {l.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>

@@ -7,6 +7,11 @@ import {
   LayoutDashboard,
   Package,
   Plus,
+  Layers,
+  ImageIcon,
+  ClipboardList,
+  Star,
+  Ticket,
   ArrowLeft,
   LogOut,
 } from 'lucide-react'
@@ -19,6 +24,11 @@ const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/products/new', label: 'Add Product', icon: Plus },
+  { href: '/admin/bundles', label: 'Bundles', icon: Layers },
+  { href: '/admin/banners', label: 'Banners', icon: ImageIcon },
+  { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
+  { href: '/admin/reviews', label: 'Reviews', icon: Star },
+  { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
 ]
 
 export function AdminSidebar() {

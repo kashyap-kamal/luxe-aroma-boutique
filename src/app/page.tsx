@@ -2,22 +2,24 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 import {
   getFeaturedProducts,
-  getCategories,
 } from "@/lib/data-service";
 import { generateHomeMetadata } from "@/lib/metadata";
+import { homepageConfig } from "@/lib/homepage-config";
 
 // Components
 import HeroSection from "@/components/home/hero-section";
 import CollectionsSection from "@/components/home/collections-section";
 import FeaturedSection from "@/components/home/featured-section";
+import ProductSpotlight from "@/components/home/product-spotlight";
 import StorySection from "@/components/home/story-section";
+import BundleSection from "@/components/home/bundle-section";
+import ScentQuizSection from "@/components/home/scent-quiz-section";
 import NewsletterSection from "@/components/home/newsletter-section";
 import WhyChooseUs from "@/components/why-choose-us";
 import Testimonials from "@/components/testimonials";
 import Loading, {
   ProductGridSkeleton,
   TestimonialSkeleton,
-  WhyChooseUsSkeleton,
 } from "@/components/ui/loading";
 
 // Generate metadata for SEO
@@ -26,44 +28,55 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  // Fetch data in parallel
-  const [featuredProducts, categories] = await Promise.all([
-    getFeaturedProducts(8),
-    getCategories(),
-  ]);
+  const featuredProducts = await getFeaturedProducts(8);
 
   return (
-    <main className="flex-grow bg-white overflow-x-hidden">
-      {/* Hero Section - Featured products above the fold */}
-      <HeroSection products={featuredProducts} />
+    <main className="flex-grow overflow-x-hidden" style={{ background: "#f9f9f9" }}>
+      {homepageConfig.showHero && (
+        <HeroSection products={featuredProducts} />
+      )}
 
-      {/* Collections Section - Client Component */}
-      <Suspense
-        fallback={<Loading text="Loading collections..." className="py-16" />}
-      >
-        <CollectionsSection categories={categories} />
-      </Suspense>
-
-      {/* Featured Products Section - Client Component */}
-      <Suspense fallback={<ProductGridSkeleton count={8} />}>
-        <FeaturedSection products={featuredProducts} />
-      </Suspense>
-
-      {/* Why Choose Us Section - Client-side with streaming */}
-      <Suspense fallback={<WhyChooseUsSkeleton />}>
+      {homepageConfig.showWhyChooseUs && (
         <WhyChooseUs />
-      </Suspense>
+      )}
 
-      {/* Story Section - Client Component */}
-      <StorySection />
+      {homepageConfig.showCollections && (
+        <Suspense fallback={<Loading text="Loading collections..." className="py-16" />}>
+          <CollectionsSection />
+        </Suspense>
+      )}
 
-      {/* Testimonials Section - Client-side with streaming */}
-      <Suspense fallback={<TestimonialSkeleton />}>
-        <Testimonials />
-      </Suspense>
+      {homepageConfig.showProductSpotlight && (
+        <ProductSpotlight products={featuredProducts} />
+      )}
 
-      {/* Newsletter Section - Client Component */}
-      <NewsletterSection />
+      {homepageConfig.showFeatured && (
+        <Suspense fallback={<ProductGridSkeleton count={8} />}>
+          <FeaturedSection products={featuredProducts} />
+        </Suspense>
+      )}
+
+      {homepageConfig.showBundles && (
+        <BundleSection />
+      )}
+
+      {homepageConfig.showScentQuiz && (
+        <ScentQuizSection />
+      )}
+
+      {homepageConfig.showStory && (
+        <StorySection />
+      )}
+
+      {homepageConfig.showTestimonials && (
+        <Suspense fallback={<TestimonialSkeleton />}>
+          <Testimonials />
+        </Suspense>
+      )}
+
+      {homepageConfig.showNewsletter && (
+        <NewsletterSection />
+      )}
     </main>
   );
 }

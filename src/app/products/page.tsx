@@ -233,33 +233,37 @@ const ProductsLoading = () => (
 // Main Products component with Suspense boundary
 const Products = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <div className="bg-luxe-cream py-16 md:py-24 relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-luxe-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-luxe-blue/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
-
-        <div className="luxury-container relative z-10 text-center">
+    <div className="min-h-screen flex flex-col" style={{ background: "#fcf9f8" }}>
+      <div className="pt-10 pb-10 md:pt-12 md:pb-12" style={{ background: "#fcf9f8" }}>
+        <div className="luxury-container">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
-            <span className="text-luxe-gold text-sm font-bold uppercase tracking-widest mb-3 block">
+            <p
+              className="apo-chip inline-block mb-3"
+              style={{ color: "#735c00", background: "rgba(212,175,55,0.15)" }}
+            >
               The Collection
-            </span>
-            <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-6">
-              Exquisite Fragrances
+            </p>
+            <h1
+              className="font-serif font-bold leading-tight mb-2"
+              style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", color: "#1c1b1b" }}
+            >
+              All Fragrances
             </h1>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-              Discover our curated selection of premium perfumes, crafted to
-              evoke emotion and capture memories.
+            <p
+              className="font-sans leading-relaxed max-w-lg"
+              style={{ fontSize: "0.95rem", color: "#4d4635" }}
+            >
+              Premium scents for every mood and occasion. Crafted to last.
             </p>
           </motion.div>
         </div>
       </div>
 
-      <main className="flex-grow pt-24 pb-12 md:pt-28 md:pb-16">
+      <main className="flex-grow pb-16" style={{ background: "#fcf9f8" }}>
         <div className="luxury-container">
           <Suspense fallback={<ProductsLoading />}>
             <ProductsContent />

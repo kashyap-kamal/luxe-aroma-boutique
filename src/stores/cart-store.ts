@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { billingCalculator, BillingBreakdown, BillingItem } from "@/lib/billing";
 import { fetchProducts } from "@/lib/product-service";
+import { Bundle } from "@/lib/bundle-service";
 
 export interface Product {
   id: string;
@@ -19,11 +20,15 @@ export interface Product {
   description?: string;
   url?: string;
   tags?: string[];
+  fragrance_notes?: {
+    top: string[];
+    middle: string[];
+    base: string[];
+  };
   rating?: {
     stars: number;
     out_of: number;
   };
-
   status: string;
 }
 
@@ -32,11 +37,20 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface BundleCartItem {
+  bundle: Bundle;
+  quantity: number;
+}
+
 interface CartStore {
   cartItems: CartItem[];
+  bundleItems: BundleCartItem[];
   addToCart: (product: Product, quantity: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  addBundleToCart: (bundle: Bundle, quantity: number) => void;
+  removeBundleFromCart: (bundleId: string) => void;
+  updateBundleQuantity: (bundleId: string, quantity: number) => void;
   clearCart: () => void;
   refreshPrices: () => Promise<boolean>;
   getBillingBreakdown: () => BillingBreakdown;
@@ -48,7 +62,8 @@ const createCartStore: StateCreator<
   [["zustand/persist", unknown], ["zustand/immer", never]]
 > = (set, get) => ({
   cartItems: [],
-  // subtotal: 0,
+  bundleItems: [],
+
   addToCart: (product, quantity) => {
     set((state) => {
       const existingItem = (state.cartItems as CartItem[]).find(
@@ -61,6 +76,7 @@ const createCartStore: StateCreator<
       }
     });
   },
+
   removeFromCart: (productId) => {
     set((state) => {
       const idx = (state.cartItems as CartItem[]).findIndex(
@@ -71,6 +87,7 @@ const createCartStore: StateCreator<
       }
     });
   },
+
   updateQuantity: (productId, quantity) => {
     if (quantity <= 0) {
       get().removeFromCart(productId);
@@ -85,11 +102,53 @@ const createCartStore: StateCreator<
       }
     });
   },
+
+  addBundleToCart: (bundle, quantity) => {
+    set((state) => {
+      const existing = (state.bundleItems as BundleCartItem[]).find(
+        (i) => i.bundle.id === bundle.id,
+      );
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        state.bundleItems.push({ bundle, quantity });
+      }
+    });
+  },
+
+  removeBundleFromCart: (bundleId) => {
+    set((state) => {
+      const idx = (state.bundleItems as BundleCartItem[]).findIndex(
+        (i) => i.bundle.id === bundleId,
+      );
+      if (idx !== -1) {
+        state.bundleItems.splice(idx, 1);
+      }
+    });
+  },
+
+  updateBundleQuantity: (bundleId, quantity) => {
+    if (quantity <= 0) {
+      get().removeBundleFromCart(bundleId);
+      return;
+    }
+    set((state) => {
+      const item = (state.bundleItems as BundleCartItem[]).find(
+        (i) => i.bundle.id === bundleId,
+      );
+      if (item) {
+        item.quantity = quantity;
+      }
+    });
+  },
+
   clearCart: () => {
     set((state) => {
       state.cartItems.length = 0;
+      state.bundleItems.length = 0;
     });
   },
+
   refreshPrices: async () => {
     const { cartItems } = get();
     if (cartItems.length === 0) return false;
@@ -122,28 +181,50 @@ const createCartStore: StateCreator<
       return false;
     }
   },
+
   getBillingBreakdown: () => {
-    const { cartItems } = get();
-    const billingItems = cartItems.map(item => ({
-      id: item.product.id,
-      name: item.product.name,
-      price: item.product.price.current,
-      quantity: item.quantity,
-      category: item.product.category,
-      hsnCode: '3303', // HSN code for perfumes
-    }));
+    const { cartItems, bundleItems } = get();
+    const billingItems: BillingItem[] = [
+      ...cartItems.map((item) => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price.current,
+        quantity: item.quantity,
+        category: item.product.category,
+        hsnCode: "3303",
+      })),
+      ...bundleItems.map((item) => ({
+        id: item.bundle.id,
+        name: item.bundle.name,
+        price: item.bundle.price.current,
+        quantity: item.quantity,
+        category: "bundle",
+        hsnCode: "3303",
+      })),
+    ];
     return billingCalculator.calculateBilling(billingItems);
   },
+
   getBillingItems: () => {
-    const { cartItems } = get();
-    return cartItems.map(item => ({
-      id: item.product.id,
-      name: item.product.name,
-      price: item.product.price.current,
-      quantity: item.quantity,
-      category: item.product.category,
-      hsnCode: '3303', // HSN code for perfumes
-    }));
+    const { cartItems, bundleItems } = get();
+    return [
+      ...cartItems.map((item) => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price.current,
+        quantity: item.quantity,
+        category: item.product.category,
+        hsnCode: "3303",
+      })),
+      ...bundleItems.map((item) => ({
+        id: item.bundle.id,
+        name: item.bundle.name,
+        price: item.bundle.price.current,
+        quantity: item.quantity,
+        category: "bundle",
+        hsnCode: "3303",
+      })),
+    ];
   },
 });
 
@@ -155,13 +236,16 @@ export const useCartStore = create<CartStore>()(
 );
 
 export const useCartSubtotal = () => {
-  const { cartItems } = useCartStore();
+  const { cartItems, bundleItems } = useCartStore();
 
-  // Calculate subtotal using current price
-  const total = cartItems.reduce(
+  const productTotal = cartItems.reduce(
     (sum, item) => sum + item.product.price.current * item.quantity,
     0,
   );
+  const bundleTotal = bundleItems.reduce(
+    (sum, item) => sum + item.bundle.price.current * item.quantity,
+    0,
+  );
 
-  return total;
+  return productTotal + bundleTotal;
 };

@@ -2,148 +2,168 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, Search, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/stores/cart-store";
+import { useUser } from "@/stores/auth-store";
 import { UserMenu } from "@/components/auth/user-menu";
-import Image from "next/image";
 import {
   motion,
   useScroll,
   useMotionValueEvent,
   AnimatePresence,
 } from "framer-motion";
-import { cn } from "@/lib/utils";
+
+const leftLinks = [
+  { href: "/products", label: "SHOP BY MOOD" },
+  { href: "/products?category=men", label: "MEN" },
+  { href: "/products?category=women", label: "WOMEN" },
+];
+
+const rightLinks = [
+  { href: "/products?category=unisex", label: "UNISEX" },
+  { href: "/products?featured=true", label: "BESTSELLERS" },
+];
+
+const allLinks = [
+  { href: "/products", label: "Shop by Mood" },
+  { href: "/products?category=men", label: "Men" },
+  { href: "/products?category=women", label: "Women" },
+  { href: "/products?category=unisex", label: "Unisex" },
+  { href: "/products?featured=true", label: "Bestsellers" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { cartItems } = useCartStore();
+  const { cartItems, bundleItems } = useCartStore();
+  const user = useUser();
   const { scrollY } = useScroll();
 
-  // Handle scroll for sticky behavior
   useMotionValueEvent(scrollY, "change", (latest) => {
-    if (latest > 50) {
-      setIsScrolled(true);
-    } else {
-      setIsScrolled(false);
-    }
+    setIsScrolled(latest > 10);
   });
 
-  const itemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const itemCount =
+    cartItems.reduce((t, i) => t + i.quantity, 0) +
+    bundleItems.reduce((t, i) => t + i.quantity, 0);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/products", label: "Perfumes" },
-    { href: "/about", label: "About" },
-    { href: "/contact", label: "Contact" },
-  ];
-
-  // All pages now have light backgrounds (hero is cream, not dark)
-  // Always use dark (black text) styling; only vary bg opacity on scroll
-  const isAtTop = false;
+  const navLinkClass =
+    "font-sans uppercase tracking-widest transition-all duration-200 whitespace-nowrap";
 
   return (
     <>
-      <motion.header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
-          isScrolled
-            ? "bg-white/95 backdrop-blur-2xl border-b border-gray-200/50 shadow-sm py-3"
-            : "bg-white/60 backdrop-blur-xl py-4"
-        )}
+      {/* Sticky navbar — sits right below the sticky promo banner */}
+      <header
+        className="sticky top-0 z-50 transition-shadow duration-300"
+        style={{
+          background: isScrolled
+            ? "rgba(249, 249, 249, 0.97)"
+            : "rgba(249, 249, 249, 0.93)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          boxShadow: isScrolled ? "0 1px 0 rgba(0,0,0,0.05)" : "none",
+        }}
       >
-        <div className="luxury-container">
-          <div className="flex justify-between items-center">
-            {/* Logo */}
-            <Link href="/" className="flex items-center z-50">
-              <Image
-                src={
-                  isAtTop
-                    ? "/assets/arome-luxe-logo-white.png"
-                    : "/assets/arome-luxe-logo.png"
-                }
-                alt="Aromé Luxe"
-                width={150}
-                height={50}
-                className={cn(
-                  "h-auto max-h-8 md:max-h-10 w-auto object-contain transition-all duration-300",
-                  !isAtTop && "opacity-90"
-                )}
-                priority
-              />
-            </Link>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "relative font-medium text-sm uppercase tracking-wider transition-colors group py-2",
-                    isAtTop
-                      ? "text-white hover:text-luxe-gold"
-                      : "text-gray-900 hover:text-luxe-gold"
-                  )}
-                >
-                  {link.label}
-                  <span
-                    className={cn(
-                      "absolute bottom-0 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full",
-                      isAtTop ? "bg-luxe-gold" : "bg-gray-900"
-                    )}
-                  />
-                </Link>
-              ))}
-            </nav>
-
-            {/* Icons */}
-            <div className="flex items-center space-x-2 md:space-x-4 z-50">
-              <Link href="/cart">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "relative hover:bg-black/5 transition-colors rounded-full",
-                    isAtTop ? "text-white hover:bg-white/10" : "text-gray-900"
-                  )}
-                >
-                  <ShoppingBag className="h-5 w-5" />
-                  {itemCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 bg-luxe-gold text-black text-[10px] h-4 w-4 flex items-center justify-center rounded-full border-none">
-                      {itemCount}
-                    </Badge>
-                  )}
-                </Button>
-              </Link>
-
-              <div className={cn(isAtTop ? "text-white" : "text-gray-900")}>
-                <UserMenu />
-              </div>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "md:hidden hover:bg-black/5 rounded-full",
-                  isAtTop ? "text-white hover:bg-white/10" : "text-gray-900"
-                )}
-                onClick={toggleMenu}
+        {/* Desktop nav: 3-column grid */}
+        <nav className="hidden lg:grid grid-cols-[1fr_auto_1fr] items-center px-8 xl:px-12 py-5 xl:py-6">
+          {/* Left links */}
+          <div className="flex gap-6 xl:gap-8 items-center">
+            {leftLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={`${navLinkClass} hover:text-[#2d3435] pb-0.5 border-b border-transparent hover:border-[#2d3435]`}
+                style={{ fontSize: "11px", color: "#5c5b5b" }}
               >
-                <Menu className="h-6 w-6" />
-              </Button>
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Center logo */}
+          <Link href="/" className="px-6 xl:px-10">
+            <h1
+              className="font-serif font-bold uppercase whitespace-nowrap"
+              style={{
+                fontSize: "clamp(1.3rem, 2vw, 1.75rem)",
+                letterSpacing: "-0.02em",
+                color: "#2D3435",
+              }}
+            >
+              AROMÉ LUXE
+            </h1>
+          </Link>
+
+          {/* Right links + icons */}
+          <div className="flex items-center justify-end gap-6 xl:gap-8">
+            {rightLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={`${navLinkClass} hover:text-[#2d3435]`}
+                style={{ fontSize: "11px", color: "#5c5b5b" }}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="flex items-center gap-4 ml-2" style={{ color: "#2d3435" }}>
+              <Link href="/products" className="transition-transform hover:scale-110" aria-label="Search">
+                <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              </Link>
+              {user ? (
+                <UserMenu />
+              ) : (
+                <Link href="/auth/signin" className="transition-transform hover:scale-110" aria-label="Sign in">
+                  <User className="h-[18px] w-[18px]" strokeWidth={1.5} />
+                </Link>
+              )}
+              <Link href="/cart" className="relative transition-transform hover:scale-110" aria-label="Cart">
+                <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
+                {itemCount > 0 && (
+                  <Badge className="absolute -top-1.5 -right-2 bg-[#2d3435] text-[#f9f9f9] text-[9px] h-4 min-w-4 flex items-center justify-center rounded-full border-none p-0 font-sans">
+                    {itemCount}
+                  </Badge>
+                )}
+              </Link>
             </div>
           </div>
-        </div>
-      </motion.header>
+        </nav>
 
-      {/* Mobile Menu Overlay */}
+        {/* Mobile/tablet nav */}
+        <nav className="lg:hidden flex justify-between items-center px-5 py-4">
+          <Link href="/">
+            <h1
+              className="font-serif font-bold uppercase"
+              style={{ fontSize: "1.15rem", letterSpacing: "-0.02em", color: "#2D3435" }}
+            >
+              AROMÉ LUXE
+            </h1>
+          </Link>
+          <div className="flex items-center gap-3.5" style={{ color: "#2d3435" }}>
+            <Link href="/products" aria-label="Search">
+              <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
+            </Link>
+            <Link href="/cart" className="relative" aria-label="Cart">
+              <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              {itemCount > 0 && (
+                <Badge className="absolute -top-1.5 -right-2 bg-[#2d3435] text-[#f9f9f9] text-[9px] h-4 min-w-4 flex items-center justify-center rounded-full border-none p-0 font-sans">
+                  {itemCount}
+                </Badge>
+              )}
+            </Link>
+            <button className="transition-transform hover:scale-110" onClick={() => setIsMenuOpen(true)} aria-label="Open menu">
+              <Menu className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Mobile drawer */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
@@ -151,67 +171,75 @@ const Navbar = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
-              onClick={toggleMenu}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+              onClick={() => setIsMenuOpen(false)}
             />
-
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: "0%" }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-white z-50 md:hidden shadow-2xl flex flex-col"
+              transition={{ type: "spring", damping: 28, stiffness: 220 }}
+              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm z-50 flex flex-col"
+              style={{ background: "#f9f9f9" }}
             >
-              <div className="p-4 flex justify-between items-center border-b-2 border-luxe-gold/20">
-                <Image
-                  src="/assets/arome-luxe-logo.png"
-                  alt="Aromé Luxe"
-                  width={120}
-                  height={40}
-                  className="h-8 w-auto object-contain"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleMenu}
-                  className="text-black hover:bg-black/5 rounded-full"
-                >
-                  <X className="h-6 w-6" />
+              <div className="flex justify-between items-center px-6 py-5">
+                <h2 className="font-serif font-bold uppercase" style={{ fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#2D3435" }}>
+                  AROMÉ LUXE
+                </h2>
+                <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)} aria-label="Close menu">
+                  <X className="h-5 w-5" />
                 </Button>
               </div>
-              <nav className="p-8 flex flex-col space-y-6">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-2xl font-serif font-bold text-gray-900 hover:text-luxe-gold transition-colors"
-                    onClick={toggleMenu}
+              <nav className="flex-1 px-6 py-6 flex flex-col gap-1 overflow-y-auto">
+                {allLinks.map((link, i) => (
+                  <motion.div
+                    key={link.label}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.25 }}
                   >
-                    {link.label}
-                  </Link>
+                    <Link
+                      href={link.href}
+                      className="block py-3 font-sans uppercase tracking-widest transition-colors"
+                      style={{ fontSize: "12px", color: "#5c5b5b" }}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
                 ))}
-                <Link
-                  href="/cart"
-                  className="text-2xl font-serif font-bold text-gray-900 hover:text-luxe-gold transition-colors flex items-center gap-3"
-                  onClick={toggleMenu}
-                >
-                  Cart
-                  {itemCount > 0 && (
-                    <span className="inline-flex items-center justify-center h-6 min-w-6 px-1.5 rounded-full bg-luxe-gold text-black text-xs font-bold">
-                      {itemCount}
-                    </span>
+                <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+                  {!user && (
+                    <Link
+                      href="/auth/signin"
+                      className="block py-3 font-sans uppercase tracking-widest transition-colors"
+                      style={{ fontSize: "12px", color: "#5c5b5b" }}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Sign In
+                    </Link>
                   )}
-                </Link>
-              </nav>
-              <div className="mt-auto p-8 bg-luxe-cream">
-                <div className="text-center">
-                  <p className="text-xs text-gray-400 uppercase tracking-widest">
-                    Est. 2024
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    &copy; {new Date().getFullYear()} Arome Luxe
-                  </p>
+                  <Link
+                    href="/cart"
+                    className="flex items-center gap-3 py-3 font-sans text-sm transition-colors"
+                    style={{ color: "#2d3435" }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <ShoppingBag className="h-4 w-4" />
+                    Cart
+                    {itemCount > 0 && (
+                      <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full text-xs font-bold" style={{ background: "#2d3435", color: "#f9f9f9" }}>
+                        {itemCount}
+                      </span>
+                    )}
+                  </Link>
                 </div>
+              </nav>
+              <div className="px-6 py-5" style={{ background: "#f2f4f4" }}>
+                <p className="font-sans uppercase" style={{ fontSize: "10px", letterSpacing: "0.15em", color: "#5a6061" }}>
+                  &copy; {new Date().getFullYear()} Aromé Luxe
+                </p>
               </div>
             </motion.div>
           </>

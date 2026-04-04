@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import { LayoutWrapper } from "@/components/layout-wrapper";
 import { Toaster } from "sonner";
@@ -7,19 +7,21 @@ import PerformanceMonitor from "@/components/performance-monitor";
 import { baseMetadata } from "@/lib/metadata";
 import { AuthProvider } from "@/components/auth/auth-provider";
 
-// Optimized font loading with display swap
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const notoSerif = Noto_Serif({
+  variable: "--font-noto-serif",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
   preload: true,
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
-  preload: false, // Only preload primary font
+  preload: true,
 });
 
 // Use centralized metadata
@@ -64,7 +66,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${notoSerif.variable} ${inter.variable} antialiased`}
       >
         <AuthProvider>
           <LayoutWrapper>

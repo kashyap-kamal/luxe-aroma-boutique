@@ -400,7 +400,7 @@ const CheckoutContent: React.FC = () => {
 
   return (
     <>
-      <main className="flex-grow pt-24 pb-8">
+      <main className="flex-grow pt-8 pb-8">
         <div className="luxury-container">
           <div className="flex items-center gap-2 mb-6">
             <ShoppingBag className="h-6 w-6" />

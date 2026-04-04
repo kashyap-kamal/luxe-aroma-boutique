@@ -1,134 +1,97 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import Link from "next/link";
-import { useRef } from "react";
-import { TextReveal } from "@/components/ui/text-reveal";
-import { MagnetButton } from "@/components/ui/magnet-button";
-import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { Flower2, FlaskConical, Bike } from "lucide-react";
+
+const pillars = [
+  {
+    icon: Flower2,
+    label: "Rooted in India",
+    body:
+      "We partner directly with India's finest fragrance houses — cutting out middlemen to bring you premium ingredients at honest prices.",
+  },
+  {
+    icon: FlaskConical,
+    label: "Expert Blending",
+    body:
+      "Each formula is refined over dozens of iterations. We don't ship until the dry-down is flawless on skin, not just paper.",
+  },
+  {
+    icon: Bike,
+    label: "Direct to You",
+    body:
+      "No middlemen, no inflated margins. You pay for the fragrance, not the boutique. That's the Aromé Luxe model.",
+  },
+];
 
 export default function StorySection() {
-  const containerRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
-
   return (
-    <section ref={containerRef} className="py-32 bg-black text-white relative overflow-hidden">
-      {/* Background Texture */}
-      <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay" />
-      
-      {/* Ambient Background Gradient */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-luxe-blue/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
-      
-      <div className="luxury-container relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
+    <section className="py-20 md:py-24" style={{ background: "#ffffff" }}>
+      <div className="luxury-container">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5 }}
+          className="max-w-xl mb-14"
+        >
+          <p
+            className="apo-chip inline-block mb-3"
+            style={{ color: "#735c00", background: "rgba(212,175,55,0.15)" }}
           >
-            <span className="text-luxe-gold text-sm font-bold uppercase tracking-[0.2em] mb-6 block">
-              Our Heritage
-            </span>
-            <h2 className="text-5xl md:text-6xl font-serif font-bold mb-10 leading-tight">
-              <div className="overflow-hidden">
-                <TextReveal text="Crafting Memories" className="block" />
-              </div>
-              <div className="overflow-hidden text-gray-400 italic">
-                <TextReveal text="Through Scent" delay={0.2} className="block" />
-              </div>
-            </h2>
-            
-            <div className="space-y-8 text-lg text-gray-400 font-light leading-relaxed border-l border-white/10 pl-8">
-              <p>
-                Aromé Luxe was born from a passion for exceptional fragrances and a
-                desire to bring the world&apos;s finest scents to discerning
-                customers. Our journey began with a simple belief: that a perfume is
-                more than just a scent—it&apos;s an expression of personality.
-              </p>
-              <p>
-                Each of our fragrances is carefully crafted using the highest
-                quality ingredients sourced from around the globe. We work with
-                master perfumers who blend traditional techniques with innovative
-                approaches.
-              </p>
-            </div>
+            The Luxury Paradox
+          </p>
+          <h2
+            className="font-serif font-bold leading-tight"
+            style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", color: "#1c1b1b" }}
+          >
+            Why should luxury cost a fortune?
+          </h2>
+          <p
+            className="mt-3 font-sans leading-relaxed"
+            style={{ fontSize: "0.95rem", color: "#4d4635" }}
+          >
+            We built Aromé Luxe on a single belief: premium fragrance shouldn&apos;t
+            come with a premium guilt trip.
+          </p>
+        </motion.div>
 
-            <div className="mt-12">
-              <Link href="/about">
-                <MagnetButton className="bg-white text-black hover:bg-luxe-gold transition-colors group">
-                  <span className="mr-3">Discover Our Story</span>
-                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </MagnetButton>
-              </Link>
-            </div>
-          </motion.div>
-
-          <div className="relative h-[600px] hidden lg:block perspective-[1000px]">
-            <motion.div 
-              style={{ y, rotateX: 5, rotateY: -5 }}
-              whileHover={{ rotateX: 0, rotateY: 0 }}
-              transition={{ duration: 0.5 }}
-              className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-2xl rounded-3xl border border-white/10 p-12 shadow-2xl"
+        {/* Pillars */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          {pillars.map((pillar, i) => (
+            <motion.div
+              key={pillar.label}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.45, delay: i * 0.08 }}
+              className="p-6 md:p-8"
+              style={{ background: "#f6f3f2", borderRadius: "0.25rem" }}
             >
-              <div className="h-full w-full border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden group">
-                {/* Interactive gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-luxe-gold/10 via-transparent to-luxe-blue/10 group-hover:scale-110 transition-transform duration-[2s]" />
-                
-                <div className="text-center relative z-10 max-w-md">
-                  <div className="text-6xl text-luxe-gold opacity-50 font-serif mb-6">&quot;</div>
-                  <h3 className="text-4xl font-serif italic mb-8 text-white font-light leading-tight">
-                    Perfume is the art that makes memory speak.
-                  </h3>
-                  <div className="w-12 h-[1px] bg-luxe-gold mx-auto mb-6" />
-                  <p className="text-luxe-gold uppercase tracking-[0.3em] text-xs font-bold">
-                    Francis Kurkdjian
-                  </p>
-                </div>
+              <div
+                className="inline-flex items-center justify-center w-10 h-10 mb-5"
+                style={{
+                  background: "rgba(212,175,55,0.15)",
+                  borderRadius: "0.25rem",
+                }}
+              >
+                <pillar.icon className="h-5 w-5" style={{ color: "#735c00" }} />
               </div>
+              <h3
+                className="font-serif font-semibold mb-2 leading-snug"
+                style={{ fontSize: "1.05rem", color: "#1c1b1b" }}
+              >
+                {pillar.label}
+              </h3>
+              <p
+                className="font-sans leading-relaxed"
+                style={{ fontSize: "0.875rem", color: "#4d4635" }}
+              >
+                {pillar.body}
+              </p>
             </motion.div>
-            
-            {/* Floating elements */}
-            <motion.div 
-              animate={{ 
-                y: [0, -40, 0],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-20 -right-20 w-48 h-48 bg-luxe-gold/20 rounded-full blur-3xl"
-            />
-            <motion.div 
-              animate={{ 
-                y: [0, 60, 0],
-                scale: [1, 1.2, 1]
-              }}
-              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute -bottom-20 -left-20 w-64 h-64 bg-luxe-blue/20 rounded-full blur-3xl"
-            />
-          </div>
-
-          {/* Mobile: simplified quote card (visible below lg breakpoint) */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="lg:hidden mt-12 p-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm text-center"
-          >
-            <div className="text-4xl text-luxe-gold opacity-50 font-serif mb-4">&quot;</div>
-            <p className="text-xl font-serif italic text-white font-light leading-relaxed mb-4">
-              Perfume is the art that makes memory speak.
-            </p>
-            <div className="w-10 h-[1px] bg-luxe-gold mx-auto mb-4" />
-            <p className="text-luxe-gold uppercase tracking-[0.3em] text-xs font-bold">
-              Francis Kurkdjian
-            </p>
-          </motion.div>
+          ))}
         </div>
       </div>
     </section>

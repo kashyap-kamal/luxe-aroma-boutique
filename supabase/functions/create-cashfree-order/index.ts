@@ -18,7 +18,7 @@ serve(async (req) => {
 
   try {
     // Parse request
-    const { amount, customerInfo, cartItems, returnUrl } = await req.json();
+    const { amount, customerInfo, cartItems, bundleItems, returnUrl } = await req.json();
 
     // Validate required fields
     if (!customerInfo?.email || !customerInfo?.name || !customerInfo?.contact) {
@@ -28,7 +28,9 @@ serve(async (req) => {
       );
     }
 
-    if (!cartItems || cartItems.length === 0) {
+    const hasCartItems = cartItems && cartItems.length > 0;
+    const hasBundleItems = bundleItems && bundleItems.length > 0;
+    if (!hasCartItems && !hasBundleItems) {
       return new Response(
         JSON.stringify({ error: "Cart is empty" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -47,63 +49,105 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch current prices from DB for all cart item product IDs
-    const productIds = cartItems.map((item: { productId: string }) => item.productId);
-    const { data: dbProducts, error: dbError } = await supabase
-      .from("products")
-      .select("id, name, price_current, price_original, currency, status")
-      .in("id", productIds);
-
-    if (dbError || !dbProducts) {
-      console.error("Error fetching product prices:", dbError);
-      return new Response(
-        JSON.stringify({ error: "Failed to validate product prices" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Validate all products exist and are in stock, calculate server total
-    const productMap = new Map(dbProducts.map((p: { id: string }) => [p.id, p]));
     let serverTotal = 0;
     const validatedItems: Array<{
       product_id: string;
       product_name: string;
       price: number;
       quantity: number;
+      type: "product" | "bundle";
     }> = [];
 
-    for (const item of cartItems) {
-      const dbProduct = productMap.get(item.productId) as {
-        id: string;
-        name: string;
-        price_current: number;
-        status: string;
-      } | undefined;
+    // ── Validate regular product prices ──
+    if (hasCartItems) {
+      const productIds = (cartItems as Array<{ productId: string }>).map((item) => item.productId);
+      const { data: dbProducts, error: dbError } = await supabase
+        .from("products")
+        .select("id, name, price_current, status")
+        .in("id", productIds);
 
-      if (!dbProduct) {
+      if (dbError || !dbProducts) {
+        console.error("Error fetching product prices:", dbError);
         return new Response(
-          JSON.stringify({ error: `Product not found: ${item.productId}` }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "Failed to validate product prices" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      if (dbProduct.status === "out_of_stock" || dbProduct.status === "discontinued") {
+      const productMap = new Map(dbProducts.map((p: { id: string }) => [p.id, p]));
+      for (const item of cartItems) {
+        const dbProduct = productMap.get(item.productId) as {
+          id: string; name: string; price_current: number; status: string;
+        } | undefined;
+
+        if (!dbProduct) {
+          return new Response(
+            JSON.stringify({ error: `Product not found: ${item.productId}` }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        if (dbProduct.status === "out_of_stock" || dbProduct.status === "discontinued") {
+          return new Response(
+            JSON.stringify({ error: `${dbProduct.name} is currently unavailable` }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
+        serverTotal += Number(dbProduct.price_current) * quantity;
+        validatedItems.push({
+          product_id: item.productId,
+          product_name: dbProduct.name,
+          price: Number(dbProduct.price_current),
+          quantity,
+          type: "product",
+        });
+      }
+    }
+
+    // ── Validate bundle prices ──
+    if (hasBundleItems) {
+      const bundleIds = (bundleItems as Array<{ bundleId: string }>).map((item) => item.bundleId);
+      const { data: dbBundles, error: bundleError } = await supabase
+        .from("product_bundles")
+        .select("id, name, price_current, status")
+        .in("id", bundleIds);
+
+      if (bundleError || !dbBundles) {
+        console.error("Error fetching bundle prices:", bundleError);
         return new Response(
-          JSON.stringify({ error: `${dbProduct.name} is currently unavailable` }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "Failed to validate bundle prices" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
-      const lineTotal = Number(dbProduct.price_current) * quantity;
-      serverTotal += lineTotal;
+      const bundleMap = new Map(dbBundles.map((b: { id: string }) => [b.id, b]));
+      for (const item of bundleItems) {
+        const dbBundle = bundleMap.get(item.bundleId) as {
+          id: string; name: string; price_current: number; status: string;
+        } | undefined;
 
-      validatedItems.push({
-        product_id: item.productId,
-        product_name: dbProduct.name,
-        price: Number(dbProduct.price_current),
-        quantity,
-      });
+        if (!dbBundle) {
+          return new Response(
+            JSON.stringify({ error: `Bundle not found: ${item.bundleId}` }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        if (dbBundle.status === "sold_out") {
+          return new Response(
+            JSON.stringify({ error: `${dbBundle.name} is currently sold out` }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
+        serverTotal += Number(dbBundle.price_current) * quantity;
+        validatedItems.push({
+          product_id: item.bundleId,
+          product_name: dbBundle.name,
+          price: Number(dbBundle.price_current),
+          quantity,
+          type: "bundle",
+        });
+      }
     }
 
     // Log discrepancy between client and server totals
