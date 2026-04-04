@@ -1,92 +1,72 @@
+"use client";
+
 import React from "react";
-import { Shield, Truck, Award, Heart, Zap, Headphones } from "lucide-react";
+import { motion } from "framer-motion";
+import { Award, Truck, Shield, Headphones } from "lucide-react";
+
+const features = [
+  {
+    icon: Award,
+    title: "100% Authentic",
+    description: "Handpicked premium fragrances from world-renowned perfumers.",
+  },
+  {
+    icon: Truck,
+    title: "Free Shipping",
+    description: "Complimentary delivery on every order across India.",
+  },
+  {
+    icon: Shield,
+    title: "Secure Payments",
+    description: "Protected transactions with Cashfree payment gateway.",
+  },
+  {
+    icon: Headphones,
+    title: "Expert Support",
+    description: "Dedicated fragrance advisors available to guide you.",
+  },
+];
 
 const WhyChooseUs: React.FC = () => {
-  const features = [
-    {
-      icon: <Award className="w-8 h-8" />,
-      title: "Premium Quality",
-      description:
-        "Handpicked fragrances from the world&apos;s finest perfumers with authentic ingredients and long-lasting scents.",
-    },
-    {
-      icon: <Truck className="w-8 h-8" />,
-      title: "Free Shipping",
-      description:
-        "Enjoy complimentary shipping on all orders. Your favorite fragrances delivered right to your doorstep.",
-    },
-    {
-      icon: <Shield className="w-8 h-8" />,
-      title: "Secure Payment",
-      description:
-        "Shop with confidence using our secure payment gateway. Your financial information is always protected.",
-    },
-    {
-      icon: <Heart className="w-8 h-8" />,
-      title: "Customer Love",
-      description:
-        "Join thousands of satisfied customers who trust Aromé Luxe for their fragrance needs.",
-    },
-    {
-      icon: <Zap className="w-8 h-8" />,
-      title: "Fast Delivery",
-      description:
-        "Quick processing and fast delivery across India. Get your orders within 3-5 business days.",
-    },
-    {
-      icon: <Headphones className="w-8 h-8" />,
-      title: "24/7 Support",
-      description:
-        "Our dedicated customer support team is always ready to help you with any questions or concerns.",
-    },
-  ];
-
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 md:py-20 bg-luxe-cream border-y border-gray-100">
       <div className="luxury-container">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif font-bold mb-4">
-            Why Choose Aromé Luxe?
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <span className="text-luxe-gold text-sm font-bold uppercase tracking-widest mb-3 block">
+            The Arome Luxe Promise
+          </span>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">
+            Why Choose Us
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            We&apos;re committed to providing you with an exceptional fragrance
-            shopping experience. Here&apos;s what makes us the perfect choice
-            for your perfume needs.
-          </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {features.map((feature, index) => (
-            <div
-              key={index}
-              className="text-center p-6 rounded-lg hover:shadow-lg transition-shadow duration-300"
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="text-center group"
             >
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-luxe-blue/10 text-luxe-blue rounded-full mb-4">
-                {feature.icon}
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-luxe-gold/10 text-luxe-gold mb-4 transition-colors duration-300 group-hover:bg-luxe-gold group-hover:text-white">
+                <feature.icon className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1.5">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-500 leading-relaxed">
                 {feature.description}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
-
-        {/* Additional Info */}
-        <div className="mt-12 text-center">
-          <div className="bg-gradient-to-r from-luxe-blue/5 to-purple-500/5 rounded-lg p-8">
-            <h3 className="text-2xl font-serif font-bold mb-4 text-gray-900">
-              Your Satisfaction is Our Priority
-            </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We believe that every customer deserves the best. That&apos;s why
-              we go above and beyond to ensure you have a memorable shopping
-              experience with us. From premium products to exceptional service,
-              we&apos;re here to exceed your expectations.
-            </p>
-          </div>
         </div>
       </div>
     </section>

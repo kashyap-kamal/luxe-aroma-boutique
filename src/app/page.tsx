@@ -28,14 +28,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home() {
   // Fetch data in parallel
   const [featuredProducts, categories] = await Promise.all([
-    getFeaturedProducts(4),
+    getFeaturedProducts(8),
     getCategories(),
   ]);
 
   return (
     <main className="flex-grow bg-white overflow-x-hidden">
-      {/* Hero Section - Client Component */}
-      <HeroSection />
+      {/* Hero Section - Featured products above the fold */}
+      <HeroSection products={featuredProducts} />
 
       {/* Collections Section - Client Component */}
       <Suspense
@@ -45,7 +45,7 @@ export default async function Home() {
       </Suspense>
 
       {/* Featured Products Section - Client Component */}
-      <Suspense fallback={<ProductGridSkeleton count={4} />}>
+      <Suspense fallback={<ProductGridSkeleton count={8} />}>
         <FeaturedSection products={featuredProducts} />
       </Suspense>
 

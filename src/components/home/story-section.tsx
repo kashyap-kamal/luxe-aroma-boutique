@@ -111,6 +111,24 @@ export default function StorySection() {
               className="absolute -bottom-20 -left-20 w-64 h-64 bg-luxe-blue/20 rounded-full blur-3xl"
             />
           </div>
+
+          {/* Mobile: simplified quote card (visible below lg breakpoint) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="lg:hidden mt-12 p-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm text-center"
+          >
+            <div className="text-4xl text-luxe-gold opacity-50 font-serif mb-4">&quot;</div>
+            <p className="text-xl font-serif italic text-white font-light leading-relaxed mb-4">
+              Perfume is the art that makes memory speak.
+            </p>
+            <div className="w-10 h-[1px] bg-luxe-gold mx-auto mb-4" />
+            <p className="text-luxe-gold uppercase tracking-[0.3em] text-xs font-bold">
+              Francis Kurkdjian
+            </p>
+          </motion.div>
         </div>
       </div>
     </section>

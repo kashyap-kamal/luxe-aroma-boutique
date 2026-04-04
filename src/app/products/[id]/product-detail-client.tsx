@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { Product } from "@/lib/data-service";
 import { useCartStore } from "@/stores/cart-store";
+import { useProductById } from "@/hooks/use-products";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -15,8 +16,11 @@ interface ProductDetailClientProps {
 }
 
 const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
-  product,
+  product: initialProduct,
 }) => {
+  const { product: hydratedProduct } = useProductById(initialProduct.id, initialProduct);
+  const product = hydratedProduct ?? initialProduct;
+
   const router = useRouter();
   const { addToCart } = useCartStore();
   const [quantity, setQuantity] = useState(1);
@@ -117,7 +121,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
-                className="flex-1 bg-amber-600/0 text-luxe-black hover:bg-amber-600 cursor-pointer"
+                className="flex-1 bg-luxe-gold text-luxe-black hover:bg-amber-600 cursor-pointer font-semibold"
                 size="lg"
                 onClick={handleBuyNow}
               >
@@ -135,6 +139,27 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Spacer to prevent content from being hidden behind sticky bar on mobile */}
+      <div className="h-20 md:hidden" />
+
+      {/* Sticky bottom CTA bar - mobile only */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex gap-3 z-40 md:hidden safe-area-bottom">
+        <Button
+          variant="outline"
+          className="flex-1 border-luxe-blue text-luxe-blue hover:bg-luxe-blue hover:text-white min-h-[48px] font-medium"
+          onClick={handleAddToCart}
+        >
+          <ShoppingBag className="mr-2 h-5 w-5" />
+          Add to Cart
+        </Button>
+        <Button
+          className="flex-1 bg-luxe-gold text-luxe-black hover:bg-amber-600 min-h-[48px] font-semibold"
+          onClick={handleBuyNow}
+        >
+          Buy Now
+        </Button>
       </div>
     </main>
   );

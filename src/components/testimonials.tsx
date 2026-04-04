@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
 
 interface Testimonial {
   id: number;
@@ -9,7 +10,6 @@ interface Testimonial {
   location: string;
   rating: number;
   comment: string;
-  image: string;
 }
 
 const testimonials: Testimonial[] = [
@@ -19,8 +19,7 @@ const testimonials: Testimonial[] = [
     location: "Mumbai, Maharashtra",
     rating: 5,
     comment:
-      "Absolutely love the Aventus fragrance! The quality is exceptional and the scent lasts all day. Aromé Luxe has become my go-to for premium perfumes.",
-    image: "👩‍💼",
+      "Absolutely love the Aventus fragrance! The quality is exceptional and the scent lasts all day. Arome Luxe has become my go-to for premium perfumes.",
   },
   {
     id: 2,
@@ -29,7 +28,6 @@ const testimonials: Testimonial[] = [
     rating: 5,
     comment:
       "The Cool Water perfume exceeded my expectations. Great value for money and the packaging was beautiful. Will definitely order again!",
-    image: "👨‍💼",
   },
   {
     id: 3,
@@ -37,106 +35,140 @@ const testimonials: Testimonial[] = [
     location: "Bangalore, Karnataka",
     rating: 5,
     comment:
-      "Fast delivery and amazing customer service. The Hawas fragrance is perfect for special occasions. Highly recommend Aromé Luxe!",
-    image: "👩‍🎨",
+      "Fast delivery and amazing customer service. The Hawas fragrance is perfect for special occasions. Highly recommend Arome Luxe!",
   },
 ];
 
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+}
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 80 : -80,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -80 : 80,
+    opacity: 0,
+  }),
+};
+
 const Testimonials: React.FC = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [[currentIndex, direction], setPage] = useState([0, 0]);
 
-  // Auto-rotate testimonials every 5 seconds
+  const paginate = useCallback(
+    (newDirection: number) => {
+      const nextIndex =
+        newDirection > 0
+          ? currentIndex === testimonials.length - 1
+            ? 0
+            : currentIndex + 1
+          : currentIndex === 0
+          ? testimonials.length - 1
+          : currentIndex - 1;
+      setPage([nextIndex, newDirection]);
+    },
+    [currentIndex]
+  );
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 5000);
-
+    const interval = setInterval(() => paginate(1), 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [paginate]);
 
-  const goToPrevious = () => {
-    setCurrentIndex(
-      currentIndex === 0 ? testimonials.length - 1 : currentIndex - 1
-    );
-  };
-
-  const goToNext = () => {
-    setCurrentIndex(
-      currentIndex === testimonials.length - 1 ? 0 : currentIndex + 1
-    );
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
+  const current = testimonials[currentIndex];
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-20 md:py-24 bg-white">
       <div className="luxury-container">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif font-bold mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-14"
+        >
+          <span className="text-luxe-gold text-sm font-bold uppercase tracking-widest mb-3 block">
+            Testimonials
+          </span>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">
             What Our Customers Say
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Don&apos;t just take our word for it. Here&apos;s what our satisfied
-            customers have to say about their Aromé Luxe experience.
-          </p>
-        </div>
+        </motion.div>
 
-        <div className="relative max-w-4xl mx-auto">
-          {/* Testimonial Card */}
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <div className="flex items-center justify-center mb-6">
-              <div className="text-6xl mb-4">
-                {testimonials[currentIndex].image}
-              </div>
-            </div>
+        <div className="relative max-w-3xl mx-auto">
+          <Quote className="absolute -top-4 left-1/2 -translate-x-1/2 w-10 h-10 text-luxe-gold/20" />
 
-            <div className="flex justify-center mb-4">
-              {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
-                <Star
-                  key={i}
-                  className="w-5 h-5 text-yellow-400 fill-current"
-                />
-              ))}
-            </div>
+          <div className="min-h-[280px] flex items-center justify-center">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={current.id}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="w-full text-center px-4 md:px-12"
+              >
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-900 text-white text-lg font-semibold tracking-wide mb-6">
+                  {getInitials(current.name)}
+                </div>
 
-            <blockquote className="text-lg text-gray-700 text-center mb-6 italic">
-              &ldquo;{testimonials[currentIndex].comment}&rdquo;
-            </blockquote>
+                <div className="flex justify-center gap-1 mb-5">
+                  {Array.from({ length: current.rating }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className="w-4 h-4 text-luxe-gold fill-luxe-gold"
+                    />
+                  ))}
+                </div>
 
-            <div className="text-center">
-              <div className="font-semibold text-gray-900">
-                {testimonials[currentIndex].name}
-              </div>
-              <div className="text-sm text-gray-500">
-                {testimonials[currentIndex].location}
-              </div>
-            </div>
+                <blockquote className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6 font-light italic">
+                  &ldquo;{current.comment}&rdquo;
+                </blockquote>
+
+                <div>
+                  <div className="font-semibold text-gray-900">
+                    {current.name}
+                  </div>
+                  <div className="text-sm text-gray-400 mt-0.5">
+                    {current.location}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-center items-center space-x-4">
+          <div className="flex justify-center items-center gap-4 mt-8">
             <button
-              onClick={goToPrevious}
-              className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
+              onClick={() => paginate(-1)}
+              className="p-2.5 rounded-full border border-gray-200 text-gray-400 hover:border-luxe-gold hover:text-luxe-gold transition-colors"
               aria-label="Previous testimonial"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
 
-            {/* Dots Indicator */}
-            <div className="flex space-x-2">
+            <div className="flex gap-2">
               {testimonials.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
+                  onClick={() =>
+                    setPage([index, index > currentIndex ? 1 : -1])
+                  }
+                  className={`h-2 rounded-full transition-all duration-300 ${
                     index === currentIndex
-                      ? "bg-luxe-blue"
-                      : "bg-gray-300 hover:bg-gray-400"
+                      ? "w-8 bg-luxe-gold"
+                      : "w-2 bg-gray-200 hover:bg-gray-300"
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
@@ -144,11 +176,11 @@ const Testimonials: React.FC = () => {
             </div>
 
             <button
-              onClick={goToNext}
-              className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
+              onClick={() => paginate(1)}
+              className="p-2.5 rounded-full border border-gray-200 text-gray-400 hover:border-luxe-gold hover:text-luxe-gold transition-colors"
               aria-label="Next testimonial"
             >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>

@@ -96,29 +96,27 @@ export const getFeaturedProducts = cache(async (limit: number = 4): Promise<Prod
 });
 
 export const getCategories = cache(async (): Promise<Category[]> => {
-  return getCachedData('categories', () => {
-    const allProducts = staticProducts;
-    const categoryMap = new Map<string, Category>();
+  const allProducts = await resolveProducts();
+  const categoryMap = new Map<string, Category>();
 
-    allProducts.forEach(product => {
-      const categoryName = product.category;
-      if (!categoryMap.has(categoryName)) {
-        categoryMap.set(categoryName, {
-          id: categoryName.toLowerCase().replace(/\s+/g, '-'),
-          name: categoryName,
-          slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
-          description: `Explore our ${categoryName} collection`,
-          image: `/images/categories/${categoryName.toLowerCase().replace(/\s+/g, '-')}.jpg`,
-          productCount: 0,
-        });
-      }
+  allProducts.forEach(product => {
+    const categoryName = product.category;
+    if (!categoryMap.has(categoryName)) {
+      categoryMap.set(categoryName, {
+        id: categoryName.toLowerCase().replace(/\s+/g, '-'),
+        name: categoryName,
+        slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
+        description: `Explore our ${categoryName} collection`,
+        image: `/images/categories/${categoryName.toLowerCase().replace(/\s+/g, '-')}.jpg`,
+        productCount: 0,
+      });
+    }
 
-      const category = categoryMap.get(categoryName)!;
-      category.productCount++;
-    });
+    const category = categoryMap.get(categoryName)!;
+    category.productCount++;
+  });
 
-    return Array.from(categoryMap.values());
-  }, CACHE_DURATION.CATEGORIES);
+  return Array.from(categoryMap.values());
 });
 
 export const getTestimonials = cache(async (): Promise<Testimonial[]> => {

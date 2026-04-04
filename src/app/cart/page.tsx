@@ -1,15 +1,27 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "lucide-react";
 import CartItem from "@/components/cart-item";
 import CartSummary from "@/components/cart-summary";
 import { useCartStore, useCartSubtotal } from "@/stores/cart-store";
+import { toast } from "sonner";
 
 const Cart = () => {
-  const { cartItems, clearCart } = useCartStore();
+  const { cartItems, clearCart, refreshPrices } = useCartStore();
   const subtotal = useCartSubtotal();
+
+  useEffect(() => {
+    refreshPrices().then((pricesChanged) => {
+      if (pricesChanged) {
+        toast.info("Prices Updated", {
+          description: "Some prices in your cart have been updated.",
+        });
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isEmpty = cartItems.length === 0;
 

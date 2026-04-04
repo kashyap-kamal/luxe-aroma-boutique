@@ -31,11 +31,14 @@ const Loading: React.FC<LoadingProps> = ({
 // Skeleton components for better loading experience
 export const ProductCardSkeleton: React.FC = () => (
   <div className="animate-pulse">
-    <div className="bg-gray-200 aspect-square rounded-lg mb-4"></div>
-    <div className="space-y-2">
+    <div className="bg-gray-200 aspect-square rounded-lg mb-3"></div>
+    <div className="px-1 space-y-2">
       <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-      <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+      <div className="flex justify-between items-center">
+        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+        <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+      </div>
+      <div className="h-10 bg-gray-200 rounded-lg w-full"></div>
     </div>
   </div>
 );
@@ -43,7 +46,7 @@ export const ProductCardSkeleton: React.FC = () => (
 export const ProductGridSkeleton: React.FC<{ count?: number }> = ({
   count = 8,
 }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
     {Array.from({ length: count }).map((_, index) => (
       <ProductCardSkeleton key={index} />
     ))}
@@ -75,21 +78,18 @@ export const TestimonialSkeleton: React.FC = () => (
 );
 
 export const WhyChooseUsSkeleton: React.FC = () => (
-  <div className="py-16 bg-gray-50">
+  <div className="py-16 md:py-20 bg-luxe-cream border-y border-gray-100">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
-        <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto"></div>
+        <div className="h-4 bg-gray-200 rounded w-32 mx-auto mb-3 animate-pulse"></div>
+        <div className="h-8 bg-gray-200 rounded w-48 mx-auto animate-pulse"></div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="text-center p-6 rounded-lg">
-            <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
-            <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto mb-3"></div>
-            <div className="space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-            </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="text-center animate-pulse">
+            <div className="w-14 h-14 bg-gray-200 rounded-full mx-auto mb-4"></div>
+            <div className="h-5 bg-gray-200 rounded w-24 mx-auto mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-32 mx-auto"></div>
           </div>
         ))}
       </div>

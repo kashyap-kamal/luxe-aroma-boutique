@@ -231,3 +231,17 @@ h6 {
 .luxury-gradient {
   @apply bg-gradient-to-r from-luxe-blue to-luxe-violet;
 }
+
+/* Scrollbar hide utility (for horizontal scroll carousels) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* iOS safe area bottom padding */
+.safe-area-bottom {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}

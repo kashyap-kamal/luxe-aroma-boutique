@@ -42,6 +42,7 @@ export default function NewsletterSection() {
           <span className="text-luxe-gold text-sm font-bold uppercase tracking-widest mb-4 block">
             Stay Connected
           </span>
+          <div className="w-12 h-[1px] bg-luxe-gold/40 mx-auto mb-6" />
           <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">
             Join Our Exclusive Community
           </h2>

@@ -105,34 +105,34 @@ const Footer = () => {
 
         <hr className="my-8 border-gray-200" />
 
-        <div className="flex flex-col items-center justify-between md:flex-row">
-          <p className="mb-4 text-sm text-gray-600 md:mb-0">
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          <p className="text-sm text-gray-600 order-2 md:order-1">
             &copy; {new Date().getFullYear()} Aromé Luxe. All rights reserved.
           </p>
-          <div className="flex space-x-6">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 order-1 md:order-2">
             <Link
               href="/privacy-policy"
-              className="text-sm text-gray-600 hover:text-luxe-sandy"
+              className="text-sm text-gray-600 hover:text-luxe-sandy min-h-[44px] flex items-center"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms-of-service"
-              className="text-sm text-gray-600 hover:text-luxe-sandy"
+              className="text-sm text-gray-600 hover:text-luxe-sandy min-h-[44px] flex items-center"
             >
               Terms of Service
             </Link>
             <Link
               href="/shipping-delivery"
-              className="text-sm text-gray-600 hover:text-luxe-sandy"
+              className="text-sm text-gray-600 hover:text-luxe-sandy min-h-[44px] flex items-center"
             >
-              Shipping & Delivery
+              Shipping &amp; Delivery
             </Link>
             <Link
               href="/cancellation-refund"
-              className="text-sm text-gray-600 hover:text-luxe-sandy"
+              className="text-sm text-gray-600 hover:text-luxe-sandy min-h-[44px] flex items-center"
             >
-              Returns & Refunds
+              Returns &amp; Refunds
             </Link>
           </div>
         </div>

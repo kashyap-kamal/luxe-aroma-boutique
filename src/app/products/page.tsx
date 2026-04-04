@@ -3,15 +3,12 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchProducts } from "@/lib/product-service";
-import { Product } from "@/stores/cart-store";
 import {
   products as staticProducts,
-  getProductCategories as getStaticCategories,
-  getMaxPrice as getStaticMaxPrice,
   sortProducts,
   SortOption,
 } from "@/lib/mock-data";
+import { useProducts } from "@/hooks/use-products";
 import ProductGrid from "@/components/product-grid";
 import ProductFilter from "@/components/product-filter";
 import { Filter, X } from "lucide-react";
@@ -24,29 +21,20 @@ const ProductsContent = () => {
   const pathname = usePathname();
   const initialCategory = searchParams.get("category") || "";
 
-  const [allProducts, setAllProducts] = useState<Product[]>(staticProducts);
-  const [categories, setCategories] = useState<string[]>(getStaticCategories());
-  const [maxPrice, setMaxPrice] = useState(getStaticMaxPrice());
+  const { products: allProducts } = useProducts(staticProducts);
+  const categories = [...new Set(allProducts.map((p) => p.category))];
+  const maxPrice = Math.max(...allProducts.map((p) => p.price.current), 0);
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
   const [sortBy, setSortBy] = useState<SortOption>("default");
-  const [filteredProducts, setFilteredProducts] = useState(staticProducts);
+  const [filteredProducts, setFilteredProducts] = useState(allProducts);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Fetch products from Supabase on mount (shows latest catalog in real-time)
+  // Update price range when products load from DB
   useEffect(() => {
-    fetchProducts().then((products) => {
-      if (products.length > 0) {
-        setAllProducts(products);
-        const cats = [...new Set(products.map((p) => p.category))];
-        setCategories(cats);
-        const max = Math.max(...products.map((p) => p.price.current));
-        setMaxPrice(max);
-        setPriceRange((prev) => [prev[0], max]);
-      }
-    });
-  }, []);
+    setPriceRange((prev) => [prev[0], maxPrice]);
+  }, [maxPrice]);
 
   // Update filtered products when filters change
   useEffect(() => {

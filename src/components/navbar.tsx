@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Menu, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,6 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { cartItems } = useCartStore();
   const { scrollY } = useScroll();
-  const pathname = usePathname();
 
   // Handle scroll for sticky behavior
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -46,16 +44,9 @@ const Navbar = () => {
     { href: "/contact", label: "Contact" },
   ];
 
-  // Check if we're on a page with light background
-  // These pages need dark navbar colors since they have light backgrounds
-  // Only homepage has dark hero background, all other pages have white/light backgrounds
-  const isLightBackgroundPage = pathname !== "/";
-
-  // Determine if we should use light (white) or dark styling
-  // Use dark styling when: scrolled OR on light background pages
-  // Use light styling when: at top of pages with dark hero backgrounds
-  const useDarkStyling = isScrolled || isLightBackgroundPage;
-  const isAtTop = !useDarkStyling;
+  // All pages now have light backgrounds (hero is cream, not dark)
+  // Always use dark (black text) styling; only vary bg opacity on scroll
+  const isAtTop = false;
 
   return (
     <>
@@ -63,10 +54,8 @@ const Navbar = () => {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
           isScrolled
-            ? "bg-white/80 backdrop-blur-2xl border-b border-white/40 shadow-[0_4px_30px_rgba(0,0,0,0.03)] py-3"
-            : isLightBackgroundPage
-            ? "bg-white/60 backdrop-blur-xl py-4" // Light background pages: subtle white background
-            : "bg-transparent py-6" // Other pages: transparent at top
+            ? "bg-white/95 backdrop-blur-2xl border-b border-gray-200/50 shadow-sm py-3"
+            : "bg-white/60 backdrop-blur-xl py-4"
         )}
       >
         <div className="luxury-container">
@@ -173,7 +162,7 @@ const Navbar = () => {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-white z-50 md:hidden shadow-2xl flex flex-col"
             >
-              <div className="p-4 flex justify-between items-center border-b border-gray-100">
+              <div className="p-4 flex justify-between items-center border-b-2 border-luxe-gold/20">
                 <Image
                   src="/assets/arome-luxe-logo.png"
                   alt="Aromé Luxe"
@@ -201,11 +190,28 @@ const Navbar = () => {
                     {link.label}
                   </Link>
                 ))}
+                <Link
+                  href="/cart"
+                  className="text-2xl font-serif font-bold text-gray-900 hover:text-luxe-gold transition-colors flex items-center gap-3"
+                  onClick={toggleMenu}
+                >
+                  Cart
+                  {itemCount > 0 && (
+                    <span className="inline-flex items-center justify-center h-6 min-w-6 px-1.5 rounded-full bg-luxe-gold text-black text-xs font-bold">
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
               </nav>
-              <div className="mt-auto p-8 bg-gray-50">
-                <p className="text-sm text-gray-500 text-center">
-                  © {new Date().getFullYear()} Aromé Luxe
-                </p>
+              <div className="mt-auto p-8 bg-luxe-cream">
+                <div className="text-center">
+                  <p className="text-xs text-gray-400 uppercase tracking-widest">
+                    Est. 2024
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    &copy; {new Date().getFullYear()} Arome Luxe
+                  </p>
+                </div>
               </div>
             </motion.div>
           </>

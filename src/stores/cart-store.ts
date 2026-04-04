@@ -2,6 +2,7 @@ import { create, StateCreator } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { billingCalculator, BillingBreakdown, BillingItem } from "@/lib/billing";
+import { fetchProducts } from "@/lib/product-service";
 
 export interface Product {
   id: string;
@@ -37,6 +38,7 @@ interface CartStore {
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  refreshPrices: () => Promise<boolean>;
   getBillingBreakdown: () => BillingBreakdown;
   getBillingItems: () => BillingItem[];
 }
@@ -87,6 +89,38 @@ const createCartStore: StateCreator<
     set((state) => {
       state.cartItems.length = 0;
     });
+  },
+  refreshPrices: async () => {
+    const { cartItems } = get();
+    if (cartItems.length === 0) return false;
+
+    try {
+      const dbProducts = await fetchProducts();
+      if (dbProducts.length === 0) return false;
+
+      const productMap = new Map(dbProducts.map((p) => [p.id, p]));
+      let pricesChanged = false;
+
+      set((state) => {
+        for (const item of state.cartItems as CartItem[]) {
+          const dbProduct = productMap.get(item.product.id);
+          if (dbProduct) {
+            if (
+              item.product.price.current !== dbProduct.price.current ||
+              item.product.price.original !== dbProduct.price.original
+            ) {
+              pricesChanged = true;
+            }
+            item.product.price = dbProduct.price;
+            item.product.status = dbProduct.status;
+          }
+        }
+      });
+
+      return pricesChanged;
+    } catch {
+      return false;
+    }
   },
   getBillingBreakdown: () => {
     const { cartItems } = get();

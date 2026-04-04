@@ -77,7 +77,7 @@ const OrderSummary: React.FC<{
 const CheckoutContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { cartItems, clearCart, getBillingBreakdown } = useCartStore();
+  const { cartItems, clearCart, getBillingBreakdown, refreshPrices } = useCartStore();
   const {
     processPayment,
     isProcessing,
@@ -133,9 +133,16 @@ const CheckoutContent: React.FC = () => {
   // This prevents hydration mismatch since cart data comes from sessionStorage
   useEffect(() => {
     setIsMounted(true);
-    // Calculate billing breakdown after mount
-    const breakdown = getBillingBreakdown();
-    setBilling(breakdown);
+    // Refresh cart prices from DB, then calculate billing
+    refreshPrices().then((pricesChanged) => {
+      if (pricesChanged) {
+        toast.info("Prices Updated", {
+          description: "Some prices in your cart have been updated to reflect the latest changes.",
+        });
+      }
+      const breakdown = getBillingBreakdown();
+      setBilling(breakdown);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
