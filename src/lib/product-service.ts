@@ -65,6 +65,7 @@ export function toProduct(row: ProductRow): Product {
     description: row.description || `Premium ${row.name} fragrance - a luxurious scent perfect for any occasion.`,
     tags: row.tags || [],
     fragrance_notes: row.fragrance_notes || undefined,
+    featured: row.featured,
     rating: {
       stars: Number(row.rating_stars),
       out_of: 5,

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ShoppingBag, Menu, X, Search, User } from "lucide-react";
+import { ShoppingBag, Menu, X, Search, User, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/stores/cart-store";
@@ -15,8 +15,16 @@ import {
   AnimatePresence,
 } from "framer-motion";
 
-const leftLinks = [
-  { href: "/products", label: "SHOP BY MOOD" },
+const moodSubLinks = [
+  { href: "/products?tag=fresh", label: "Fresh & Citrus" },
+  { href: "/products?tag=woody", label: "Woody & Spicy" },
+  { href: "/products?tag=date-night", label: "Date Night" },
+  { href: "/products?tag=office-wear", label: "Office Wear" },
+  { href: "/products?tag=everyday-fresh", label: "Everyday Fresh" },
+  { href: "/products", label: "All Fragrances" },
+];
+
+const categoryLinks = [
   { href: "/products?category=men", label: "MEN" },
   { href: "/products?category=women", label: "WOMEN" },
 ];
@@ -26,19 +34,12 @@ const rightLinks = [
   { href: "/products?featured=true", label: "BESTSELLERS" },
 ];
 
-const allLinks = [
-  { href: "/products", label: "Shop by Mood" },
-  { href: "/products?category=men", label: "Men" },
-  { href: "/products?category=women", label: "Women" },
-  { href: "/products?category=unisex", label: "Unisex" },
-  { href: "/products?featured=true", label: "Bestsellers" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [moodOpen, setMoodOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
   const { cartItems, bundleItems } = useCartStore();
   const user = useUser();
   const { scrollY } = useScroll();
@@ -72,7 +73,47 @@ const Navbar = () => {
         <nav className="hidden lg:grid grid-cols-[1fr_auto_1fr] items-center px-8 xl:px-12 py-5 xl:py-6">
           {/* Left links */}
           <div className="flex gap-6 xl:gap-8 items-center">
-            {leftLinks.map((link) => (
+            {/* SHOP BY MOOD — dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setMoodOpen(true)}
+              onMouseLeave={() => setMoodOpen(false)}
+            >
+              <button
+                className={`${navLinkClass} hover:text-[#2d3435] pb-0.5 flex items-center gap-1`}
+                style={{ fontSize: "11px", color: "#5c5b5b" }}
+              >
+                SHOP BY MOOD
+                <ChevronDown className="h-3 w-3 transition-transform" style={{ transform: moodOpen ? "rotate(180deg)" : "" }} />
+              </button>
+              <AnimatePresence>
+                {moodOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full left-0 mt-2 py-2 min-w-[180px] z-50"
+                    style={{ background: "#f9f9f9", boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}
+                  >
+                    {moodSubLinks.map((link) => (
+                      <Link
+                        key={link.href + link.label}
+                        href={link.href}
+                        className="block px-4 py-2 font-sans text-xs transition-colors hover:bg-[#f2f4f4]"
+                        style={{ color: "#5c5b5b" }}
+                        onClick={() => setMoodOpen(false)}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* MEN / WOMEN */}
+            {categoryLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
@@ -192,12 +233,47 @@ const Navbar = () => {
                 </Button>
               </div>
               <nav className="flex-1 px-6 py-6 flex flex-col gap-1 overflow-y-auto">
-                {allLinks.map((link, i) => (
+                {/* Shop by Mood — expandable */}
+                <div>
+                  <button
+                    className="w-full flex items-center justify-between py-3 font-sans uppercase tracking-widest transition-colors"
+                    style={{ fontSize: "12px", color: "#5c5b5b" }}
+                    onClick={() => setMobileExpanded(!mobileExpanded)}
+                  >
+                    Shop by Mood
+                    <ChevronDown className="h-3 w-3 transition-transform" style={{ transform: mobileExpanded ? "rotate(180deg)" : "" }} />
+                  </button>
+                  {mobileExpanded && (
+                    <div className="pl-4 pb-2 space-y-1">
+                      {moodSubLinks.map((link) => (
+                        <Link
+                          key={link.href + link.label}
+                          href={link.href}
+                          className="block py-2 font-sans text-xs transition-colors"
+                          style={{ color: "#5c5b5b" }}
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {/* Other links */}
+                {[
+                  { href: "/products?category=men", label: "Men" },
+                  { href: "/products?category=women", label: "Women" },
+                  { href: "/products?category=unisex", label: "Unisex" },
+                  { href: "/products?featured=true", label: "Bestsellers" },
+                  { href: "/quiz", label: "Scent Quiz" },
+                  { href: "/about", label: "About" },
+                  { href: "/contact", label: "Contact" },
+                ].map((link, i) => (
                   <motion.div
                     key={link.label}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05, duration: 0.25 }}
+                    transition={{ delay: (i + 1) * 0.05, duration: 0.25 }}
                   >
                     <Link
                       href={link.href}

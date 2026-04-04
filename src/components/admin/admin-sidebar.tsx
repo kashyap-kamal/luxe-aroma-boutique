@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Star,
   Ticket,
+  ListChecks,
   ArrowLeft,
   LogOut,
 } from 'lucide-react'
@@ -29,6 +30,7 @@ const navItems = [
   { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
   { href: '/admin/reviews', label: 'Reviews', icon: Star },
   { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
+  { href: '/admin/curated', label: 'Curated Lists', icon: ListChecks },
 ]
 
 export function AdminSidebar() {

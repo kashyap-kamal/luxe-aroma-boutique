@@ -10,13 +10,13 @@ const categories = [
     slug: "fresh-citrus",
     label: "FRESH & CITRUS",
     image: "/assets/home/fresh-citrus.jpg",
-    href: "/products?tag=fresh-citrus",
+    href: "/products?tag=fresh",
   },
   {
     slug: "woody-spicy",
     label: "WOODY & SPICY",
     image: "/assets/home/woody-spicy.jpg",
-    href: "/products?tag=woody-spicy",
+    href: "/products?tag=woody",
   },
 ];
 

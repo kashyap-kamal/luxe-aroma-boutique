@@ -20,12 +20,16 @@ const ProductsContent = () => {
   const { replace } = useRouter();
   const pathname = usePathname();
   const initialCategory = searchParams.get("category") || "";
+  const initialTag = searchParams.get("tag") || "";
+  const initialFeatured = searchParams.get("featured") === "true";
 
   const { products: allProducts } = useProducts(staticProducts);
   const categories = [...new Set(allProducts.map((p) => p.category))];
   const maxPrice = Math.max(...allProducts.map((p) => p.price.current), 0);
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedTag] = useState(initialTag);
+  const [showFeatured] = useState(initialFeatured);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
   const [sortBy, setSortBy] = useState<SortOption>("default");
   const [filteredProducts, setFilteredProducts] = useState(allProducts);
@@ -41,6 +45,12 @@ const ProductsContent = () => {
     let filtered = allProducts;
     if (selectedCategory) {
       filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+    if (selectedTag) {
+      filtered = filtered.filter((p) => p.tags?.includes(selectedTag));
+    }
+    if (showFeatured) {
+      filtered = filtered.filter((p) => p.featured);
     }
     filtered = filtered.filter(
       (p) => p.price.current >= priceRange[0] && p.price.current <= priceRange[1]
@@ -61,7 +71,7 @@ const ProductsContent = () => {
       params.delete("sort");
     }
     replace(`${pathname}?${params.toString()}`);
-  }, [selectedCategory, priceRange, sortBy, allProducts, replace, pathname]);
+  }, [selectedCategory, selectedTag, showFeatured, priceRange, sortBy, allProducts, replace, pathname]);
 
   // Reset filters
   const handleReset = () => {

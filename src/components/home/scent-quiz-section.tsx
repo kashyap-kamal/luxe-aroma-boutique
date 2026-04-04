@@ -56,8 +56,7 @@ export default function ScentQuizSection() {
               padding: "18px 48px",
             }}
             onClick={() => {
-              // TODO: wire to quiz page/modal when ready
-              window.location.href = "/products";
+              window.location.href = "/quiz";
             }}
           >
             START QUIZ &gt;
