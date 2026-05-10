@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { subscribeEmail } from "@/lib/newsletter-service";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState("");
@@ -35,103 +37,313 @@ export default function NewsletterSection() {
   };
 
   return (
-    <section className="py-20 md:py-24" style={{ background: "#1c1b1b" }}>
-      <div className="luxury-container">
-        <div className="max-w-xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+    <section
+      style={{
+        background: INK,
+        color: CREAM,
+      }}
+    >
+      {/* Desktop: 2-column */}
+      <div
+        className="hidden md:grid"
+        style={{ gridTemplateColumns: "3fr 2fr" }}
+      >
+        {/* Left: subscription */}
+        <div
+          style={{
+            padding: "72px 48px",
+            borderRight: `1px solid ${SAFFRON}`,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: SAFFRON,
+            }}
           >
-            {/* Credit pill */}
+            CLASSIFIEDS — JOIN THE INNER CIRCLE
+          </div>
+          <h2
+            style={{
+              fontSize: "clamp(3rem, 6vw, 5.5rem)",
+              lineHeight: 0.92,
+              letterSpacing: "-0.04em",
+              fontWeight: 300,
+              margin: "20px 0",
+              fontFamily: "var(--font-fraunces), serif",
+            }}
+          >
+            Letters from{" "}
+            <em style={{ fontWeight: 300, color: SAFFRON }}>
+              the perfumer.
+            </em>
+          </h2>
+          <p
+            style={{
+              fontFamily: "var(--font-inter), sans-serif",
+              fontSize: 15,
+              lineHeight: 1.6,
+              opacity: 0.7,
+              maxWidth: 500,
+            }}
+          >
+            New arrivals, dispatches from Grasse, the occasional unhinged
+            opinion on synthetic musks. Weekly. Worth the inbox.
+          </p>
+
+          {subscribed ? (
             <div
-              className="inline-flex items-center gap-2 px-3 py-1 mb-6 font-sans text-xs font-medium tracking-wide"
               style={{
-                background: "rgba(212,175,55,0.15)",
-                color: "#d4af37",
-                borderRadius: "0.25rem",
+                marginTop: 40,
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 13,
+                letterSpacing: "0.15em",
+                color: SAFFRON,
+                textTransform: "uppercase",
               }}
             >
-              <Gift className="h-3.5 w-3.5" />
-              Get ₹50 store credit on your first order
+              ★ WELCOME ABOARD — CHECK YOUR INBOX
             </div>
-
-            <h2
-              className="font-serif font-bold mb-3 leading-tight"
-              style={{
-                fontSize: "clamp(1.6rem, 3vw, 2rem)",
-                color: "#fcf9f8",
-              }}
-            >
-              Join the Inner Circle
-            </h2>
-            <p
-              className="font-sans mb-8 leading-relaxed"
-              style={{ fontSize: "0.9rem", color: "#7f7663" }}
-            >
-              New arrivals, exclusive offers, and expert fragrance tips — delivered
-              weekly. No spam, ever.
-            </p>
-
-            {subscribed ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="font-sans font-medium"
-                style={{ color: "#d4af37" }}
-              >
-                Welcome aboard! Check your inbox for your ₹50 credit.
-              </motion.div>
-            ) : (
-              <motion.form
-                onSubmit={handleSubscribe}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.15, duration: 0.4 }}
-                className="flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto"
+          ) : (
+            <form onSubmit={handleSubscribe}>
+              <div
+                style={{
+                  display: "flex",
+                  marginTop: 40,
+                  maxWidth: 600,
+                  border: `1px solid ${SAFFRON}`,
+                }}
               >
                 <input
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder="your.address@inbox.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-grow px-4 py-3 font-sans text-sm bg-transparent text-white placeholder:text-[#7f7663] focus:outline-none transition-colors duration-200"
                   style={{
-                    border: "1px solid rgba(212,175,55,0.25)",
-                    borderRadius: "0.25rem",
+                    flex: 1,
+                    background: "transparent",
+                    border: "none",
+                    color: CREAM,
+                    padding: "18px 22px",
+                    fontSize: 15,
+                    outline: "none",
+                    fontFamily: "var(--font-inter), sans-serif",
                   }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.borderColor = "rgba(212,175,55,0.6)")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.borderColor = "rgba(212,175,55,0.25)")
-                  }
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 font-sans text-sm font-medium transition-opacity duration-200 hover:opacity-90 shrink-0 disabled:opacity-50"
                   style={{
-                    background: "#735c00",
-                    color: "#ffffff",
-                    borderRadius: "0.25rem",
+                    background: SAFFRON,
+                    color: INK,
+                    border: "none",
+                    padding: "0 36px",
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: 11,
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    opacity: loading ? 0.7 : 1,
                   }}
                 >
-                  Subscribe
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  SUBSCRIBE →
                 </button>
-              </motion.form>
-            )}
+              </div>
+            </form>
+          )}
 
-            <p
-              className="font-sans mt-5"
-              style={{ fontSize: "0.72rem", color: "#4d4635" }}
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.15em",
+              opacity: 0.45,
+              marginTop: 16,
+              textTransform: "uppercase",
+            }}
+          >
+            ★ ₹50 STORE CREDIT ON FIRST ORDER · UNSUBSCRIBE ANY TIME
+          </div>
+        </div>
+
+        {/* Right: testimonial quote */}
+        <div
+          style={{
+            padding: "72px 48px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 11,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: SAFFRON,
+              }}
             >
-              By subscribing you agree to our Privacy Policy. Unsubscribe anytime.
+              LETTERS / PG. 16
+            </div>
+            <p
+              style={{
+                fontSize: 22,
+                lineHeight: 1.4,
+                fontStyle: "italic",
+                fontWeight: 300,
+                marginTop: 20,
+                fontFamily: "var(--font-fraunces), serif",
+              }}
+            >
+              &ldquo;Absolutely love the quality. The dry-down on Ameer Al Oud
+              lasts past midnight — and so does the compliment count.&rdquo;
             </p>
-          </motion.div>
+            <div
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 11,
+                letterSpacing: "0.15em",
+                marginTop: 20,
+                opacity: 0.55,
+              }}
+            >
+              — PRIYA S., BOMBAY · AVENTUS
+            </div>
+          </div>
+          <div
+            style={{
+              marginTop: 48,
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.15em",
+              opacity: 0.3,
+              lineHeight: 1.8,
+            }}
+          >
+            COLOPHON · SET IN FRAUNCES &amp; JETBRAINS MONO
+            <br />
+            PRINTED ON RECYCLED PIXELS
+            <br />
+            © MMXXVI AROMÉ LUXE · ALL RIGHTS RESERVED
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile */}
+      <div className="flex flex-col md:hidden" style={{ padding: "40px 20px" }}>
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: SAFFRON,
+            marginBottom: 12,
+          }}
+        >
+          JOIN THE INNER CIRCLE
+        </div>
+        <h2
+          style={{
+            fontSize: "2.5rem",
+            lineHeight: 0.92,
+            letterSpacing: "-0.03em",
+            fontWeight: 300,
+            marginBottom: 16,
+            fontFamily: "var(--font-fraunces), serif",
+          }}
+        >
+          Letters from{" "}
+          <em style={{ color: SAFFRON }}>the perfumer.</em>
+        </h2>
+        <p
+          style={{
+            fontFamily: "var(--font-inter), sans-serif",
+            fontSize: 14,
+            lineHeight: 1.6,
+            opacity: 0.7,
+            marginBottom: 24,
+          }}
+        >
+          New arrivals, dispatches from Grasse, opinions on synthetic musks.
+          Weekly. Worth the inbox.
+        </p>
+
+        {subscribed ? (
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 12,
+              letterSpacing: "0.15em",
+              color: SAFFRON,
+              textTransform: "uppercase",
+            }}
+          >
+            ★ WELCOME — CHECK YOUR INBOX
+          </div>
+        ) : (
+          <form onSubmit={handleSubscribe}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0,
+                border: `1px solid ${SAFFRON}`,
+              }}
+            >
+              <input
+                type="email"
+                placeholder="your.address@inbox.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: `1px solid ${SAFFRON}`,
+                  color: CREAM,
+                  padding: "16px 18px",
+                  fontSize: 14,
+                  outline: "none",
+                  fontFamily: "var(--font-inter), sans-serif",
+                }}
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  background: SAFFRON,
+                  color: INK,
+                  border: "none",
+                  padding: "16px 18px",
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 11,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  cursor: loading ? "not-allowed" : "pointer",
+                }}
+              >
+                SUBSCRIBE →
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 9,
+            letterSpacing: "0.12em",
+            opacity: 0.4,
+            marginTop: 16,
+            textTransform: "uppercase",
+          }}
+        >
+          ★ ₹50 STORE CREDIT ON FIRST ORDER · UNSUBSCRIBE ANY TIME
         </div>
       </div>
     </section>

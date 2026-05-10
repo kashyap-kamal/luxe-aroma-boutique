@@ -2,12 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Package, DollarSign, TrendingUp, AlertTriangle, ShoppingBag, IndianRupee, Star, Ticket } from 'lucide-react'
-import { fetchProductStats } from '@/lib/product-service'
+import { Package, DollarSign, TrendingUp, AlertTriangle, ShoppingBag, IndianRupee, Star, Ticket, Truck, Sparkles } from 'lucide-react'
+import { fetchProductStats, fetchProducts } from '@/lib/product-service'
+import { Product } from '@/stores/cart-store'
 import { fetchOrderStats, OrderStats } from '@/lib/order-admin-service'
 import { fetchAllCoupons, CouponRow } from '@/lib/coupon-service'
 import { fetchAllReviews, ReviewRow } from '@/lib/review-service'
+import { getFreeShipping, getShippingRate, getSetting, updateSetting, FreeShippingSetting, ShippingRateSetting } from '@/lib/settings-service'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface ProductStats {
   total_products: number
@@ -28,7 +35,13 @@ export default function AdminDashboard() {
   const [orderStats, setOrderStats] = useState<OrderStats | null>(null)
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [reviews, setReviews] = useState<ReviewRow[]>([])
+  const [freeShipping, setFreeShipping] = useState<FreeShippingSetting>({ enabled: true, threshold: 0 })
+  const [shippingRate, setShippingRate] = useState<ShippingRateSetting>({ amount: 49, currency: '₹' })
+  const [savingShipping, setSavingShipping] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [spotlightId, setSpotlightId] = useState<string>('')
+  const [savingSpotlight, setSavingSpotlight] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -36,8 +49,40 @@ export default function AdminDashboard() {
       fetchOrderStats().then(setOrderStats).catch(() => {}),
       fetchAllCoupons().then(setCoupons).catch(() => {}),
       fetchAllReviews().then(setReviews).catch(() => {}),
+      getFreeShipping().then(setFreeShipping).catch(() => {}),
+      getShippingRate().then(setShippingRate).catch(() => {}),
+      fetchProducts().then(setAllProducts).catch(() => {}),
+      getSetting<string>('spotlight_product_id').then((id) => { if (id) setSpotlightId(id) }).catch(() => {}),
     ]).finally(() => setLoading(false))
   }, [])
+
+  const handleFreeShippingToggle = async (enabled: boolean) => {
+    setSavingShipping(true)
+    const updated = { ...freeShipping, enabled }
+    setFreeShipping(updated)
+    try {
+      await updateSetting('free_shipping', updated)
+    } catch { /* revert on error */ setFreeShipping((prev) => ({ ...prev, enabled: !enabled })) }
+    finally { setSavingShipping(false) }
+  }
+
+  const handleShippingThreshold = async (threshold: number) => {
+    const updated = { ...freeShipping, threshold }
+    setFreeShipping(updated)
+    try { await updateSetting('free_shipping', updated) } catch {}
+  }
+
+  const handleShippingRate = async (amount: number) => {
+    const updated = { ...shippingRate, amount }
+    setShippingRate(updated)
+    try { await updateSetting('shipping_rate', updated) } catch {}
+  }
+
+  const handleSpotlightSave = async () => {
+    setSavingSpotlight(true)
+    try { await updateSetting('spotlight_product_id', spotlightId) } catch {}
+    finally { setSavingSpotlight(false) }
+  }
 
   if (loading) {
     return (
@@ -103,6 +148,94 @@ export default function AdminDashboard() {
             </Card>
           )
         })}
+      </div>
+
+      {/* Shipping Settings */}
+      <div className="mb-6">
+        <Card>
+          <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Truck className="h-4 w-4 text-blue-500" />Shipping Settings</CardTitle></CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="free-shipping"
+                  checked={freeShipping.enabled}
+                  onCheckedChange={handleFreeShippingToggle}
+                  disabled={savingShipping}
+                />
+                <Label htmlFor="free-shipping" className="cursor-pointer font-medium">
+                  Free shipping for all customers
+                </Label>
+              </div>
+              {!freeShipping.enabled && (
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="threshold" className="text-sm text-muted-foreground whitespace-nowrap">Free above ₹</Label>
+                    <Input
+                      id="threshold"
+                      type="number"
+                      min={0}
+                      className="w-24 h-8"
+                      value={freeShipping.threshold}
+                      onChange={(e) => handleShippingThreshold(Number(e.target.value))}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="rate" className="text-sm text-muted-foreground whitespace-nowrap">Flat rate ₹</Label>
+                    <Input
+                      id="rate"
+                      type="number"
+                      min={0}
+                      className="w-24 h-8"
+                      value={shippingRate.amount}
+                      onChange={(e) => handleShippingRate(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+              )}
+              <span className="text-xs text-muted-foreground">
+                {freeShipping.enabled
+                  ? 'All orders ship free'
+                  : freeShipping.threshold > 0
+                    ? `Free above ₹${freeShipping.threshold}, otherwise ₹${shippingRate.amount}`
+                    : `Flat ₹${shippingRate.amount} per order`}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Spotlight Product */}
+      <div className="mb-6">
+        <Card>
+          <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Sparkles className="h-4 w-4 text-amber-500" />Homepage Spotlight Product</CardTitle></CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-1">
+                <Label htmlFor="spotlight-select" className="text-sm text-muted-foreground mb-2 block">Featured product on homepage</Label>
+                <Select value={spotlightId} onValueChange={setSpotlightId}>
+                  <SelectTrigger id="spotlight-select" className="w-full sm:max-w-xs">
+                    <SelectValue placeholder="Select a product…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Default (first featured product)</SelectItem>
+                    {allProducts.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleSpotlightSave} disabled={savingSpotlight} className="sm:self-end">
+                {savingSpotlight ? 'Saving…' : 'Save'}
+              </Button>
+              {spotlightId && (
+                <span className="text-xs text-muted-foreground">
+                  {allProducts.find((p) => p.id === spotlightId)?.name ?? spotlightId}
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Bottom row */}

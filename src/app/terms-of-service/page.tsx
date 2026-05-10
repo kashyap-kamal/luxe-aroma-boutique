@@ -1,348 +1,273 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
+
+const section = { marginTop: 40 };
+const h2Style = {
+  fontFamily: "var(--font-fraunces), serif",
+  fontSize: "1.6rem",
+  fontWeight: 300,
+  color: INK,
+  letterSpacing: "-0.02em",
+  borderTop: `1px solid ${INK}`,
+  paddingTop: 20,
+  marginBottom: 14,
+};
+const pStyle = { marginBottom: 14, lineHeight: 1.75 };
+const ulStyle = { listStyle: "disc", paddingLeft: 24, marginBottom: 20 };
+const liStyle = { marginBottom: 8 };
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen bg-luxe-aliceBlue pt-24">
-      <div className="luxury-container pb-12">
-        {/* Back to Home Button */}
-        <div className="mb-8">
-          <Link href="/">
-            <Button variant="outline" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Button>
+    <div style={{ minHeight: "100vh", background: CREAM, color: INK, paddingTop: 80 }}>
+      {/* Header */}
+      <div style={{ borderBottom: `1px solid ${INK}`, paddingTop: 40, paddingBottom: 40 }} className="px-5 md:px-12">
+        <div className="max-w-4xl mx-auto">
+          <Link
+            href="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: INK,
+              textDecoration: "none",
+              marginBottom: 24,
+              opacity: 0.6,
+            }}
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Back to Home
           </Link>
-        </div>
-
-        {/* Terms of Service Content */}
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 prose prose-lg">
-          <h1 className="text-3xl font-bold text-luxe-blue mb-4">
-            TERMS OF SERVICE
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              marginBottom: 12,
+              opacity: 0.5,
+            }}
+          >
+            LEGAL / TERMS OF SERVICE
+          </div>
+          <h1
+            style={{
+              fontFamily: "var(--font-fraunces), serif",
+              fontSize: "clamp(2.5rem, 5vw, 4rem)",
+              fontWeight: 300,
+              lineHeight: 0.95,
+              letterSpacing: "-0.03em",
+              margin: 0,
+            }}
+          >
+            Terms of <em>Service</em>
           </h1>
-          <p className="text-gray-600 mb-8">Last updated: July 20, 2025</p>
+          <p
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.15em",
+              marginTop: 16,
+              opacity: 0.5,
+            }}
+          >
+            LAST UPDATED: APRIL 5, 2026
+          </p>
+        </div>
+      </div>
 
-          <div className="space-y-6">
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                1. Acceptance of Terms
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                By accessing and using the Aromé Luxe website at{" "}
-                <a
-                  href="https://aromeluxe.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-luxe-blue hover:underline"
-                >
-                  https://aromeluxe.in
-                </a>{" "}
-                and any related services, you accept and agree to be bound by
-                the terms and provision of this agreement. If you do not agree
-                to abide by the above, please do not use this service.
-              </p>
-            </section>
+      {/* Content */}
+      <div style={{ paddingTop: 48, paddingBottom: 80 }} className="luxury-container px-5 md:px-12">
+        <div className="max-w-4xl mx-auto" style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 15, color: "#3A3833" }}>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                2. Description of Service
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                Aromé Luxe provides an online platform for the sale of luxury
-                fragrances and related products. Our services include browsing
-                products, placing orders, customer support, and account
-                management. We reserve the right to modify, suspend, or
-                discontinue any aspect of our service at any time.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                3. User Accounts
-              </h2>
-              <div className="space-y-3">
-                <p className="text-gray-700 leading-relaxed">
-                  To access certain features of our website, you may be required
-                  to create an account. You are responsible for:
-                </p>
-                <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                  <li>
-                    Maintaining the confidentiality of your account credentials
-                  </li>
-                  <li>All activities that occur under your account</li>
-                  <li>Providing accurate and complete information</li>
-                  <li>Notifying us immediately of any unauthorized use</li>
-                </ul>
-                <p className="text-gray-700 leading-relaxed">
-                  We reserve the right to terminate accounts that violate these
-                  terms or for any other reason at our discretion.
-                </p>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                4. Product Information and Pricing
-              </h2>
-              <div className="space-y-3">
-                <p className="text-gray-700 leading-relaxed">
-                  We strive to provide accurate product descriptions, pricing,
-                  and availability information. However:
-                </p>
-                <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                  <li>
-                    Product images are for illustrative purposes and may not
-                    reflect exact appearance
-                  </li>
-                  <li>Prices are subject to change without notice</li>
-                  <li>Product availability is not guaranteed</li>
-                  <li>We reserve the right to correct pricing errors</li>
-                </ul>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                5. Orders and Payment
-              </h2>
-              <div className="space-y-3">
-                <p className="text-gray-700 leading-relaxed">
-                  By placing an order, you:
-                </p>
-                <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                  <li>
-                    Confirm that all information provided is accurate and
-                    complete
-                  </li>
-                  <li>
-                    Agree to pay the specified price plus applicable taxes and
-                    shipping
-                  </li>
-                  <li>Authorize us to process your payment</li>
-                  <li>
-                    Acknowledge that order confirmation does not guarantee
-                    product availability
-                  </li>
-                </ul>
-                <p className="text-gray-700 leading-relaxed">
-                  We accept various payment methods as indicated on our website.
-                  All payments must be made in the currency specified.
-                </p>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                6. Shipping and Delivery
-              </h2>
-              <div className="space-y-3">
-                <p className="text-gray-700 leading-relaxed">
-                  Shipping terms and delivery estimates are provided at
-                  checkout. Please note:
-                </p>
-                <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                  <li>Delivery times are estimates and may vary</li>
-                  <li>Risk of loss transfers to you upon delivery</li>
-                  <li>
-                    You are responsible for providing accurate shipping
-                    information
-                  </li>
-                  <li>
-                    Additional charges may apply for international shipping
-                  </li>
-                </ul>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                7. Returns and Refunds
-              </h2>
-              <div className="space-y-3">
-                <p className="text-gray-700 leading-relaxed">
-                  Our return policy allows for returns within 30 days of
-                  delivery, subject to the following conditions:
-                </p>
-                <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                  <li>Products must be unused and in original packaging</li>
-                  <li>
-                    Return shipping costs are the responsibility of the customer
-                  </li>
-                  <li>Refunds will be processed within 14 business days</li>
-                  <li>
-                    Sale items and personalized products may have different
-                    return terms
-                  </li>
-                </ul>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                8. Intellectual Property
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                All content on this website, including but not limited to text,
-                graphics, logos, images, and software, is the property of Aromé
-                Luxe or its licensors and is protected by copyright, trademark,
-                and other intellectual property laws. You may not reproduce,
-                distribute, or create derivative works without our express
-                written consent.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                9. Prohibited Uses
-              </h2>
-              <div className="space-y-3">
-                <p className="text-gray-700 leading-relaxed">
-                  You agree not to use our website for any unlawful purpose or
-                  in any way that could damage, disable, overburden, or impair
-                  our servers or networks. Prohibited activities include:
-                </p>
-                <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                  <li>Attempting to gain unauthorized access to our systems</li>
-                  <li>Using automated tools to access our website</li>
-                  <li>
-                    Interfering with the proper functioning of our website
-                  </li>
-                  <li>Transmitting viruses or malicious code</li>
-                  <li>Harassing or threatening other users</li>
-                </ul>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                10. Privacy Policy
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                Your privacy is important to us. Please review our{" "}
-                <Link
-                  href="/privacy-policy"
-                  className="text-luxe-blue hover:underline"
-                >
-                  Privacy Policy
-                </Link>
-                , which also governs your use of our website and is incorporated
-                into these Terms of Service by reference.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                11. Disclaimers and Limitations
-              </h2>
-              <div className="space-y-3">
-                <p className="text-gray-700 leading-relaxed">
-                  Our website and services are provided &quot;as is&quot;
-                  without warranties of any kind. We disclaim all warranties,
-                  express or implied, including but not limited to:
-                </p>
-                <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                  <li>
-                    Warranties of merchantability or fitness for a particular
-                    purpose
-                  </li>
-                  <li>
-                    Warranties that our website will be uninterrupted or
-                    error-free
-                  </li>
-                  <li>Warranties regarding the accuracy of information</li>
-                </ul>
-                <p className="text-gray-700 leading-relaxed">
-                  In no event shall Aromé Luxe be liable for any indirect,
-                  incidental, special, or consequential damages arising from
-                  your use of our website or services.
-                </p>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                12. Indemnification
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                You agree to indemnify and hold harmless Aromé Luxe, its
-                officers, directors, employees, and agents from any claims,
-                damages, or expenses arising from your use of our website or
-                violation of these terms.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                13. Governing Law
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                These Terms of Service shall be governed by and construed in
-                accordance with the laws of India. Any disputes arising from
-                these terms shall be subject to the exclusive jurisdiction of
-                the courts in India.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                14. Changes to Terms
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                We reserve the right to modify these Terms of Service at any
-                time. Changes will be effective immediately upon posting on our
-                website. Your continued use of our website after changes
-                constitutes acceptance of the modified terms.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                15. Contact Information
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                If you have any questions about these Terms of Service, please
-                contact us at:
-              </p>
-              <div className="bg-gray-50 p-4 rounded-lg mt-3">
-                <p className="text-gray-700">
-                  <strong>Email:</strong> legal@aromeluxe.in
-                  <br />
-                  <strong>Address:</strong> Aromé Luxe, [Your Business Address]
-                  <br />
-                  <strong>Phone:</strong> [Your Phone Number]
-                </p>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                16. Severability
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                If any provision of these Terms of Service is found to be
-                unenforceable or invalid, that provision will be limited or
-                eliminated to the minimum extent necessary so that these Terms
-                of Service will otherwise remain in full force and effect.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-luxe-blue mb-4">
-                17. Entire Agreement
-              </h2>
-              <p className="text-gray-700 leading-relaxed">
-                These Terms of Service, together with our Privacy Policy,
-                constitute the entire agreement between you and Aromé Luxe
-                regarding your use of our website and services.
-              </p>
-            </section>
+          <div style={section}>
+            <h2 style={h2Style}>1. Acceptance of Terms</h2>
+            <p style={pStyle}>
+              By accessing and using the Aromé Luxe website at{" "}
+              <a href="https://aromeluxe.in" target="_blank" rel="noopener noreferrer" style={{ color: SAFFRON }}>https://aromeluxe.in</a>{" "}
+              and any related services, you accept and agree to be bound by these terms.
+              If you do not agree, please do not use this service.
+            </p>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-200">
-            <p className="text-sm text-gray-600 text-center">
-              By using our website, you acknowledge that you have read,
-              understood, and agree to be bound by these Terms of Service.
+          <div style={section}>
+            <h2 style={h2Style}>2. Description of Service</h2>
+            <p style={pStyle}>
+              Aromé Luxe provides an online platform for the sale of luxury fragrances and related products.
+              Our services include browsing products, placing orders, customer support, and account management.
+              We reserve the right to modify, suspend, or discontinue any aspect of our service at any time.
+            </p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>3. User Accounts</h2>
+            <p style={pStyle}>To access certain features of our website, you may be required to create an account. You are responsible for:</p>
+            <ul style={ulStyle}>
+              <li style={liStyle}>Maintaining the confidentiality of your account credentials</li>
+              <li style={liStyle}>All activities that occur under your account</li>
+              <li style={liStyle}>Providing accurate and complete information</li>
+              <li style={liStyle}>Notifying us immediately of any unauthorized use</li>
+            </ul>
+            <p style={pStyle}>We reserve the right to terminate accounts that violate these terms or for any other reason at our discretion.</p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>4. Product Information and Pricing</h2>
+            <p style={pStyle}>We strive to provide accurate product descriptions, pricing, and availability information. However:</p>
+            <ul style={ulStyle}>
+              <li style={liStyle}>Product images are for illustrative purposes and may not reflect exact appearance</li>
+              <li style={liStyle}>Prices are subject to change without notice</li>
+              <li style={liStyle}>Product availability is not guaranteed</li>
+              <li style={liStyle}>We reserve the right to correct pricing errors</li>
+            </ul>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>5. Orders and Payment</h2>
+            <p style={pStyle}>By placing an order, you:</p>
+            <ul style={ulStyle}>
+              <li style={liStyle}>Confirm that all information provided is accurate and complete</li>
+              <li style={liStyle}>Agree to pay the specified price plus applicable taxes and shipping</li>
+              <li style={liStyle}>Authorize us to process your payment via our payment gateway</li>
+              <li style={liStyle}>Acknowledge that order confirmation does not guarantee product availability</li>
+            </ul>
+            <p style={pStyle}>
+              All online payments are processed by <strong>Cashfree Payments India Pvt. Ltd.</strong>, an RBI-authorised Payment Aggregator.
+              By completing a transaction, you also agree to{" "}
+              <a href="https://www.cashfree.com/tnc/" target="_blank" rel="noopener noreferrer" style={{ color: SAFFRON }}>Cashfree&apos;s terms</a>.
+              We accept UPI, credit/debit cards, and net banking. All payments are in INR.{" "}
+              <strong>Cash on Delivery (COD) is not available.</strong>
+            </p>
+            <p style={pStyle}>
+              <strong>Refund limitations:</strong> Refunds cannot be processed for transactions older than 120 days.
+              Cash refunds are not offered; all refunds are credited to the original payment method only.
+            </p>
+            <p style={pStyle}>
+              <strong>Chargebacks:</strong> If you initiate a chargeback, Cashfree will raise a dispute and we will submit evidence. Banks typically take 21–45 days to adjudicate.
+            </p>
+            <p style={pStyle}>
+              <strong>Merchant-initiated cancellations:</strong> We may cancel an order if a product is out of stock, if we cannot verify your delivery address, or if there is a pricing or technical error. A full refund will be issued in such cases.
+            </p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>6. Shipping and Delivery</h2>
+            <p style={pStyle}>All orders are shipped via <strong>Shiprocket</strong> courier partners. Please note:</p>
+            <ul style={ulStyle}>
+              <li style={liStyle}>Delivery times are estimates and may vary due to courier delays, weather, or public holidays</li>
+              <li style={liStyle}>Risk of loss transfers to you upon delivery</li>
+              <li style={liStyle}>You are responsible for providing an accurate and complete shipping address</li>
+              <li style={liStyle}>We currently ship within India only</li>
+              <li style={liStyle}><strong>Perfumes containing alcohol are classified as flammable goods under IATA regulations and are restricted from air transport.</strong> Such orders ship via surface/ground courier only (typically 5–9 business days).</li>
+              <li style={liStyle}>Three delivery attempts are made before a shipment is returned (RTO)</li>
+              <li style={liStyle}>Shiprocket&apos;s liability for lost or damaged shipments without add-on insurance is limited to ₹5,000 or the declared order value, whichever is lower</li>
+            </ul>
+            <p style={pStyle}>
+              For full details, see our <Link href="/shipping-delivery" style={{ color: SAFFRON }}>Shipping &amp; Delivery Policy</Link>.
+            </p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>7. Returns and Refunds</h2>
+            <p style={pStyle}>Our return policy allows for returns within <strong>7 days of delivery</strong>, subject to:</p>
+            <ul style={ulStyle}>
+              <li style={liStyle}>Products must be <strong>unopened and in original packaging</strong> with seals intact</li>
+              <li style={liStyle}>Return shipping costs are the customer&apos;s responsibility, except for defective or incorrectly delivered items</li>
+              <li style={liStyle}>Refunds are initiated within 2–3 business days and credited within 5–7 working days</li>
+              <li style={liStyle}>Opened or used perfumes, sale items, and personalised products cannot be returned unless defective</li>
+              <li style={liStyle}>Refunds cannot be processed for transactions older than 120 days</li>
+            </ul>
+            <p style={pStyle}>
+              For full details, see our <Link href="/cancellation-refund" style={{ color: SAFFRON }}>Cancellation &amp; Refund Policy</Link>.
+            </p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>8. Intellectual Property</h2>
+            <p style={pStyle}>
+              All content on this website, including text, graphics, logos, images, and software, is the property of Aromé Luxe or its licensors
+              and is protected by copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, or create derivative
+              works without our express written consent.
+            </p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>9. Prohibited Uses</h2>
+            <p style={pStyle}>You agree not to use our website for any unlawful purpose. Prohibited activities include:</p>
+            <ul style={ulStyle}>
+              <li style={liStyle}>Attempting to gain unauthorized access to our systems</li>
+              <li style={liStyle}>Using automated tools to access our website</li>
+              <li style={liStyle}>Interfering with the proper functioning of our website</li>
+              <li style={liStyle}>Transmitting viruses or malicious code</li>
+            </ul>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>10. Privacy Policy</h2>
+            <p style={pStyle}>
+              Your privacy is important to us. Please review our{" "}
+              <Link href="/privacy-policy" style={{ color: SAFFRON }}>Privacy Policy</Link>,
+              which also governs your use of our website and is incorporated into these Terms of Service by reference.
+            </p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>11. Disclaimers and Limitations</h2>
+            <p style={pStyle}>Our website and services are provided &quot;as is&quot; without warranties of any kind. In no event shall Aromé Luxe be liable for any indirect, incidental, special, or consequential damages arising from your use of our website or services.</p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>12. Fragrance Sensitivity & Allergen Disclaimer</h2>
+            <p style={pStyle}>Fragrances and perfumes contain complex chemical compounds that may cause allergic reactions in some individuals. By purchasing, you acknowledge that:</p>
+            <ul style={ulStyle}>
+              <li style={liStyle}>You have considered any known fragrance allergies before purchase</li>
+              <li style={liStyle}>We are not liable for any adverse reactions arising from use of our products</li>
+              <li style={liStyle}>Opened or used products cannot be returned due to health and hygiene reasons</li>
+              <li style={liStyle}>If you experience a reaction, discontinue use immediately and consult a medical professional</li>
+            </ul>
+            <p style={pStyle}>
+              For known fragrance allergies, contact us at <a href="mailto:contact@aromeluxe.in" style={{ color: SAFFRON }}>contact@aromeluxe.in</a> before purchasing.
+            </p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>13. Governing Law</h2>
+            <p style={pStyle}>
+              These Terms shall be governed by and construed in accordance with the laws of India. Any disputes shall be subject to the exclusive jurisdiction of the courts in Ghaziabad, Uttar Pradesh, India.
+            </p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>14. Changes to Terms</h2>
+            <p style={pStyle}>
+              We reserve the right to modify these Terms at any time. Changes are effective immediately upon posting. Continued use of our website after changes constitutes acceptance of the modified terms.
+            </p>
+          </div>
+
+          <div style={section}>
+            <h2 style={h2Style}>15. Contact Information</h2>
+            <p style={pStyle}>If you have any questions about these Terms of Service:</p>
+            <div style={{ background: "rgba(14,14,12,0.04)", border: `1px solid rgba(14,14,12,0.12)`, padding: "20px 24px", marginTop: 16 }}>
+              <p style={{ margin: 0, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 12, letterSpacing: "0.1em" }}>
+                <span style={{ opacity: 0.5 }}>EMAIL</span> &nbsp;
+                <a href="mailto:contact@aromeluxe.in" style={{ color: SAFFRON }}>contact@aromeluxe.in</a>
+                <br /><br />
+                <span style={{ opacity: 0.5 }}>ADDRESS</span> &nbsp;
+                <span style={{ color: INK }}>Aromé Luxe, A5 901 Olive County, Vasundhara, Ghaziabad — 201010, Uttar Pradesh, India</span>
+              </p>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 60, paddingTop: 24, borderTop: `1px solid rgba(14,14,12,0.15)`, textAlign: "center" }}>
+            <p style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.15em", opacity: 0.4, textTransform: "uppercase" }}>
+              By using our website, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
             </p>
           </div>
         </div>

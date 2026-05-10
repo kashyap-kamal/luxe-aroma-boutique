@@ -4,12 +4,15 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ArrowRight, ShoppingBag, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, RotateCcw, ShoppingBag } from "lucide-react";
 import { Product, useCartStore } from "@/stores/cart-store";
 import { fetchProducts } from "@/lib/product-service";
 import { toast } from "sonner";
 
-// ── Quiz questions and answer-to-tag mappings ──
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
+const DARK = "#1A0908";
 
 interface QuizOption {
   label: string;
@@ -19,14 +22,16 @@ interface QuizOption {
 }
 
 interface QuizQuestion {
+  step: string;
   title: string;
   subtitle: string;
   options: QuizOption[];
 }
 
-const quizQuestions: QuizQuestion[] = [
+const QUESTIONS: QuizQuestion[] = [
   {
-    title: "Who is this fragrance for?",
+    step: "01",
+    title: "Who is this for?",
     subtitle: "Let's start with the basics.",
     options: [
       { label: "Men", description: "Masculine, confident scents", tags: [], category: "men" },
@@ -35,6 +40,7 @@ const quizQuestions: QuizQuestion[] = [
     ],
   },
   {
+    step: "02",
     title: "What's the occasion?",
     subtitle: "Where will you wear this most?",
     options: [
@@ -45,7 +51,8 @@ const quizQuestions: QuizQuestion[] = [
     ],
   },
   {
-    title: "Which scent family speaks to you?",
+    step: "03",
+    title: "Which scent family?",
     subtitle: "Trust your instinct here.",
     options: [
       { label: "Fresh & Light", description: "Citrus, aquatic, clean", tags: ["fresh", "aquatic", "citrus"] },
@@ -55,6 +62,7 @@ const quizQuestions: QuizQuestion[] = [
     ],
   },
   {
+    step: "04",
     title: "How long should it last?",
     subtitle: "Longevity matters.",
     options: [
@@ -64,7 +72,8 @@ const quizQuestions: QuizQuestion[] = [
     ],
   },
   {
-    title: "What season are you dressing for?",
+    step: "05",
+    title: "What season?",
     subtitle: "Climate affects how a scent unfolds.",
     options: [
       { label: "Summer", description: "Hot days, open air", tags: ["summer"] },
@@ -74,61 +83,65 @@ const quizQuestions: QuizQuestion[] = [
   },
 ];
 
-// ── Scoring logic ──
-
 function scoreProducts(
   products: Product[],
   answers: { tags: string[]; category: string }
 ): Array<{ product: Product; score: number; matchPercent: number }> {
   const maxPossibleScore = answers.tags.length + (answers.category ? 1 : 0);
-
   return products
     .map((p) => {
       let score = 0;
-      // Category match
       if (answers.category && p.category === answers.category) score += 1;
-      if (!answers.category) score += 0.5; // slight bonus for "Anyone"
-      // Tag matches
+      if (!answers.category) score += 0.5;
       for (const tag of answers.tags) {
         if (p.tags?.includes(tag)) score += 1;
       }
-      const matchPercent = maxPossibleScore > 0 ? Math.round((score / maxPossibleScore) * 100) : 0;
+      const matchPercent =
+        maxPossibleScore > 0
+          ? Math.round((score / maxPossibleScore) * 100)
+          : 0;
       return { product: p, score, matchPercent: Math.min(matchPercent, 99) };
     })
     .filter((r) => r.score > 0)
     .sort((a, b) => b.score - a.score);
 }
 
-// ── Components ──
-
 export default function QuizPage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [results, setResults] = useState<Array<{ product: Product; score: number; matchPercent: number }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [results, setResults] = useState<
+    Array<{ product: Product; score: number; matchPercent: number }>
+  >([]);
   const [showResults, setShowResults] = useState(false);
   const { addToCart } = useCartStore();
+  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetchProducts().then(setProducts);
+    fetchProducts()
+      .then(setProducts)
+      .finally(() => setLoading(false));
   }, []);
 
   const handleSelect = (optionIndex: number) => {
     const newAnswers = [...answers, optionIndex];
     setAnswers(newAnswers);
 
-    if (step < quizQuestions.length - 1) {
+    if (step < QUESTIONS.length - 1) {
       setStep(step + 1);
     } else {
-      // Calculate results
       const collectedTags: string[] = [];
       let category = "";
       newAnswers.forEach((ansIdx, qIdx) => {
-        const option = quizQuestions[qIdx].options[ansIdx];
+        const option = QUESTIONS[qIdx].options[ansIdx];
         collectedTags.push(...option.tags);
         if (option.category !== undefined) category = option.category;
       });
-      const scored = scoreProducts(products, { tags: collectedTags, category });
+      const scored = scoreProducts(products, {
+        tags: collectedTags,
+        category,
+      });
       setResults(scored.slice(0, 4));
       setShowResults(true);
     }
@@ -149,180 +162,515 @@ export default function QuizPage() {
   };
 
   const handleAddToCart = (product: Product) => {
+    if (addedIds.has(product.id)) return;
     addToCart(product, 1);
+    setAddedIds((prev) => new Set(prev).add(product.id));
+    setTimeout(() => {
+      setAddedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(product.id);
+        return next;
+      });
+    }, 1500);
     toast.success(`${product.name} added to cart`);
   };
 
-  const currentQuestion = quizQuestions[step];
+  const q = QUESTIONS[step];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#2d3435" }}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 lg:px-12 py-5">
-        <Link href="/" className="font-serif font-bold uppercase text-lg" style={{ color: "#f9f9f9", letterSpacing: "-0.02em" }}>
-          AROMÉ LUXE
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: DARK, color: CREAM }}
+    >
+      {/* ── Top bar ── */}
+      <div
+        style={{
+          borderBottom: `1px solid rgba(242,237,228,0.12)`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "16px 32px",
+        }}
+      >
+        <Link
+          href="/"
+          style={{
+            fontFamily: "var(--font-fraunces), serif",
+            fontSize: "1.1rem",
+            fontWeight: 300,
+            letterSpacing: "-0.02em",
+            color: CREAM,
+            textDecoration: "none",
+          }}
+        >
+          Aromé <em>Luxe</em>
         </Link>
-        <Link href="/" className="font-sans text-xs uppercase tracking-widest" style={{ color: "rgba(249,249,249,0.5)" }}>
-          <ArrowLeft className="inline h-3 w-3 mr-1" />
-          Back to Store
+
+        {!showResults && (
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.2em",
+              color: SAFFRON,
+            }}
+          >
+            SCENT DIAGNOSTIC — {q?.step}/{QUESTIONS.length}
+          </div>
+        )}
+
+        <Link
+          href="/"
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            color: "rgba(242,237,228,0.4)",
+            textDecoration: "none",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <ArrowLeft style={{ width: 12, height: 12 }} />
+          Exit
         </Link>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-6">
+      {/* ── Body ── */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
         <AnimatePresence mode="wait">
           {!showResults ? (
+            /* ── Question ── */
             <motion.div
               key={`q-${step}`}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.35 }}
-              className="max-w-2xl w-full"
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              style={{ maxWidth: 640, width: "100%" }}
             >
-              {/* Progress */}
-              <div className="flex items-center gap-3 mb-10">
-                <div className="flex-1 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(249,249,249,0.1)" }}>
+              {/* Progress bar */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 4,
+                  marginBottom: 48,
+                }}
+              >
+                {QUESTIONS.map((_, i) => (
                   <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${((step + 1) / quizQuestions.length) * 100}%`, background: "#735b3a" }}
-                  />
-                </div>
-                <span className="font-sans text-xs" style={{ color: "rgba(249,249,249,0.4)" }}>
-                  {step + 1}/{quizQuestions.length}
-                </span>
-              </div>
-
-              {/* Question */}
-              <span className="font-sans uppercase tracking-[0.5em] text-[10px] block mb-4" style={{ color: "#735b3a" }}>
-                SENSORY JOURNEY
-              </span>
-              <h2 className="font-serif italic font-normal mb-2" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", color: "#f9f9f9" }}>
-                {currentQuestion.title}
-              </h2>
-              <p className="font-sans font-light mb-10" style={{ fontSize: "1rem", color: "rgba(249,249,249,0.5)" }}>
-                {currentQuestion.subtitle}
-              </p>
-
-              {/* Options */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {currentQuestion.options.map((option, i) => (
-                  <button
-                    key={option.label}
-                    onClick={() => handleSelect(i)}
-                    className="text-left p-5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    key={i}
                     style={{
-                      background: "rgba(249,249,249,0.05)",
-                      border: "1px solid rgba(249,249,249,0.1)",
+                      flex: 1,
+                      height: 2,
+                      background:
+                        i <= step
+                          ? SAFFRON
+                          : "rgba(242,237,228,0.12)",
+                      transition: "background 0.4s",
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "rgba(249,249,249,0.1)";
-                      e.currentTarget.style.borderColor = "rgba(115,91,58,0.5)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(249,249,249,0.05)";
-                      e.currentTarget.style.borderColor = "rgba(249,249,249,0.1)";
-                    }}
-                  >
-                    <div className="font-sans font-semibold text-sm mb-1" style={{ color: "#f9f9f9" }}>
-                      {option.label}
-                    </div>
-                    <div className="font-sans text-xs" style={{ color: "rgba(249,249,249,0.45)" }}>
-                      {option.description}
-                    </div>
-                  </button>
+                  />
                 ))}
               </div>
 
-              {/* Back button */}
+              {/* Label */}
+              <div
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 10,
+                  letterSpacing: "0.25em",
+                  textTransform: "uppercase",
+                  color: SAFFRON,
+                  marginBottom: 16,
+                }}
+              >
+                QUESTION {q.step}
+              </div>
+
+              {/* Title */}
+              <h2
+                style={{
+                  fontFamily: "var(--font-fraunces), serif",
+                  fontSize: "clamp(2rem, 5vw, 3.2rem)",
+                  fontWeight: 300,
+                  lineHeight: 1.0,
+                  letterSpacing: "-0.03em",
+                  color: CREAM,
+                  margin: "0 0 8px",
+                }}
+              >
+                {q.title}
+              </h2>
+              <p
+                style={{
+                  fontFamily: "var(--font-inter), sans-serif",
+                  fontSize: 14,
+                  color: "rgba(242,237,228,0.45)",
+                  marginBottom: 40,
+                }}
+              >
+                {q.subtitle}
+              </p>
+
+              {/* Options */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    q.options.length === 3 ? "repeat(3, 1fr)" : "repeat(2, 1fr)",
+                  gap: 12,
+                }}
+                className="!grid-cols-1 sm:!grid-cols-none"
+              >
+                {q.options.map((opt, i) => (
+                  <motion.button
+                    key={opt.label}
+                    onClick={() => handleSelect(i)}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      textAlign: "left",
+                      padding: "20px 24px",
+                      background: "rgba(242,237,228,0.04)",
+                      border: "1px solid rgba(242,237,228,0.12)",
+                      cursor: "pointer",
+                      transition: "border-color 0.2s, background 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = `rgba(232,118,58,0.5)`;
+                      e.currentTarget.style.background = "rgba(232,118,58,0.06)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "rgba(242,237,228,0.12)";
+                      e.currentTarget.style.background = "rgba(242,237,228,0.04)";
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: "var(--font-fraunces), serif",
+                        fontSize: "1.1rem",
+                        fontWeight: 300,
+                        color: CREAM,
+                        marginBottom: 6,
+                      }}
+                    >
+                      {opt.label}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-jetbrains-mono), monospace",
+                        fontSize: 10,
+                        letterSpacing: "0.1em",
+                        color: "rgba(242,237,228,0.38)",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {opt.description}
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Back */}
               {step > 0 && (
-                <button onClick={handleBack} className="mt-6 font-sans text-xs uppercase tracking-widest flex items-center gap-2" style={{ color: "rgba(249,249,249,0.4)" }}>
-                  <ArrowLeft className="h-3 w-3" /> Previous
+                <button
+                  onClick={handleBack}
+                  style={{
+                    marginTop: 32,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    color: "rgba(242,237,228,0.35)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  <ArrowLeft style={{ width: 12, height: 12 }} /> Previous
                 </button>
               )}
             </motion.div>
           ) : (
-            /* Results */
+            /* ── Results ── */
             <motion.div
               key="results"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="max-w-4xl w-full py-10"
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              style={{ maxWidth: 960, width: "100%", paddingBottom: 40 }}
             >
-              <div className="text-center mb-10">
-                <span className="font-sans uppercase tracking-[0.5em] text-[10px] block mb-4" style={{ color: "#735b3a" }}>
-                  YOUR RESULTS
-                </span>
-                <h2 className="font-serif italic font-normal mb-3" style={{ fontSize: "clamp(1.8rem, 4vw, 2.5rem)", color: "#f9f9f9" }}>
-                  We found your match{results.length > 1 ? "es" : ""}.
+              {/* Results header */}
+              <div style={{ marginBottom: 48 }}>
+                <div
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.25em",
+                    textTransform: "uppercase",
+                    color: SAFFRON,
+                    marginBottom: 16,
+                  }}
+                >
+                  DIAGNOSTIC COMPLETE
+                </div>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-fraunces), serif",
+                    fontSize: "clamp(2.4rem, 5vw, 4rem)",
+                    fontWeight: 300,
+                    lineHeight: 0.92,
+                    letterSpacing: "-0.04em",
+                    color: CREAM,
+                    margin: "0 0 16px",
+                  }}
+                >
+                  Your matches,
+                  <br />
+                  <em style={{ color: SAFFRON }}>curated.</em>
                 </h2>
-                <p className="font-sans font-light" style={{ fontSize: "0.95rem", color: "rgba(249,249,249,0.5)" }}>
-                  Based on your preferences, here&apos;s what we recommend.
+                <p
+                  style={{
+                    fontFamily: "var(--font-inter), sans-serif",
+                    fontSize: 14,
+                    color: "rgba(242,237,228,0.45)",
+                    maxWidth: 440,
+                  }}
+                >
+                  Based on your answers, these fragrances are calibrated to you.
                 </p>
               </div>
 
+              {/* Divider */}
+              <div
+                style={{
+                  height: 1,
+                  background: "rgba(242,237,228,0.1)",
+                  marginBottom: 40,
+                }}
+              />
+
               {results.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="font-sans" style={{ color: "rgba(249,249,249,0.5)" }}>
-                    No exact matches found. Try a different combination!
+                <div style={{ textAlign: "center", padding: "48px 0" }}>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-inter), sans-serif",
+                      fontSize: 14,
+                      color: "rgba(242,237,228,0.45)",
+                      marginBottom: 24,
+                    }}
+                  >
+                    No exact matches found. Browse our full collection instead.
                   </p>
+                  <Link
+                    href="/products"
+                    style={{
+                      background: SAFFRON,
+                      color: INK,
+                      padding: "16px 32px",
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      fontSize: 11,
+                      letterSpacing: "0.2em",
+                      textTransform: "uppercase",
+                      textDecoration: "none",
+                      display: "inline-block",
+                    }}
+                  >
+                    Browse All →
+                  </Link>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                    gap: 1,
+                    border: "1px solid rgba(242,237,228,0.1)",
+                  }}
+                >
                   {results.map(({ product, matchPercent }, i) => (
                     <motion.div
                       key={product.id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="group"
+                      transition={{ delay: i * 0.08 }}
+                      style={{
+                        background: "#120604",
+                        padding: "0",
+                        position: "relative",
+                      }}
                     >
-                      <div className="relative overflow-hidden mb-3" style={{ aspectRatio: "3/4", background: "rgba(249,249,249,0.05)" }}>
+                      {/* Match badge */}
+                      {i === 0 && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 12,
+                            left: 12,
+                            zIndex: 2,
+                            background: SAFFRON,
+                            color: INK,
+                            fontFamily: "var(--font-jetbrains-mono), monospace",
+                            fontSize: 9,
+                            letterSpacing: "0.15em",
+                            padding: "4px 8px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          BEST MATCH
+                        </div>
+                      )}
+
+                      {/* Match % */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: i === 0 ? 38 : 12,
+                          left: 12,
+                          zIndex: 2,
+                          fontFamily: "var(--font-jetbrains-mono), monospace",
+                          fontSize: 9,
+                          letterSpacing: "0.1em",
+                          color: "rgba(242,237,228,0.4)",
+                        }}
+                      >
+                        {matchPercent}% MATCH
+                      </div>
+
+                      {/* Image */}
+                      <div
+                        style={{
+                          position: "relative",
+                          height: 280,
+                          background: `radial-gradient(circle at 50% 60%, #3D1A0A 0%, #120604 70%)`,
+                        }}
+                      >
                         <Image
                           src={product.image}
                           alt={product.name}
-                          width={300}
-                          height={400}
-                          className="object-cover w-full h-full"
+                          fill
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                          className="object-contain"
+                          style={{ padding: "24px 32px" }}
                         />
-                        <div className="absolute top-2 left-2 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider" style={{ background: "#735b3a", color: "#f9f9f9" }}>
-                          {matchPercent}% Match
-                        </div>
                       </div>
-                      <div className="px-1">
+
+                      {/* Info */}
+                      <div
+                        style={{
+                          padding: "16px 20px 20px",
+                          borderTop: "1px solid rgba(242,237,228,0.08)",
+                        }}
+                      >
                         {product.fragrance_notes?.top && (
-                          <p className="font-sans uppercase tracking-[0.1em] mb-1" style={{ fontSize: "0.55rem", color: "rgba(249,249,249,0.35)" }}>
+                          <div
+                            style={{
+                              fontFamily: "var(--font-jetbrains-mono), monospace",
+                              fontSize: 9,
+                              letterSpacing: "0.15em",
+                              textTransform: "uppercase",
+                              color: "rgba(242,237,228,0.3)",
+                              marginBottom: 6,
+                            }}
+                          >
                             {product.fragrance_notes.top.slice(0, 3).join(" · ")}
-                          </p>
+                          </div>
                         )}
-                        <h3 className="font-serif font-medium mb-1" style={{ fontSize: "0.95rem", color: "#f9f9f9" }}>
+                        <div
+                          style={{
+                            fontFamily: "var(--font-fraunces), serif",
+                            fontSize: "1rem",
+                            fontWeight: 300,
+                            color: CREAM,
+                            marginBottom: 10,
+                          }}
+                        >
                           {product.name}
-                        </h3>
-                        <div className="flex items-baseline gap-2 mb-3">
-                          <span className="font-sans font-semibold text-sm" style={{ color: "#f9f9f9" }}>
-                            {product.price.currency}{product.price.current.toLocaleString("en-IN")}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "baseline",
+                            gap: 8,
+                            marginBottom: 14,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "var(--font-fraunces), serif",
+                              fontSize: "1.1rem",
+                              fontWeight: 300,
+                              color: CREAM,
+                            }}
+                          >
+                            {product.price.currency}
+                            {product.price.current.toLocaleString("en-IN")}
                           </span>
                           {product.price.on_sale && (
-                            <span className="font-sans text-xs line-through" style={{ color: "rgba(249,249,249,0.35)" }}>
-                              {product.price.currency}{product.price.original.toLocaleString("en-IN")}
+                            <span
+                              style={{
+                                fontFamily: "var(--font-jetbrains-mono), monospace",
+                                fontSize: 10,
+                                color: "rgba(242,237,228,0.3)",
+                                textDecoration: "line-through",
+                              }}
+                            >
+                              {product.price.currency}
+                              {product.price.original.toLocaleString("en-IN")}
                             </span>
                           )}
                         </div>
-                        <div className="flex gap-2">
+
+                        <div style={{ display: "flex", gap: 8 }}>
                           <button
                             onClick={() => handleAddToCart(product)}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 font-sans text-xs font-medium tracking-wide transition-all hover:opacity-90"
-                            style={{ background: "#735b3a", color: "#f9f9f9" }}
+                            disabled={addedIds.has(product.id)}
+                            style={{
+                              flex: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 6,
+                              padding: "11px 0",
+                              background: addedIds.has(product.id)
+                                ? "rgba(232,118,58,0.3)"
+                                : SAFFRON,
+                              color: INK,
+                              border: "none",
+                              fontFamily: "var(--font-jetbrains-mono), monospace",
+                              fontSize: 9,
+                              letterSpacing: "0.15em",
+                              textTransform: "uppercase",
+                              cursor: addedIds.has(product.id)
+                                ? "not-allowed"
+                                : "pointer",
+                              transition: "background 0.2s",
+                            }}
                           >
-                            <ShoppingBag className="h-3.5 w-3.5" />
-                            Add to Cart
+                            <ShoppingBag style={{ width: 11, height: 11 }} />
+                            {addedIds.has(product.id) ? "Added" : "Add to Cart"}
                           </button>
                           <Link
                             href={`/products/${product.id}`}
-                            className="flex items-center justify-center px-3 py-2.5 font-sans text-xs tracking-wide transition-all"
-                            style={{ border: "1px solid rgba(249,249,249,0.2)", color: "#f9f9f9" }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "11px 14px",
+                              border: "1px solid rgba(242,237,228,0.15)",
+                              color: CREAM,
+                              textDecoration: "none",
+                              transition: "border-color 0.2s",
+                            }}
                           >
-                            <ArrowRight className="h-3.5 w-3.5" />
+                            <ArrowRight style={{ width: 13, height: 13 }} />
                           </Link>
                         </div>
                       </div>
@@ -331,26 +679,86 @@ export default function QuizPage() {
                 </div>
               )}
 
-              <div className="flex justify-center gap-4 mt-10">
+              {/* Footer actions */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  marginTop: 32,
+                }}
+              >
                 <button
                   onClick={handleRestart}
-                  className="flex items-center gap-2 px-6 py-3 font-sans text-xs uppercase tracking-widest transition-all"
-                  style={{ border: "1px solid rgba(249,249,249,0.2)", color: "#f9f9f9" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "14px 24px",
+                    background: "none",
+                    border: "1px solid rgba(242,237,228,0.15)",
+                    color: CREAM,
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                  }}
                 >
-                  <RotateCcw className="h-3 w-3" /> Retake Quiz
+                  <RotateCcw style={{ width: 11, height: 11 }} />
+                  Retake
                 </button>
                 <Link
                   href="/products"
-                  className="flex items-center gap-2 px-6 py-3 font-sans text-xs uppercase tracking-widest transition-all"
-                  style={{ background: "#735b3a", color: "#f9f9f9" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "14px 28px",
+                    background: SAFFRON,
+                    color: INK,
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    textDecoration: "none",
+                  }}
                 >
-                  Browse All <ArrowRight className="h-3 w-3" />
+                  Browse All <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      {/* Loading overlay while products fetch */}
+      {loading && !showResults && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: DARK,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 50,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.3em",
+              textTransform: "uppercase",
+              color: SAFFRON,
+              animation: "pulse 1.5s ease-in-out infinite",
+            }}
+          >
+            LOADING COLLECTION...
+          </div>
+        </div>
+      )}
     </div>
   );
 }

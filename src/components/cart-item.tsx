@@ -1,9 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { CartItem as CartItemType, useCartStore } from "@/stores/cart-store";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 import Image from "next/image";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
 
 interface CartItemProps {
   item: CartItemType;
@@ -13,77 +16,145 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const { updateQuantity, removeFromCart } = useCartStore();
   const { product, quantity } = item;
 
-  const handleIncrease = () => {
-    updateQuantity(product.id, quantity + 1);
-  };
-
-  const handleDecrease = () => {
-    if (quantity > 1) {
-      updateQuantity(product.id, quantity - 1);
-    } else {
-      removeFromCart(product.id);
-    }
-  };
-
-  const handleRemove = () => {
-    removeFromCart(product.id);
-  };
-
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center py-4 border-b">
-      <div className="flex-shrink-0 w-24 h-24 bg-gray-100 rounded overflow-hidden mr-4 mb-3 sm:mb-0">
-        <Link href={`/products/${product.id}`}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "80px 1fr auto",
+        gap: 16,
+        padding: "20px 0",
+        borderBottom: `1px solid ${INK}`,
+        alignItems: "start",
+      }}
+    >
+      {/* Image */}
+      <Link href={`/products/${product.id}`}>
+        <div style={{ background: "#EDE9E0", aspectRatio: "1", overflow: "hidden" }}>
           <Image
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover"
-            width={96}
-            height={96}
+            width={80}
+            height={80}
+            className="object-cover w-full h-full"
           />
-        </Link>
-      </div>
+        </div>
+      </Link>
 
-      <div className="flex-grow">
+      {/* Info */}
+      <div>
         <Link href={`/products/${product.id}`}>
-          <h3 className="font-medium text-lg mb-1 hover:text-luxe-blue transition-colors">
-            {product.name}
-          </h3>
-        </Link>
-        <p className="text-gray-500 text-sm mb-2">{product.size}</p>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-              onClick={handleDecrease}
-            >
-              <Minus className="h-3 w-3" />
-            </Button>
-            <span className="text-center w-6">{quantity}</span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-              onClick={handleIncrease}
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-gray-400 hover:text-red-500"
-            onClick={handleRemove}
+          <div
+            style={{
+              fontFamily: "var(--font-fraunces), serif",
+              fontSize: "1rem",
+              fontWeight: 300,
+              color: INK,
+              letterSpacing: "-0.01em",
+              marginBottom: 4,
+            }}
           >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+            {product.name}
+          </div>
+        </Link>
+        {product.size && (
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 9,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              opacity: 0.5,
+              color: INK,
+              marginBottom: 12,
+            }}
+          >
+            {product.size}
+          </div>
+        )}
+
+        {/* Qty controls */}
+        <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+          <button
+            onClick={() => quantity > 1 ? updateQuantity(product.id, quantity - 1) : removeFromCart(product.id)}
+            style={{
+              width: 28,
+              height: 28,
+              border: `1px solid ${INK}`,
+              background: "transparent",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Minus style={{ width: 10, height: 10 }} />
+          </button>
+          <div
+            style={{
+              width: 36,
+              height: 28,
+              border: `1px solid ${INK}`,
+              borderLeft: "none",
+              borderRight: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 11,
+              color: INK,
+            }}
+          >
+            {quantity}
+          </div>
+          <button
+            onClick={() => updateQuantity(product.id, quantity + 1)}
+            style={{
+              width: 28,
+              height: 28,
+              border: `1px solid ${INK}`,
+              background: "transparent",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Plus style={{ width: 10, height: 10 }} />
+          </button>
         </div>
       </div>
 
-      <div className="flex-shrink-0 mt-2 sm:mt-0 font-medium text-right">
-        {product.price.currency}
-        {(product.price.current * quantity).toLocaleString()}
+      {/* Price + remove */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+        <button
+          onClick={() => removeFromCart(product.id)}
+          style={{ background: "none", border: "none", cursor: "pointer", opacity: 0.4, padding: 0 }}
+        >
+          <X style={{ width: 14, height: 14, color: INK }} />
+        </button>
+        <div
+          style={{
+            fontFamily: "var(--font-fraunces), serif",
+            fontSize: "1rem",
+            fontWeight: 300,
+            color: INK,
+          }}
+        >
+          {product.price.currency}{(product.price.current * quantity).toLocaleString("en-IN")}
+        </div>
+        {product.price.on_sale && (
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 9,
+              textDecoration: "line-through",
+              opacity: 0.4,
+              color: INK,
+            }}
+          >
+            {product.price.currency}{(product.price.original * quantity).toLocaleString("en-IN")}
+          </div>
+        )}
       </div>
     </div>
   );

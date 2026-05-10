@@ -257,3 +257,28 @@ export async function deleteBundle(id: string): Promise<void> {
 
   if (error) throw new Error(error.message)
 }
+
+// ============================================================
+// IMAGE UPLOAD (to Supabase Storage)
+// ============================================================
+
+export async function uploadBundleImage(file: File, slug: string): Promise<string> {
+  const ext = file.name.split('.').pop() || 'png'
+  const fileName = `${slug}-${Date.now()}.${ext}`
+  const filePath = `bundles/${fileName}`
+
+  const { error } = await supabase.storage
+    .from('product-images')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+    })
+
+  if (error) throw new Error(error.message)
+
+  const { data: urlData } = supabase.storage
+    .from('product-images')
+    .getPublicUrl(filePath)
+
+  return urlData.publicUrl
+}

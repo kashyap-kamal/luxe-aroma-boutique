@@ -256,7 +256,7 @@ serve(async (req) => {
     // Handle different order statuses
     switch (order_status) {
       case "PAID":
-        // Payment successful - update order in database
+        // Payment successful - upsert order in database
         console.log(`Order ${order_id} payment successful`);
 
         // First, fetch the order details to get items and customer info
@@ -266,11 +266,37 @@ serve(async (req) => {
           .eq("cashfree_order_id", order_id)
           .single();
 
-        if (fetchError) {
+        if (fetchError && fetchError.code !== "PGRST116") {
           console.error("Error fetching order:", fetchError);
         }
 
-        // Update order status in database
+        // If order doesn't exist (initial insert failed), create it from webhook data
+        if (!orderData) {
+          console.warn(`Order ${order_id} not found in DB — creating from webhook data`);
+          const { error: insertFallbackError } = await supabase.from("orders").insert({
+            cashfree_order_id: order_id,
+            order_amount: order_amount || 0,
+            order_currency: order_currency || "INR",
+            order_status: "PAID",
+            payment_status: "SUCCESS",
+            customer_name: customer_details?.customer_name || "Unknown",
+            customer_email: customer_details?.customer_email || "",
+            customer_phone: customer_details?.customer_phone || "",
+            items: [],
+            payment_method: payment_details?.payment_group || payment_details?.payment_method || null,
+            payment_details: payment_details || {},
+            shipping_address: shipping_address || null,
+            billing_address: billing_address || null,
+            notes: "Order record created from payment webhook (initial insert failed)",
+          });
+          if (insertFallbackError) {
+            console.error("Fallback order insert also failed:", insertFallbackError);
+          } else {
+            console.log(`Fallback order record created for ${order_id}`);
+          }
+        }
+
+        // Update order status in database (applies whether row was just inserted or already existed)
         const { error: updateError } = await supabase
           .from("orders")
           .update({
@@ -278,8 +304,8 @@ serve(async (req) => {
             payment_status: "SUCCESS",
             payment_method: payment_details?.payment_group || payment_details?.payment_method || payment_details?.payment_method_type,
             payment_details: payment_details || {},
-            shipping_address: shipping_address || {},
-            billing_address: billing_address || {},
+            ...(shipping_address ? { shipping_address } : {}),
+            ...(billing_address ? { billing_address } : {}),
             updated_at: new Date().toISOString(),
           })
           .eq("cashfree_order_id", order_id);
@@ -288,19 +314,25 @@ serve(async (req) => {
           console.error("Error updating order:", updateError);
         }
 
+        // Re-fetch order data if it was just created via fallback
+        const { data: latestOrderData } = !orderData
+          ? await supabase.from("orders").select("*").eq("cashfree_order_id", order_id).single()
+          : { data: orderData };
+        const resolvedOrderData = latestOrderData || orderData;
+
         // Automatically create Shiprocket shipment order after payment success
-        if (orderData && !orderData.shiprocket_awb) {
+        if (resolvedOrderData && !resolvedOrderData.shiprocket_awb) {
           try {
             console.log(`Creating Shiprocket order for ${order_id}`);
             
             // Extract shipping address details
-            const shipAddr = shipping_address || orderData.shipping_address || {};
-            const customerName = orderData.customer_name || customer_details?.customer_name || "Customer";
-            const customerPhone = orderData.customer_phone || customer_details?.customer_phone || "";
-            const customerEmail = orderData.customer_email || customer_details?.customer_email || "";
-            
+            const shipAddr = shipping_address || resolvedOrderData.shipping_address || {};
+            const customerName = resolvedOrderData.customer_name || customer_details?.customer_name || "Customer";
+            const customerPhone = resolvedOrderData.customer_phone || customer_details?.customer_phone || "";
+            const customerEmail = resolvedOrderData.customer_email || customer_details?.customer_email || "";
+
             // Extract items for product description
-            const items = orderData.items || [];
+            const items = resolvedOrderData.items || [];
             const productsDesc = items
               .map((item: any) => `${item.product_name || item.name || "Product"} (Qty: ${item.quantity || 1})`)
               .join(", ") || "Perfume Products";
@@ -316,10 +348,10 @@ serve(async (req) => {
                               payment_details?.payment_method_type === "COD" ? "COD" : "Prepaid";
             
             // Extract address fields with validation
-            const addressLine = shipAddr.address_line1 || shipAddr.address || orderData.shipping_address?.address || "";
-            const pincode = shipAddr.pincode || shipAddr.postal_code || shipAddr.zip_code || orderData.shipping_address?.pincode || "";
-            const city = shipAddr.city || orderData.shipping_address?.city || "";
-            const state = shipAddr.state || orderData.shipping_address?.state || "";
+            const addressLine = shipAddr.address_line1 || shipAddr.address || resolvedOrderData.shipping_address?.address || "";
+            const pincode = shipAddr.pincode || shipAddr.postal_code || shipAddr.zip_code || resolvedOrderData.shipping_address?.pincode || "";
+            const city = shipAddr.city || resolvedOrderData.shipping_address?.city || "";
+            const state = shipAddr.state || resolvedOrderData.shipping_address?.state || "";
             const phone = customerPhone;
             
             // Validate required fields before calling Shiprocket
@@ -333,7 +365,7 @@ serve(async (req) => {
             
             if (missingFields.length > 0) {
               console.warn(`Missing required address fields for Shiprocket: ${missingFields.join(", ")}`);
-              console.log("Address data received:", { shipAddr, orderDataAddress: orderData.shipping_address });
+              console.log("Address data received:", { shipAddr, orderDataAddress: resolvedOrderData.shipping_address });
               
               // Set status to pending_address instead of failed
               await supabase
@@ -384,12 +416,12 @@ serve(async (req) => {
               pincode: pincode,
               city: city,
               state: state,
-              country: shipAddr.country || orderData.shipping_address?.country || "India",
+              country: shipAddr.country || resolvedOrderData.shipping_address?.country || "India",
               order_id: order_id, // Use Cashfree order ID as Shiprocket order reference
               payment_mode: paymentMode as "COD" | "Prepaid",
               products_desc: productsDesc,
-              cod_amount: paymentMode === "COD" ? Number(orderData.order_amount) : undefined,
-              total_amount: Number(orderData.order_amount),
+              cod_amount: paymentMode === "COD" ? Number(resolvedOrderData.order_amount) : undefined,
+              total_amount: Number(resolvedOrderData.order_amount),
               quantity: items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0),
               weight: totalWeight,
               items: shiprocketItems,
@@ -433,7 +465,7 @@ serve(async (req) => {
 
                 // Log error to order_errors table
                 await supabase.from("order_errors").insert({
-                  order_id: orderData.id,
+                  order_id: resolvedOrderData.id,
                   cashfree_order_id: order_id,
                   error_type: "shipment_failed",
                   error_message: shiprocketResult.error || "Shiprocket order creation failed",
@@ -460,7 +492,7 @@ serve(async (req) => {
 
               // Log error to order_errors table for tracking
               await supabase.from("order_errors").insert({
-                order_id: orderData.id,
+                order_id: resolvedOrderData.id,
                 cashfree_order_id: order_id,
                 error_type: "shipment_failed",
                 error_message: "Shiprocket API call failed",
@@ -487,7 +519,7 @@ serve(async (req) => {
 
             // Log error to order_errors table for tracking
             await supabase.from("order_errors").insert({
-              order_id: orderData.id,
+              order_id: resolvedOrderData.id,
               cashfree_order_id: order_id,
               error_type: "shipment_failed",
               error_message: shiprocketError instanceof Error ? shiprocketError.message : "Unknown error creating Shiprocket order",
@@ -524,15 +556,15 @@ serve(async (req) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              type: orderData?.shiprocket_awb ? "shipment_created" : "order_confirmation",
+              type: resolvedOrderData?.shiprocket_awb ? "shipment_created" : "order_confirmation",
               order_id: order_id,
-              customer_email: orderData?.customer_email || customer_details?.customer_email,
-              customer_name: orderData?.customer_name || customer_details?.customer_name,
-              customer_phone: orderData?.customer_phone || customer_details?.customer_phone,
-              order_amount: orderData?.order_amount,
-              order_items: orderData?.items,
-              awb: orderData?.shiprocket_awb,
-              courier_name: orderData?.shiprocket_courier_name,
+              customer_email: resolvedOrderData?.customer_email || customer_details?.customer_email,
+              customer_name: resolvedOrderData?.customer_name || customer_details?.customer_name,
+              customer_phone: resolvedOrderData?.customer_phone || customer_details?.customer_phone,
+              order_amount: resolvedOrderData?.order_amount,
+              order_items: resolvedOrderData?.items,
+              awb: resolvedOrderData?.shiprocket_awb,
+              courier_name: resolvedOrderData?.shiprocket_courier_name,
             }),
           });
 

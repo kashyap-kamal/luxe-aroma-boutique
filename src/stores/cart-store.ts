@@ -46,6 +46,9 @@ export interface BundleCartItem {
 interface CartStore {
   cartItems: CartItem[];
   bundleItems: BundleCartItem[];
+  sidebarOpen: boolean;
+  openSidebar: () => void;
+  closeSidebar: () => void;
   addToCart: (product: Product, quantity: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -64,6 +67,9 @@ const createCartStore: StateCreator<
 > = (set, get) => ({
   cartItems: [],
   bundleItems: [],
+  sidebarOpen: false,
+  openSidebar: () => set((state) => { state.sidebarOpen = true; }),
+  closeSidebar: () => set((state) => { state.sidebarOpen = false; }),
 
   addToCart: (product, quantity) => {
     set((state) => {
@@ -233,6 +239,10 @@ export const useCartStore = create<CartStore>()(
   persist(immer(createCartStore), {
     name: "cart-store",
     storage: createJSONStorage(() => sessionStorage),
+    partialize: (state) => ({
+      cartItems: state.cartItems,
+      bundleItems: state.bundleItems,
+    }),
   }),
 );
 

@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { fetchActiveReviews, ReviewRow } from "@/lib/review-service";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
 
 interface Testimonial {
   id: string;
@@ -14,11 +17,34 @@ interface Testimonial {
   scent: string;
 }
 
-// Fallback data if DB is empty
 const fallbackTestimonials: Testimonial[] = [
-  { id: "1", name: "Priya Sharma", location: "Mumbai", rating: 5, scent: "Aventus", comment: "Absolutely love the Aventus fragrance! The quality is exceptional and the scent lasts all day. Aromé Luxe has become my go-to for premium perfumes." },
-  { id: "2", name: "Rajesh Kumar", location: "Delhi NCR", rating: 5, scent: "Cool Water", comment: "The Cool Water perfume exceeded my expectations. Great value for money and the packaging was beautiful. Will definitely order again!" },
-  { id: "3", name: "Anita Patel", location: "Bangalore", rating: 5, scent: "Hawas", comment: "Fast delivery and amazing customer service. The Hawas fragrance is perfect for special occasions. Highly recommend Aromé Luxe!" },
+  {
+    id: "1",
+    name: "Priya Sharma",
+    location: "Mumbai",
+    rating: 5,
+    scent: "Aventus",
+    comment:
+      "The dry-down on Ameer Al Oud lasts past midnight — and so does the compliment count. Ten-hour skin, finally.",
+  },
+  {
+    id: "2",
+    name: "Rajesh Kumar",
+    location: "Delhi NCR",
+    rating: 5,
+    scent: "Cool Water",
+    comment:
+      "Cool Water exceeded all expectations. Premium quality at an honest price — the Aromé Luxe model in action.",
+  },
+  {
+    id: "3",
+    name: "Anita Patel",
+    location: "Bangalore",
+    rating: 5,
+    scent: "Hawas",
+    comment:
+      "Hawas is perfect for special occasions. Fast delivery, beautiful packaging, and a fragrance that genuinely turns heads.",
+  },
 ];
 
 function toTestimonial(row: ReviewRow): Testimonial {
@@ -32,120 +58,386 @@ function toTestimonial(row: ReviewRow): Testimonial {
   };
 }
 
-function getInitials(name: string): string {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase();
-}
-
-const slideVariants = {
-  enter: (direction: number) => ({ x: direction > 0 ? 60 : -60, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (direction: number) => ({ x: direction > 0 ? -60 : 60, opacity: 0 }),
-};
-
 const Testimonials: React.FC = () => {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(fallbackTestimonials);
-  const [[currentIndex, direction], setPage] = useState([0, 0]);
+  const [testimonials, setTestimonials] =
+    useState<Testimonial[]>(fallbackTestimonials);
+  const [[current, dir], setPage] = useState([0, 0]);
 
   useEffect(() => {
     fetchActiveReviews().then((rows) => {
-      if (rows.length > 0) {
-        setTestimonials(rows.map(toTestimonial));
-      }
+      if (rows.length > 0) setTestimonials(rows.map(toTestimonial));
     });
   }, []);
 
   const paginate = useCallback(
-    (newDirection: number) => {
-      const nextIndex =
-        newDirection > 0
-          ? currentIndex === testimonials.length - 1 ? 0 : currentIndex + 1
-          : currentIndex === 0 ? testimonials.length - 1 : currentIndex - 1;
-      setPage([nextIndex, newDirection]);
+    (d: number) => {
+      const next =
+        d > 0
+          ? current === testimonials.length - 1
+            ? 0
+            : current + 1
+          : current === 0
+          ? testimonials.length - 1
+          : current - 1;
+      setPage([next, d]);
     },
-    [currentIndex, testimonials.length]
+    [current, testimonials.length]
   );
 
   useEffect(() => {
-    const interval = setInterval(() => paginate(1), 5500);
-    return () => clearInterval(interval);
+    const t = setInterval(() => paginate(1), 6000);
+    return () => clearInterval(t);
   }, [paginate]);
 
-  const current = testimonials[currentIndex];
-  if (!current) return null;
+  const item = testimonials[current];
+  if (!item) return null;
 
   return (
-    <section className="py-20 md:py-24" style={{ background: "#fcf9f8" }}>
-      <div className="luxury-container">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <p className="apo-chip inline-block mb-3" style={{ color: "#735c00", background: "rgba(212,175,55,0.15)" }}>
-            Worn by You
-          </p>
-          <h2 className="font-serif font-bold" style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", color: "#1c1b1b" }}>
-            What Our Customers Say
+    <section
+      style={{
+        background: CREAM,
+        color: INK,
+        borderBottom: `1px solid ${INK}`,
+      }}
+    >
+      {/* Section header */}
+      <div
+        style={{
+          padding: "40px 48px 28px",
+          borderBottom: `1px solid ${INK}`,
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+        }}
+        className="hidden md:flex"
+      >
+        <div>
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+            }}
+          >
+            FEATURE — 07 / LETTERS FROM THE FIELD
+          </div>
+          <h2
+            style={{
+              fontSize: "clamp(2.5rem, 4.5vw, 4rem)",
+              lineHeight: 0.95,
+              letterSpacing: "-0.03em",
+              fontWeight: 300,
+              margin: "10px 0 0",
+              fontFamily: "var(--font-fraunces), serif",
+            }}
+          >
+            What the wrists say.
           </h2>
-        </motion.div>
+        </div>
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 11,
+            letterSpacing: "0.15em",
+            opacity: 0.5,
+          }}
+        >
+          {String(current + 1).padStart(2, "0")} / {String(testimonials.length).padStart(2, "0")}
+        </div>
+      </div>
 
-        <div className="relative max-w-2xl mx-auto">
-          <div className="min-h-[260px] flex items-center justify-center">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={current.id}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-                className="w-full px-2 md:px-0"
+      {/* Mobile header */}
+      <div
+        className="flex md:hidden"
+        style={{ padding: "24px 20px 16px", borderBottom: `1px solid ${INK}` }}
+      >
+        <div>
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 9,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              marginBottom: 6,
+            }}
+          >
+            LETTERS FROM THE FIELD
+          </div>
+          <h2
+            style={{
+              fontSize: "1.8rem",
+              lineHeight: 0.95,
+              letterSpacing: "-0.03em",
+              fontWeight: 300,
+              fontFamily: "var(--font-fraunces), serif",
+            }}
+          >
+            What the wrists say.
+          </h2>
+        </div>
+      </div>
+
+      {/* Quote area */}
+      <div
+        style={{
+          gridTemplateColumns: "1fr auto",
+          minHeight: 280,
+        }}
+        className="hidden md:grid"
+      >
+        <div
+          style={{
+            padding: "56px 64px",
+            borderRight: `1px solid ${INK}`,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <AnimatePresence mode="wait" custom={dir}>
+            <motion.div
+              key={item.id}
+              custom={dir}
+              initial={{ opacity: 0, y: dir > 0 ? 16 : -16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: dir > 0 ? -16 : 16 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              {/* Stars */}
+              <div
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 12,
+                  letterSpacing: "0.15em",
+                  color: SAFFRON,
+                  marginBottom: 24,
+                }}
               >
-                <div className="p-8 md:p-10 text-center" style={{ background: "#f6f3f2", borderRadius: "0.25rem" }}>
-                  <div className="inline-flex items-center justify-center w-12 h-12 font-sans font-semibold text-sm mb-5" style={{ background: "#1c1b1b", color: "#ffffff", borderRadius: "50%" }}>
-                    {getInitials(current.name)}
-                  </div>
-                  <div className="flex justify-center gap-0.5 mb-4">
-                    {Array.from({ length: current.rating }).map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5" style={{ color: "#d4af37", fill: "#d4af37" }} />
-                    ))}
-                  </div>
-                  <blockquote className="font-serif font-normal leading-relaxed mb-5 italic" style={{ fontSize: "1.05rem", color: "#1c1b1b" }}>
-                    &ldquo;{current.comment}&rdquo;
-                  </blockquote>
-                  <div>
-                    <div className="font-sans font-semibold" style={{ fontSize: "0.875rem", color: "#1c1b1b" }}>{current.name}</div>
-                    <div className="font-sans mt-0.5" style={{ fontSize: "0.75rem", color: "#7f7663" }}>
-                      {current.location}{current.scent && <> &middot; <span style={{ color: "#735c00" }}>{current.scent}</span></>}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                {"★".repeat(item.rating)}
+              </div>
+
+              {/* Quote */}
+              <blockquote
+                style={{
+                  fontSize: "clamp(1.4rem, 2.5vw, 2rem)",
+                  lineHeight: 1.35,
+                  fontWeight: 300,
+                  fontStyle: "italic",
+                  fontFamily: "var(--font-fraunces), serif",
+                  letterSpacing: "-0.01em",
+                  margin: 0,
+                  maxWidth: 820,
+                }}
+              >
+                &ldquo;{item.comment}&rdquo;
+              </blockquote>
+
+              {/* Attribution */}
+              <div
+                style={{
+                  marginTop: 28,
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 11,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  opacity: 0.55,
+                }}
+              >
+                — {item.name}
+                {item.location && `, ${item.location.toUpperCase()}`}
+                {item.scent && (
+                  <span style={{ color: SAFFRON }}>
+                    {" "}
+                    · {item.scent.toUpperCase()}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Navigation column */}
+        <div
+          style={{
+            width: 88,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "56px 0",
+          }}
+        >
+          <button
+            onClick={() => paginate(-1)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 18,
+              color: INK,
+              opacity: 0.4,
+              lineHeight: 1,
+              padding: "8px",
+              transition: "opacity 150ms",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.4")}
+            aria-label="Previous"
+          >
+            ↑
+          </button>
+
+          {/* Dot indicators */}
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: 6 }}
+          >
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage([i, i > current ? 1 : -1])}
+                style={{
+                  width: i === current ? 3 : 3,
+                  height: i === current ? 16 : 6,
+                  background: i === current ? INK : "rgba(14,14,12,0.25)",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 300ms",
+                  padding: 0,
+                }}
+                aria-label={`Testimonial ${i + 1}`}
+              />
+            ))}
           </div>
 
-          <div className="flex justify-center items-center gap-4 mt-6">
-            <button onClick={() => paginate(-1)} className="p-2 transition-colors duration-200" style={{ color: "#7f7663" }} aria-label="Previous">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <div className="flex gap-1.5">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setPage([index, index > currentIndex ? 1 : -1])}
-                  className="h-1.5 rounded-full transition-all duration-300"
-                  style={{ width: index === currentIndex ? "2rem" : "0.5rem", background: index === currentIndex ? "#735c00" : "#d4c9b2" }}
-                  aria-label={`Go to ${index + 1}`}
-                />
-              ))}
-            </div>
-            <button onClick={() => paginate(1)} className="p-2 transition-colors duration-200" style={{ color: "#7f7663" }} aria-label="Next">
-              <ChevronRight className="w-5 h-5" />
-            </button>
+          <button
+            onClick={() => paginate(1)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 18,
+              color: INK,
+              opacity: 0.4,
+              lineHeight: 1,
+              padding: "8px",
+              transition: "opacity 150ms",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.4")}
+            aria-label="Next"
+          >
+            ↓
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile quote */}
+      <div className="flex flex-col md:hidden">
+        <div style={{ padding: "32px 20px 28px", minHeight: 200 }}>
+          <AnimatePresence mode="wait" custom={dir}>
+            <motion.div
+              key={item.id}
+              custom={dir}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.28 }}
+            >
+              <div
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 11,
+                  letterSpacing: "0.15em",
+                  color: SAFFRON,
+                  marginBottom: 16,
+                }}
+              >
+                {"★".repeat(item.rating)}
+              </div>
+              <blockquote
+                style={{
+                  fontSize: "1.2rem",
+                  lineHeight: 1.4,
+                  fontWeight: 300,
+                  fontStyle: "italic",
+                  fontFamily: "var(--font-fraunces), serif",
+                  margin: 0,
+                }}
+              >
+                &ldquo;{item.comment}&rdquo;
+              </blockquote>
+              <div
+                style={{
+                  marginTop: 16,
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 9,
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  opacity: 0.5,
+                }}
+              >
+                — {item.name}
+                {item.location && `, ${item.location}`}
+                {item.scent && (
+                  <span style={{ color: SAFFRON }}> · {item.scent}</span>
+                )}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Mobile nav */}
+        <div
+          style={{
+            borderTop: `1px solid ${INK}`,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "14px 20px",
+          }}
+        >
+          <button
+            onClick={() => paginate(-1)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 14,
+              color: INK,
+              padding: 0,
+            }}
+          >
+            ← PREV
+          </button>
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 9,
+              letterSpacing: "0.15em",
+              opacity: 0.4,
+            }}
+          >
+            {String(current + 1).padStart(2, "0")} / {String(testimonials.length).padStart(2, "0")}
           </div>
+          <button
+            onClick={() => paginate(1)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 14,
+              color: INK,
+              padding: 0,
+            }}
+          >
+            NEXT →
+          </button>
         </div>
       </div>
     </section>

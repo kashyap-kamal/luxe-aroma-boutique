@@ -1,287 +1,452 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  products as staticProducts,
-  sortProducts,
-  SortOption,
-} from "@/lib/mock-data";
+import { products as staticProducts, sortProducts, SortOption } from "@/lib/mock-data";
 import { useProducts } from "@/hooks/use-products";
+import { fetchBundles, Bundle } from "@/lib/bundle-service";
 import ProductGrid from "@/components/product-grid";
-import ProductFilter from "@/components/product-filter";
-import { Filter, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import BundleCard from "@/components/bundle-card";
+import { X, Search } from "lucide-react";
+import { categoryNameMap } from "@/lib/utils";
 
-// Component that uses useSearchParams - needs to be wrapped in Suspense
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
+
+const SCENT_FAMILIES = [
+  { label: "Fresh", tag: "fresh" },
+  { label: "Aquatic", tag: "aquatic" },
+  { label: "Woody", tag: "woody" },
+  { label: "Floral", tag: "floral" },
+  { label: "Sweet", tag: "sweet" },
+  { label: "Oriental", tag: "oriental" },
+  { label: "Oud", tag: "oud" },
+  { label: "Spicy", tag: "spicy" },
+];
+
+const OCCASIONS = [
+  { label: "Office", tag: "office-wear" },
+  { label: "Date Night", tag: "date-night" },
+  { label: "Everyday", tag: "everyday-fresh" },
+  { label: "Evening", tag: "evening" },
+];
+
+const SORT_OPTIONS: { label: string; value: SortOption }[] = [
+  { label: "Default", value: "default" },
+  { label: "Price ↑", value: "price-low-high" },
+  { label: "Price ↓", value: "price-high-low" },
+  { label: "Popular", value: "popularity" },
+  { label: "Top Rated", value: "rating" },
+];
+
+const FilterChip = ({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    style={{
+      padding: "5px 12px",
+      border: `1px solid ${INK}`,
+      background: active ? INK : "transparent",
+      color: active ? CREAM : INK,
+      fontFamily: "var(--font-jetbrains-mono), monospace",
+      fontSize: 9,
+      letterSpacing: "0.15em",
+      textTransform: "uppercase" as const,
+      cursor: "pointer",
+      transition: "all 120ms",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+    }}
+  >
+    {label}
+    {active && <X style={{ width: 9, height: 9 }} />}
+  </button>
+);
+
 const ProductsContent = () => {
   const searchParams = useSearchParams();
   const { replace } = useRouter();
   const pathname = usePathname();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   const initialCategory = searchParams.get("category") || "";
   const initialTag = searchParams.get("tag") || "";
-  const initialFeatured = searchParams.get("featured") === "true";
+  const initialSearch = searchParams.get("q") || "";
 
   const { products: allProducts } = useProducts(staticProducts);
   const categories = [...new Set(allProducts.map((p) => p.category))];
   const maxPrice = Math.max(...allProducts.map((p) => p.price.current), 0);
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const [selectedTag] = useState(initialTag);
-  const [showFeatured] = useState(initialFeatured);
+  const [selectedTag, setSelectedTag] = useState(initialTag);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
   const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [filteredProducts, setFilteredProducts] = useState(allProducts);
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [allBundles, setAllBundles] = useState<Bundle[]>([]);
+  const [matchingBundles, setMatchingBundles] = useState<Bundle[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  const [mobileColumns, setMobileColumns] = useState<1 | 2>(2);
 
-  // Update price range when products load from DB
+  useEffect(() => {
+    fetchBundles().then(setAllBundles).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    setSelectedCategory(searchParams.get("category") || "");
+    setSelectedTag(searchParams.get("tag") || "");
+    setSearchQuery(searchParams.get("q") || "");
+    const sort = searchParams.get("sort") as SortOption | null;
+    if (sort) setSortBy(sort);
+  }, [searchParams]);
+
   useEffect(() => {
     setPriceRange((prev) => [prev[0], maxPrice]);
   }, [maxPrice]);
 
-  // Update filtered products when filters change
   useEffect(() => {
     let filtered = allProducts;
-    if (selectedCategory) {
-      filtered = filtered.filter((p) => p.category === selectedCategory);
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.tags?.some((t) => t.toLowerCase().includes(q))
+      );
+      setMatchingBundles(
+        allBundles.filter(
+          (b) =>
+            b.name.toLowerCase().includes(q) ||
+            b.items.some((item) => item.product.name.toLowerCase().includes(q))
+        )
+      );
+    } else {
+      setMatchingBundles([]);
     }
-    if (selectedTag) {
-      filtered = filtered.filter((p) => p.tags?.includes(selectedTag));
-    }
-    if (showFeatured) {
-      filtered = filtered.filter((p) => p.featured);
-    }
+    if (selectedCategory) filtered = filtered.filter((p) => p.category === selectedCategory);
+    if (selectedTag) filtered = filtered.filter((p) => p.tags?.includes(selectedTag));
     filtered = filtered.filter(
       (p) => p.price.current >= priceRange[0] && p.price.current <= priceRange[1]
     );
-    const sorted = sortProducts(filtered, sortBy);
-    setFilteredProducts(sorted);
+    setFilteredProducts(sortProducts(filtered, sortBy));
 
     const params = new URLSearchParams();
-    // Update URL params
-    if (selectedCategory) {
-      params.set("category", selectedCategory);
-    } else {
-      params.delete("category");
-    }
-    if (sortBy !== "default") {
-      params.set("sort", sortBy);
-    } else {
-      params.delete("sort");
-    }
+    if (searchQuery) params.set("q", searchQuery);
+    if (selectedCategory) params.set("category", selectedCategory);
+    if (selectedTag) params.set("tag", selectedTag);
+    if (sortBy !== "default") params.set("sort", sortBy);
     replace(`${pathname}?${params.toString()}`);
-  }, [selectedCategory, selectedTag, showFeatured, priceRange, sortBy, allProducts, replace, pathname]);
+  }, [searchQuery, selectedCategory, selectedTag, priceRange, sortBy, allProducts, allBundles, replace, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reset filters
   const handleReset = () => {
+    setSearchQuery("");
     setSelectedCategory("");
+    setSelectedTag("");
     setPriceRange([0, maxPrice]);
     setSortBy("default");
+    replace(pathname);
   };
 
+  const activeFilterCount = [selectedCategory, selectedTag, searchQuery].filter(Boolean).length;
+
+  const pageLabel = (() => {
+    if (selectedCategory) return (categoryNameMap(selectedCategory) || selectedCategory).toUpperCase();
+    if (selectedTag) return selectedTag.replace(/-/g, " ").toUpperCase();
+    if (searchQuery) return `"${searchQuery.toUpperCase()}"`;
+    return "ALL FRAGRANCES";
+  })();
+
   return (
-    <div className="flex flex-col lg:flex-row gap-10 relative">
-      {/* Mobile Filter Button */}
-      <div className="lg:hidden mb-6">
-        <Button
-          onClick={() => setIsMobileFilterOpen(true)}
-          variant="outline"
-          className="w-full flex items-center justify-center gap-2 border-gray-300"
-        >
-          <Filter className="h-4 w-4" />
-          Filter & Sort
-        </Button>
-      </div>
-
-      {/* Filters Sidebar - Desktop */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="hidden lg:block w-64 flex-shrink-0"
+    <div style={{ background: CREAM, color: INK, minHeight: "100vh" }}>
+      {/* Desktop header */}
+      <div
+        style={{ padding: "56px 48px 32px", borderBottom: `1px solid ${INK}` }}
+        className="hidden md:block"
       >
-        <div className="sticky top-24">
-          <ProductFilter
-            categories={categories}
-            selectedCategory={selectedCategory}
-            priceRange={priceRange}
-            maxPrice={maxPrice}
-            sortBy={sortBy}
-            onCategoryChange={setSelectedCategory}
-            onPriceChange={setPriceRange}
-            onSortChange={setSortBy}
-            onReset={handleReset}
-          />
-        </div>
-      </motion.div>
-
-      {/* Mobile Filter Sidebar (Drawer) */}
-      <AnimatePresence>
-        {isMobileFilterOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileFilterOpen(false)}
-              className="fixed inset-0 bg-black/50 z-50 lg:hidden backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-xs bg-white z-50 lg:hidden shadow-2xl p-6 overflow-y-auto"
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-serif font-bold">Filters</h2>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsMobileFilterOpen(false)}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-              <ProductFilter
-                categories={categories}
-                selectedCategory={selectedCategory}
-                priceRange={priceRange}
-                maxPrice={maxPrice}
-                sortBy={sortBy}
-                onCategoryChange={setSelectedCategory}
-                onPriceChange={setPriceRange}
-                onSortChange={setSortBy}
-                onReset={handleReset}
-              />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Products Grid */}
-      <div className="flex-grow">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 11,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            marginBottom: 10,
+          }}
         >
-          {filteredProducts.length > 0 ? (
-            <>
-              <p className="mb-6 text-gray-500 text-sm uppercase tracking-wider">
-                Showing{" "}
-                <span className="text-gray-900 font-bold">
-                  {filteredProducts.length}
-                </span>{" "}
-                {filteredProducts.length === 1 ? "fragrance" : "fragrances"}
-              </p>
-
-              {/* We wrap ProductGrid in a motion component for staggering children if possible, 
-                  but ProductGrid currently maps directly. 
-                  Ideally, update ProductGrid to use framer-motion or wrap it here.
-                  For now, simple fade in.
-              */}
-              <ProductGrid products={filteredProducts} />
-            </>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-20 bg-gray-50 rounded-2xl"
-            >
-              <div className="text-6xl mb-4 opacity-20">🔍</div>
-              <h3 className="text-2xl font-serif font-medium mb-2 text-gray-900">
-                No fragrances found
-              </h3>
-              <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                We couldn&apos;t find any perfumes matching your current
-                filters. Try adjusting your search criteria.
-              </p>
-              <Button
-                onClick={handleReset}
-                variant="default"
-                className="bg-luxe-gold text-black hover:bg-amber-400"
-              >
-                Reset all filters
-              </Button>
-            </motion.div>
-          )}
-        </motion.div>
+          THE COLLECTION — {filteredProducts.length} FRAGRANCES
+        </div>
+        <h1
+          style={{
+            fontFamily: "var(--font-fraunces), serif",
+            fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+            fontWeight: 300,
+            lineHeight: 0.92,
+            letterSpacing: "-0.03em",
+          }}
+        >
+          {pageLabel}
+        </h1>
       </div>
+
+      {/* Mobile header */}
+      <div
+        className="block md:hidden"
+        style={{ padding: "28px 20px 20px", borderBottom: `1px solid ${INK}` }}
+      >
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 9,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            marginBottom: 8,
+          }}
+        >
+          THE COLLECTION — {filteredProducts.length}
+        </div>
+        <h1
+          style={{
+            fontFamily: "var(--font-fraunces), serif",
+            fontSize: "2rem",
+            fontWeight: 300,
+            lineHeight: 0.92,
+            letterSpacing: "-0.03em",
+          }}
+        >
+          {pageLabel}
+        </h1>
+      </div>
+
+      {/* Search + toolbar */}
+      <div
+        style={{
+          borderBottom: `1px solid ${INK}`,
+          display: "flex",
+          alignItems: "stretch",
+        }}
+      >
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "0 24px",
+            borderRight: `1px solid ${INK}`,
+          }}
+        >
+          <Search style={{ width: 13, height: 13, opacity: 0.4, flexShrink: 0 }} />
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search fragrances, notes, moods..."
+            style={{
+              flex: 1,
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.1em",
+              color: INK,
+              padding: "18px 0",
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              style={{ background: "none", border: "none", cursor: "pointer", opacity: 0.4 }}
+            >
+              <X style={{ width: 12, height: 12 }} />
+            </button>
+          )}
+        </div>
+
+        {/* Sort buttons — desktop */}
+        <div className="hidden md:flex" style={{ alignItems: "stretch" }}>
+          {SORT_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setSortBy(opt.value)}
+              style={{
+                padding: "0 16px",
+                background: sortBy === opt.value ? INK : "transparent",
+                color: sortBy === opt.value ? CREAM : INK,
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 9,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                border: "none",
+                borderRight: `1px solid ${INK}`,
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          style={{
+            padding: "0 24px",
+            background: showFilters ? INK : "transparent",
+            color: showFilters ? CREAM : INK,
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            border: "none",
+            borderLeft: `1px solid ${INK}`,
+            whiteSpace: "nowrap",
+          }}
+        >
+          FILTER {activeFilterCount > 0 && `(${activeFilterCount})`}
+        </button>
+      </div>
+
+      {/* Filter panel */}
+      {showFilters && (
+        <div
+          style={{
+            borderBottom: `1px solid ${INK}`,
+            padding: "24px 48px",
+            display: "flex",
+            flexWrap: "wrap" as const,
+            gap: 28,
+          }}
+          className="hidden md:flex"
+        >
+          <div>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>CATEGORY</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+              {categories.map((cat) => (
+                <FilterChip key={cat} label={categoryNameMap(cat) || cat} active={selectedCategory === cat} onClick={() => setSelectedCategory(selectedCategory === cat ? "" : cat)} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>SCENT FAMILY</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+              {SCENT_FAMILIES.map((s) => (
+                <FilterChip key={s.tag} label={s.label} active={selectedTag === s.tag} onClick={() => setSelectedTag(selectedTag === s.tag ? "" : s.tag)} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>OCCASION</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+              {OCCASIONS.map((o) => (
+                <FilterChip key={o.tag} label={o.label} active={selectedTag === o.tag} onClick={() => setSelectedTag(selectedTag === o.tag ? "" : o.tag)} />
+              ))}
+            </div>
+          </div>
+          {activeFilterCount > 0 && (
+            <div style={{ display: "flex", alignItems: "flex-end" }}>
+              <button onClick={handleReset} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase" as const, color: SAFFRON, textDecoration: "underline" }}>CLEAR ALL</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Mobile filter panel */}
+      {showFilters && (
+        <div className="flex md:hidden flex-col" style={{ borderBottom: `1px solid ${INK}`, padding: "20px", gap: 16 }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>CATEGORY</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+              {categories.map((cat) => <FilterChip key={cat} label={categoryNameMap(cat) || cat} active={selectedCategory === cat} onClick={() => setSelectedCategory(selectedCategory === cat ? "" : cat)} />)}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>SCENT</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+              {SCENT_FAMILIES.map((s) => <FilterChip key={s.tag} label={s.label} active={selectedTag === s.tag} onClick={() => setSelectedTag(selectedTag === s.tag ? "" : s.tag)} />)}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>SORT</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+              {SORT_OPTIONS.map((opt) => <FilterChip key={opt.value} label={opt.label} active={sortBy === opt.value} onClick={() => setSortBy(opt.value)} />)}
+            </div>
+          </div>
+          {activeFilterCount > 0 && <button onClick={handleReset} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase" as const, color: SAFFRON, textDecoration: "underline", textAlign: "left" as const }}>CLEAR ALL</button>}
+        </div>
+      )}
+
+      {/* Products grid */}
+      {filteredProducts.length > 0 ? (
+        <>
+          <div className="flex md:hidden" style={{ padding: "12px 20px", borderBottom: `1px solid ${INK}`, justifyContent: "flex-end", gap: 0 }}>
+            {([1, 2] as const).map((n) => (
+              <button key={n} onClick={() => setMobileColumns(n)} style={{ padding: "6px 14px", border: `1px solid ${INK}`, borderRight: n === 1 ? "none" : `1px solid ${INK}`, background: mobileColumns === n ? INK : "transparent", color: mobileColumns === n ? CREAM : INK, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.15em", cursor: "pointer" }}>
+                {n === 1 ? "LIST" : "GRID"}
+              </button>
+            ))}
+          </div>
+          <ProductGrid products={filteredProducts} mobileColumns={mobileColumns} />
+        </>
+      ) : (
+        <div style={{ padding: "80px 0", textAlign: "center" as const }} className="px-5 md:px-12">
+          <div style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 300, fontStyle: "italic", opacity: 0.3, marginBottom: 16 }}>Nothing found.</div>
+          <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase" as const, opacity: 0.4, marginBottom: 32 }}>NO FRAGRANCES MATCH YOUR FILTERS</div>
+          <button onClick={handleReset} style={{ background: INK, color: CREAM, border: "none", padding: "14px 28px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase" as const, cursor: "pointer" }}>RESET FILTERS</button>
+        </div>
+      )}
+
+      {/* Matching bundles */}
+      {matchingBundles.length > 0 && (
+        <div style={{ borderTop: `1px solid ${INK}` }}>
+          <div style={{ paddingTop: 28, paddingBottom: 20, borderBottom: `1px solid ${INK}`, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" as const }} className="px-5 md:px-12">
+            MATCHING SETS & BUNDLES — {matchingBundles.length}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4" style={{ borderLeft: `1px solid ${INK}` }}>
+            {matchingBundles.map((bundle, i) => (
+              <div key={bundle.id} style={{ borderRight: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}>
+                <BundleCard bundle={bundle} index={i} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// Loading component for Suspense fallback
 const ProductsLoading = () => (
-  <div className="flex flex-col lg:flex-row gap-10">
-    <div className="hidden lg:block w-64 flex-shrink-0">
-      <div className="animate-pulse space-y-8">
-        <div className="h-8 bg-gray-200 rounded w-1/2"></div>
-        <div className="space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full"></div>
-          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-        </div>
-        <div className="h-32 bg-gray-200 rounded"></div>
-      </div>
+  <div style={{ background: "#F2EDE4", minHeight: "100vh" }}>
+    <div style={{ padding: "56px 48px 32px", borderBottom: "1px solid #0E0E0C" }}>
+      <div style={{ height: 10, background: "#EDE9E0", width: 200, marginBottom: 16 }} />
+      <div style={{ height: 48, background: "#EDE9E0", width: "40%" }} />
     </div>
-    <div className="flex-grow">
-      <div className="animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-32 mb-8"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="aspect-[3/4] bg-gray-200 rounded-xl"></div>
-          ))}
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", borderTop: "1px solid #0E0E0C", borderLeft: "1px solid #0E0E0C" }}>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} style={{ borderRight: "1px solid #0E0E0C", borderBottom: "1px solid #0E0E0C", padding: 24 }}>
+          <div style={{ aspectRatio: "3/4", background: "#EDE9E0" }} />
+          <div style={{ height: 10, background: "#EDE9E0", marginTop: 14, width: "60%" }} />
+          <div style={{ height: 14, background: "#EDE9E0", marginTop: 8, width: "80%" }} />
         </div>
-      </div>
+      ))}
     </div>
   </div>
 );
 
-// Main Products component with Suspense boundary
-const Products = () => {
-  return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#fcf9f8" }}>
-      <div className="pt-10 pb-10 md:pt-12 md:pb-12" style={{ background: "#fcf9f8" }}>
-        <div className="luxury-container">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <p
-              className="apo-chip inline-block mb-3"
-              style={{ color: "#735c00", background: "rgba(212,175,55,0.15)" }}
-            >
-              The Collection
-            </p>
-            <h1
-              className="font-serif font-bold leading-tight mb-2"
-              style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", color: "#1c1b1b" }}
-            >
-              All Fragrances
-            </h1>
-            <p
-              className="font-sans leading-relaxed max-w-lg"
-              style={{ fontSize: "0.95rem", color: "#4d4635" }}
-            >
-              Premium scents for every mood and occasion. Crafted to last.
-            </p>
-          </motion.div>
-        </div>
-      </div>
-
-      <main className="flex-grow pb-16" style={{ background: "#fcf9f8" }}>
-        <div className="luxury-container">
-          <Suspense fallback={<ProductsLoading />}>
-            <ProductsContent />
-          </Suspense>
-        </div>
-      </main>
-    </div>
-  );
-};
+const Products = () => (
+  <Suspense fallback={<ProductsLoading />}>
+    <ProductsContent />
+  </Suspense>
+);
 
 export default Products;

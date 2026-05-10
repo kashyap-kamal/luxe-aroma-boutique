@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   createBundle,
   updateBundle,
+  uploadBundleImage,
   BundleRow,
   BundleType,
   BundleStatus,
@@ -23,8 +24,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { ImageIcon, Loader2, Plus, Trash2, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
+import Image from 'next/image'
 
 interface BundleFormProps {
   bundle?: BundleRow & { items?: Array<{ product_id: string; quantity: number; sort_order: number }> }
@@ -40,6 +42,8 @@ export function BundleForm({ bundle }: BundleFormProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [allProducts, setAllProducts] = useState<ProductRow[]>([])
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(bundle?.image_url ?? null)
 
   const [form, setForm] = useState({
     name: bundle?.name ?? '',
@@ -77,6 +81,24 @@ export function BundleForm({ bundle }: BundleFormProps) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB')
+      return
+    }
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+    handleField('image_url', '')
+  }
+
+  const removeImage = () => {
+    setImageFile(null)
+    setImagePreview(bundle?.image_url ?? null)
+    handleField('image_url', bundle?.image_url ?? '')
+  }
+
   const addProduct = () => {
     if (!addProductId) return
     if (selectedProducts.find((p) => p.product_id === addProductId)) {
@@ -111,6 +133,11 @@ export function BundleForm({ bundle }: BundleFormProps) {
 
     setSaving(true)
     try {
+      let imageUrl = form.image_url || undefined
+      if (imageFile) {
+        imageUrl = await uploadBundleImage(imageFile, form.slug)
+      }
+
       const formData: BundleFormData = {
         name: form.name,
         slug: form.slug,
@@ -120,7 +147,7 @@ export function BundleForm({ bundle }: BundleFormProps) {
         price_original: form.price_original ? Number(form.price_original) : undefined,
         price_current: Number(form.price_current),
         currency: form.currency,
-        image_url: form.image_url || undefined,
+        image_url: imageUrl,
         status: form.status,
         featured: form.featured,
         display_order: Number(form.display_order),
@@ -267,13 +294,65 @@ export function BundleForm({ bundle }: BundleFormProps) {
         </div>
       </div>
 
-      {/* Image URL */}
+      {/* Bundle Image */}
       <div className="space-y-1.5">
-        <Label htmlFor="image_url">Image URL</Label>
+        <Label>Bundle Image</Label>
+        {imagePreview ? (
+          <div className="relative w-40 aspect-[3/4] rounded-lg overflow-hidden bg-gray-100">
+            <Image
+              src={imagePreview}
+              alt="Preview"
+              fill
+              className="object-cover"
+            />
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute top-2 right-2 bg-white/80 rounded-full p-1 hover:bg-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center justify-center w-40 aspect-[3/4] rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+            <ImageIcon className="h-8 w-8 text-gray-400 mb-2" />
+            <span className="text-xs text-gray-500 text-center px-2">Click to upload</span>
+            <span className="text-[10px] text-gray-400 mt-1">PNG, JPG, WebP (max 5MB)</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleImageChange}
+            />
+          </label>
+        )}
+        {imagePreview && (
+          <label className="inline-block">
+            <Button type="button" variant="outline" size="sm" className="gap-2" asChild>
+              <span>
+                <Upload className="h-4 w-4" />
+                Change Image
+              </span>
+            </Button>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleImageChange}
+            />
+          </label>
+        )}
+        <p className="text-xs text-muted-foreground">Or paste a URL:</p>
         <Input
           id="image_url"
           value={form.image_url}
-          onChange={(e) => handleField('image_url', e.target.value)}
+          onChange={(e) => {
+            handleField('image_url', e.target.value)
+            if (e.target.value) {
+              setImagePreview(e.target.value)
+              setImageFile(null)
+            }
+          }}
           placeholder="https://..."
         />
       </div>

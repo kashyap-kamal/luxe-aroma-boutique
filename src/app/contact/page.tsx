@@ -2,328 +2,179 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  Mail,
-  Send,
-  CheckCircle,
-  AlertCircle,
-  Phone,
-  MapPin,
-} from "lucide-react";
-import Image from "next/image";
+import { Mail, Send, CheckCircle, AlertCircle, Phone, MapPin } from "lucide-react";
 import { ContactService, ContactMessage } from "@/lib/contact-service";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
-const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
+const DARK = "#1A0908";
+
+const faqs = [
+  { q: "How can I track my order?", a: "Once your order ships, you'll receive an AWB number via SMS and email. You can also track in real time through your account Orders page." },
+  { q: "What is your return policy?", a: "We offer a 7-day return policy for unopened items in original sealed packaging. See our Cancellation & Refund page for full details." },
+  { q: "Do you ship across India?", a: "Yes, we ship pan-India via Shiprocket. All perfume orders are shipped via surface courier (4–9 business days) due to aviation restrictions on flammable goods." },
+  { q: "How do I choose the right fragrance?", a: "Take our free Scent Quiz — it recommends fragrances based on your mood, style, and occasions. You can also reach out for a personalised recommendation." },
+  { q: "Are your fragrances cruelty-free?", a: "Yes. All Aromé Luxe fragrances are cruelty-free — we never test on animals." },
+  { q: "What payment methods do you accept?", a: "We accept all major credit/debit cards, UPI, net banking, and wallets through Cashfree — an RBI-authorised, PCI-DSS compliant payment gateway." },
+];
+
+export default function Contact() {
+  const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{
-    type: "success" | "error" | null;
-    message: string;
-  }>({ type: null, message: "" });
+  const [status, setStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    // Clear status when user starts typing
-    if (submitStatus.type) {
-      setSubmitStatus({ type: null, message: "" });
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (status.type) setStatus({ type: null, message: "" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitStatus({ type: null, message: "" });
-
     try {
-      // Use client-side service directly for static export compatibility
-      const result = await ContactService.submitContactMessage(
-        formData as ContactMessage
-      );
-
+      const result = await ContactService.submitContactMessage(formData as ContactMessage);
       if (result.success) {
-        setSubmitStatus({
-          type: "success",
-          message: result.message,
-        });
+        setStatus({ type: "success", message: result.message });
         toast.success(result.message);
-
-        // Reset form after successful submission
-        setFormData({
-          name: "",
-          email: "",
-          subject: "",
-          message: "",
-        });
+        setFormData({ name: "", email: "", subject: "", message: "" });
       } else {
-        setSubmitStatus({
-          type: "error",
-          message: result.message,
-        });
+        setStatus({ type: "error", message: result.message });
         toast.error(result.message);
       }
-    } catch (error) {
-      console.error("Error submitting contact form:", error);
-      setSubmitStatus({
-        type: "error",
-        message: "An unexpected error occurred. Please try again.",
-      });
-      toast.error("An unexpected error occurred. Please try again.");
+    } catch {
+      const msg = "An unexpected error occurred. Please try again.";
+      setStatus({ type: "error", message: msg });
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const inputStyle = {
+    width: "100%",
+    padding: "14px 16px",
+    background: "rgba(14,14,12,0.04)",
+    border: `1px solid rgba(14,14,12,0.2)`,
+    outline: "none",
+    fontFamily: "var(--font-inter), sans-serif",
+    fontSize: 14,
+    color: INK,
+    boxSizing: "border-box" as const,
+  };
+  const labelStyle = {
+    display: "block",
+    fontFamily: "var(--font-jetbrains-mono), monospace",
+    fontSize: 10,
+    letterSpacing: "0.18em",
+    textTransform: "uppercase" as const,
+    marginBottom: 8,
+    opacity: 0.6,
+  };
+
   return (
-    <main className="flex-grow pt-20 bg-white">
-      {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[400px] overflow-hidden">
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5 }}
-          className="absolute inset-0"
-        >
-          <Image
-            src="/assets/contact/contact-us.jpeg"
-            alt="Contact Aromé Luxe"
-            className="w-full h-full object-cover"
-            width={1280}
-            height={640}
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
-        </motion.div>
+    <main style={{ background: CREAM, color: INK, paddingTop: 0 }}>
 
-        <div className="relative h-full luxury-container flex flex-col justify-center items-start text-white">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-6"
-          >
-            <Link href="/">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/50 backdrop-blur-sm transition-all duration-300"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Home
-              </Button>
-            </Link>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl md:text-7xl font-serif font-bold mb-6 max-w-3xl"
-          >
-            Get in Touch
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-xl md:text-2xl max-w-2xl font-light text-gray-200 leading-relaxed"
-          >
-            We&apos;d love to hear from you. Reach out to us for any questions,
-            feedback, or assistance.
-          </motion.p>
+      {/* HERO */}
+      <section style={{ background: DARK, color: CREAM, paddingTop: 80, paddingBottom: 56, borderBottom: `1px solid ${INK}` }} className="px-5 md:px-12">
+        <div className="max-w-5xl mx-auto">
+          <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.5, marginBottom: 20 }}>
+            CONTACT / GET IN TOUCH
+          </div>
+          <h1 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "clamp(3rem, 7vw, 7rem)", fontWeight: 300, lineHeight: 0.88, letterSpacing: "-0.04em", margin: "0 0 24px" }}>
+            We&apos;d love to <em style={{ color: SAFFRON }}>hear</em> from you.
+          </h1>
+          <p style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 16, lineHeight: 1.65, maxWidth: 480, opacity: 0.75 }}>
+            Questions, feedback, fragrance consultations — reach out through any of the channels below.
+          </p>
         </div>
       </section>
 
-      {/* Contact Information & Form */}
-      <section className="py-24">
-        <div className="luxury-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            {/* Contact Information */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <span className="text-luxe-gold text-sm font-bold uppercase tracking-widest mb-3 block">
-                Contact Info
-              </span>
-              <h2 className="text-4xl font-serif font-bold text-gray-900 mb-10">
-                We&apos;re Here to Help
-              </h2>
-
-              <div className="space-y-10">
+      {/* CONTACT INFO + FORM */}
+      <section style={{ borderBottom: `1px solid ${INK}` }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2" style={{ gridTemplateColumns: undefined }}>
+            {/* Info panel */}
+            <div style={{ paddingTop: 40, paddingBottom: 40 }} className="px-5 md:px-12 border-b md:border-b-0 md:border-r border-[#0E0E0C]">
+              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.5, marginBottom: 28 }}>
+                CONTACT INFO
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
                 {[
-                  {
-                    icon: Mail,
-                    title: "Email",
-                    content: "contact@aromeluxe.in",
-                    sub: "We'll get back to you within 24 hours",
-                  },
-                  {
-                    icon: Phone,
-                    title: "Phone",
-                    content: "+91-9711562006",
-                    sub: "Available for urgent inquiries and support",
-                  },
-                  {
-                    icon: MapPin,
-                    title: "Address",
-                    content:
-                      "A5/901, Olive County, Vasundhara, Sector-5, Ghaziabad, U.P.",
-                    sub: "PIN: 201012 • Visit our boutique",
-                  },
-                ].map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="flex items-start gap-6 group"
-                  >
-                    <div className="w-14 h-14 bg-luxe-cream rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-luxe-gold transition-colors duration-300">
-                      <item.icon className="h-6 w-6 text-gray-900 group-hover:text-white transition-colors duration-300" />
+                  { icon: Mail, label: "EMAIL", value: "contact@aromeluxe.in", sub: "Response within 24 hours", href: "mailto:contact@aromeluxe.in" },
+                  { icon: Phone, label: "PHONE", value: "+91-9711562006", sub: "Urgent inquiries & support", href: "tel:+919711562006" },
+                  { icon: MapPin, label: "ADDRESS", value: "A5/901, Olive County, Vasundhara, Sector-5, Ghaziabad, U.P. — 201012", sub: "Visit our boutique by appointment", href: undefined },
+                ].map((item) => (
+                  <div key={item.label} style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
+                    <div style={{ width: 40, height: 40, background: INK, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <item.icon className="h-4 w-4" style={{ color: CREAM }} strokeWidth={1.5} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-serif font-bold text-gray-900 mb-1">
-                        {item.title}
-                      </h3>
-                      <p className="text-gray-700 font-medium text-lg mb-1">
-                        {item.content}
-                      </p>
-                      <p className="text-gray-500 text-sm">{item.sub}</p>
+                      <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.5, marginBottom: 4 }}>{item.label}</div>
+                      {item.href ? (
+                        <a href={item.href} style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "1.1rem", fontWeight: 300, color: INK, textDecoration: "none", display: "block", marginBottom: 4 }}>{item.value}</a>
+                      ) : (
+                        <div style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 14, lineHeight: 1.5, marginBottom: 4 }}>{item.value}</div>
+                      )}
+                      <div style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 12, opacity: 0.5 }}>{item.sub}</div>
                     </div>
-                  </motion.div>
-                ))}
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="bg-gray-50 p-8 rounded-2xl border border-gray-100 mt-8"
-                >
-                  <h4 className="text-lg font-serif font-bold text-gray-900 mb-3">
-                    Multiple Ways to Reach Us
-                  </h4>
-                  <p className="text-gray-600 leading-relaxed">
-                    We offer multiple contact options to ensure you can reach us
-                    in the way that&apos;s most convenient for you. Use email
-                    for detailed inquiries, phone for urgent matters, or visit
-                    our boutique for personalized fragrance consultations.
-                  </p>
-                </motion.div>
-              </div>
-            </motion.div>
-
-            {/* Contact Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-gray-100 relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-luxe-gold/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-
-              <h2 className="text-3xl font-serif font-bold text-gray-900 mb-8 relative z-10">
-                Send us a Message
-              </h2>
-
-              <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-                {/* Status Message */}
-                {submitStatus.type && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`p-4 rounded-lg flex items-center gap-3 ${
-                      submitStatus.type === "success"
-                        ? "bg-green-50 border border-green-200 text-green-800"
-                        : "bg-red-50 border border-red-200 text-red-800"
-                    }`}
-                  >
-                    {submitStatus.type === "success" ? (
-                      <CheckCircle className="h-5 w-5 flex-shrink-0" />
-                    ) : (
-                      <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                    )}
-                    <p className="text-sm font-medium">
-                      {submitStatus.message}
-                    </p>
-                  </motion.div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide"
-                    >
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-luxe-gold focus:bg-white transition-all duration-300"
-                      placeholder="John Doe"
-                    />
                   </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 40, padding: "20px 24px", background: "rgba(14,14,12,0.04)", border: `1px solid rgba(14,14,12,0.1)` }}>
+                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", opacity: 0.5, marginBottom: 8 }}>SUPPORT HOURS</div>
+                <div style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, lineHeight: 1.7, color: "#3A3833" }}>
+                  Mon–Sat: 9:00 AM – 7:00 PM<br />
+                  Sun: 10:00 AM – 6:00 PM<br />
+                  Response within 2–4 hours
+                </div>
+              </div>
+            </div>
 
+            {/* Form panel */}
+            <div style={{ paddingTop: 40, paddingBottom: 40 }} className="px-5 md:px-12">
+              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.5, marginBottom: 28 }}>
+                SEND A MESSAGE
+              </div>
+
+              {status.type && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    padding: "14px 18px",
+                    marginBottom: 24,
+                    display: "flex",
+                    gap: 10,
+                    alignItems: "flex-start",
+                    background: status.type === "success" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
+                    border: `1px solid ${status.type === "success" ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
+                    color: status.type === "success" ? "#166534" : "#991b1b",
+                  }}
+                >
+                  {status.type === "success" ? <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5" /> : <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />}
+                  <span style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13 }}>{status.message}</span>
+                </motion.div>
+              )}
+
+              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide"
-                    >
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-luxe-gold focus:bg-white transition-all duration-300"
-                      placeholder="john@example.com"
-                    />
+                    <label htmlFor="name" style={labelStyle}>Full Name *</label>
+                    <input id="name" name="name" type="text" required value={formData.name} onChange={handleChange} placeholder="Your name" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label htmlFor="email" style={labelStyle}>Email *</label>
+                    <input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} placeholder="your@email.com" style={inputStyle} />
                   </div>
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="subject"
-                    className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide"
-                  >
-                    Subject *
-                  </label>
-                  <select
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-luxe-gold focus:bg-white transition-all duration-300 appearance-none"
-                  >
+                  <label htmlFor="subject" style={labelStyle}>Subject *</label>
+                  <select id="subject" name="subject" required value={formData.subject} onChange={handleChange} style={{ ...inputStyle, appearance: "none" }}>
                     <option value="">Select a subject</option>
                     <option value="general">General Inquiry</option>
                     <option value="product">Product Information</option>
@@ -336,128 +187,97 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide"
-                  >
-                    Message *
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    rows={6}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-luxe-gold focus:bg-white transition-all duration-300 resize-none"
-                    placeholder="How can we help you today?"
-                  />
+                  <label htmlFor="message" style={labelStyle}>Message *</label>
+                  <textarea id="message" name="message" required rows={5} value={formData.message} onChange={handleChange} placeholder="How can we help you today?" style={{ ...inputStyle, resize: "none" }} />
                 </div>
 
-                <Button
+                <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gray-900 hover:bg-luxe-gold hover:text-black text-white py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium rounded-lg"
+                  style={{
+                    background: isSubmitting ? "rgba(14,14,12,0.5)" : INK,
+                    color: CREAM,
+                    border: "none",
+                    padding: "18px 32px",
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: 11,
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    cursor: isSubmitting ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 10,
+                    width: "100%",
+                  }}
                 >
                   {isSubmitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      Sending...
-                    </>
+                    <><span style={{ opacity: 0.7 }}>SENDING</span><span className="animate-pulse">...</span></>
                   ) : (
-                    <>
-                      <Send className="h-5 w-5" />
-                      Send Message
-                    </>
+                    <><Send className="h-3.5 w-3.5" />SEND MESSAGE</>
                   )}
-                </Button>
+                </button>
               </form>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-24 bg-luxe-cream">
-        <div className="luxury-container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl font-serif font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
+      {/* FAQ */}
+      <section style={{ borderBottom: `1px solid ${INK}` }} className="px-5 md:px-12">
+        <div className="max-w-5xl mx-auto">
+          <div style={{ padding: "40px 0 20px", borderBottom: `1px solid ${INK}` }}>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.5, marginBottom: 10 }}>FAQ</div>
+            <h2 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "clamp(2rem, 4vw, 3.5rem)", fontWeight: 300, lineHeight: 0.95, letterSpacing: "-0.03em", margin: 0 }}>
+              Frequently asked <em>questions.</em>
             </h2>
-            <div className="w-20 h-1 bg-luxe-gold mx-auto rounded-full" />
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            <div className="space-y-8">
-              {[
-                {
-                  q: "How can I track my order?",
-                  a: "Once your order ships, you'll receive a tracking number via email. You can also track your order through your account dashboard.",
-                },
-                {
-                  q: "What is your return policy?",
-                  a: "We offer a 30-day return policy for unused items in original packaging. Return shipping costs are the responsibility of the customer.",
-                },
-                {
-                  q: "Do you ship internationally?",
-                  a: "Yes, we ship to most countries worldwide. International shipping rates and delivery times vary by location.",
-                },
-              ].map((faq, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+          </div>
+          <Accordion type="single" collapsible>
+            {faqs.map((faq, i) => (
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                style={{ borderBottom: `1px solid rgba(14,14,12,0.12)` }}
+              >
+                <AccordionTrigger
+                  style={{
+                    fontFamily: "var(--font-fraunces), serif",
+                    fontSize: "1.1rem",
+                    fontWeight: 300,
+                    color: INK,
+                    padding: "20px 0",
+                    letterSpacing: "-0.01em",
+                  }}
                 >
-                  <h3 className="text-lg font-serif font-bold text-gray-900 mb-2">
-                    {faq.q}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">{faq.a}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="space-y-8">
-              {[
-                {
-                  q: "How do I choose the right fragrance?",
-                  a: "Consider your personal style, the occasion, and your skin chemistry. We recommend trying samples or visiting our boutique for a personalized consultation.",
-                },
-                {
-                  q: "Are your fragrances cruelty-free?",
-                  a: "Yes, all our fragrances are cruelty-free and we never test on animals. We're committed to ethical and sustainable practices.",
-                },
-                {
-                  q: "Can I schedule a private consultation?",
-                  a: "Absolutely! We offer private consultations by appointment. Contact us to schedule your personalized fragrance experience.",
-                },
-              ].map((faq, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: (index + 3) * 0.1 }}
+                  {faq.q}
+                </AccordionTrigger>
+                <AccordionContent
+                  style={{
+                    fontFamily: "var(--font-inter), sans-serif",
+                    fontSize: 14,
+                    lineHeight: 1.75,
+                    color: "#3A3833",
+                    paddingBottom: 20,
+                  }}
                 >
-                  <h3 className="text-lg font-serif font-bold text-gray-900 mb-2">
-                    {faq.q}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">{faq.a}</p>
-                </motion.div>
-              ))}
-            </div>
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section style={{ paddingTop: 56, paddingBottom: 56, background: SAFFRON }} className="px-5 md:px-12">
+        <div className="max-w-5xl mx-auto" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: INK }}>OR JUST BROWSE</div>
+          <div style={{ display: "flex", gap: 0, flexWrap: "wrap" }}>
+            <Link href="/products" style={{ background: INK, color: CREAM, padding: "16px 28px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", textDecoration: "none" }}>SHOP COLLECTION →</Link>
+            <Link href="/quiz" style={{ background: "transparent", color: INK, border: `1px solid ${INK}`, borderLeft: "none", padding: "16px 28px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", textDecoration: "none" }}>TAKE THE QUIZ</Link>
           </div>
         </div>
       </section>
     </main>
   );
-};
-
-export default Contact;
+}

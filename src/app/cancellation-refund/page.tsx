@@ -1,374 +1,156 @@
 import React from "react";
-import {
-  RotateCcw,
-  CreditCard,
-  Clock,
-  ShieldCheck,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
+
+const h2Style = {
+  fontFamily: "var(--font-fraunces), serif",
+  fontSize: "1.6rem",
+  fontWeight: 300,
+  color: INK,
+  letterSpacing: "-0.02em",
+  borderTop: `1px solid ${INK}`,
+  paddingTop: 20,
+  marginBottom: 16,
+  marginTop: 40,
+};
+const pStyle = { marginBottom: 14, lineHeight: 1.75 };
+const ulStyle = { listStyle: "disc", paddingLeft: 24, marginBottom: 20 };
+const liStyle = { marginBottom: 8 };
 
 const CancellationRefund: React.FC = () => {
   return (
-    <main className="flex-grow pt-24 pb-8">
-      <div className="luxury-container">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <RotateCcw className="h-12 w-12 text-brown-600" />
+    <div style={{ minHeight: "100vh", background: CREAM, color: INK, paddingTop: 80 }}>
+      {/* Header */}
+      <div style={{ borderBottom: `1px solid ${INK}`, paddingTop: 40, paddingBottom: 40 }} className="px-5 md:px-12">
+        <div className="max-w-4xl mx-auto">
+          <Link
+            href="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: INK,
+              textDecoration: "none",
+              marginBottom: 24,
+              opacity: 0.6,
+            }}
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Back to Home
+          </Link>
+          <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, opacity: 0.5 }}>
+            LEGAL / CANCELLATION &amp; REFUND
           </div>
-          <h1 className="text-3xl font-serif font-bold mb-2">
-            Cancellation & Refund Policy
+          <h1 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 300, lineHeight: 0.95, letterSpacing: "-0.03em", margin: 0 }}>
+            Cancellation &amp; <em>Refund</em>
           </h1>
-          <p className="text-lg text-gray-600">
-            Your satisfaction is our priority. Learn about our flexible return
-            and refund process.
+          <p style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.15em", marginTop: 16, opacity: 0.5 }}>
+            LAST UPDATED: APRIL 2026
           </p>
         </div>
+      </div>
 
-        <div className="prose prose-lg max-w-4xl mx-auto">
-          {/* Quick Overview */}
-          <div className="bg-blue-50 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-blue-800">
-              Quick Overview
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-600" />
-                <span className="text-sm text-blue-700">
-                  7-day return window
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-blue-600" />
-                <span className="text-sm text-blue-700">
-                  5-7 business days refund
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-blue-600" />
-                <span className="text-sm text-blue-700">
-                  Free returns on defects
-                </span>
-              </div>
+      {/* Quick stats row */}
+      <div style={{ borderBottom: `1px solid ${INK}` }}>
+        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-[#0E0E0C]">
+          {[
+            { label: "RETURN WINDOW", value: "7 days" },
+            { label: "REFUND TIME", value: "5–7 working days" },
+            { label: "DEFECT RETURNS", value: "Free shipping" },
+          ].map((stat, i) => (
+            <div key={i} style={{ padding: "20px 24px" }}>
+              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.5, marginBottom: 6 }}>{stat.label}</div>
+              <div style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "1.4rem", fontWeight: 300 }}>{stat.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ paddingTop: 48, paddingBottom: 80 }} className="px-5 md:px-12">
+        <div className="max-w-4xl mx-auto" style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 15, color: "#3A3833" }}>
+
+          <h2 style={h2Style}>Order Cancellation</h2>
+          <p style={pStyle}>You can cancel your order for free <strong>within 2 hours of placing it</strong>, provided it hasn&apos;t been processed for shipping. Once processing begins, you will need to follow our return process to receive a refund.</p>
+          <p style={pStyle}><strong>How to cancel:</strong> Email <a href="mailto:contact@aromeluxe.in" style={{ color: SAFFRON }}>contact@aromeluxe.in</a> with your order number and reason. We will confirm cancellation and process your refund within 24 hours.</p>
+
+          <h2 style={h2Style}>Returns</h2>
+          <p style={pStyle}>You have <strong>7 days from the date of delivery</strong> to initiate a return. Items must be in their original condition with all packaging and tags intact, and seals must be unbroken.</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+            <div style={{ border: `1px solid rgba(14,14,12,0.15)`, padding: "20px 24px" }}>
+              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 12, color: SAFFRON }}>RETURNABLE</div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14 }}>
+                {["Unopened perfumes in original packaging", "Defective or damaged items", "Wrong items delivered", "Items not matching description"].map(item => (
+                  <li key={item} style={{ padding: "6px 0", borderBottom: "1px solid rgba(14,14,12,0.06)" }}>✓ {item}</li>
+                ))}
+              </ul>
+            </div>
+            <div style={{ border: `1px solid rgba(14,14,12,0.15)`, padding: "20px 24px", background: "rgba(14,14,12,0.02)" }}>
+              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 12, opacity: 0.5 }}>NOT RETURNABLE</div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14 }}>
+                {["Opened or used perfumes", "Personalised or custom items", "Items damaged by customer", "Items without original packaging", "Sale items (unless defective)"].map(item => (
+                  <li key={item} style={{ padding: "6px 0", borderBottom: "1px solid rgba(14,14,12,0.06)", opacity: 0.6 }}>✗ {item}</li>
+                ))}
+              </ul>
             </div>
           </div>
 
-          {/* Order Cancellation */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">
-              Order Cancellation
-            </h2>
+          <p style={pStyle}><strong>Return process:</strong> Contact us within 7 days → get a return authorisation (RMA) → pack securely in original packaging → ship back. We will inspect within 2–3 business days of receipt.</p>
 
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                <div>
-                  <h3 className="font-semibold text-green-800">
-                    Before Processing
-                  </h3>
-                  <p className="text-sm text-green-700">
-                    You can cancel your order for free within 2 hours of placing
-                    it, provided it hasn&apos;t been processed for shipping.
-                  </p>
-                </div>
+          <h2 style={h2Style}>Refunds</h2>
+          <div style={{ border: `1px solid rgba(14,14,12,0.15)`, marginBottom: 24 }}>
+            {[
+              ["Return received & inspected", "1–2 business days"],
+              ["Refund initiated by us", "2–3 business days"],
+              ["Bank/card credit (via Cashfree)", "5–7 working days"],
+              ["Total time from return receipt", "7–12 working days"],
+            ].map(([label, time], i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderBottom: i < 3 ? "1px solid rgba(14,14,12,0.08)" : "none", background: i === 3 ? "rgba(14,14,12,0.04)" : "transparent" }}>
+                <span style={{ fontWeight: i === 3 ? 600 : 400, color: INK }}>{label}</span>
+                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 12, letterSpacing: "0.1em", color: i === 3 ? SAFFRON : INK }}>{time}</span>
               </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                <div>
-                  <h3 className="font-semibold text-yellow-800">
-                    After Processing
-                  </h3>
-                  <p className="text-sm text-yellow-700">
-                    Once your order is processed, you&apos;ll need to follow our
-                    return process to receive a refund.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <h3 className="text-lg font-semibold mb-3">How to Cancel</h3>
-            <ol className="list-decimal list-inside space-y-2 text-gray-700">
-              <li>Contact us immediately via phone, email, or live chat</li>
-              <li>Provide your order number and reason for cancellation</li>
-              <li>
-                We&apos;ll confirm cancellation and process your refund within
-                24 hours
-              </li>
-            </ol>
-          </section>
-
-          {/* Returns Policy */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">
-              Returns Policy
-            </h2>
-
-            <h3 className="text-lg font-semibold mb-3">Return Window</h3>
-            <p className="mb-4">
-              You have <strong>7 days</strong> from the date of delivery to
-              initiate a return. All returned items must be in their original
-              condition with tags attached.
+          <div style={{ background: `rgba(232,118,58,0.06)`, border: `1px solid rgba(232,118,58,0.3)`, padding: "16px 20px", marginBottom: 24 }}>
+            <p style={{ margin: 0, fontSize: 13, lineHeight: 1.65 }}>
+              <strong>Important:</strong> Refund processing after initiation is managed by Cashfree Payments (RBI-authorised) and your bank, and is outside our direct control.{" "}
+              <strong>Cash refunds are not available.</strong> All refunds go to the original payment method only. Refunds cannot be processed for transactions older than 120 days from the purchase date.
             </p>
+          </div>
 
-            <h3 className="text-lg font-semibold mb-3">Eligible Items</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <h4 className="font-medium text-green-800 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" /> Returnable Items
-                </h4>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li>• Unopened perfumes and cosmetics</li>
-                  <li>• Items with defects or damage</li>
-                  <li>• Wrong items delivered</li>
-                  <li>• Items not matching description</li>
-                  <li>• Accessories and gift sets</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-medium text-red-800 mb-2 flex items-center gap-2">
-                  <XCircle className="h-4 w-4" /> Non-Returnable Items
-                </h4>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li>• Opened or used perfumes</li>
-                  <li>• Personalized or custom items</li>
-                  <li>• Items damaged by customer</li>
-                  <li>• Items without original packaging</li>
-                  <li>• Sale items (unless defective)</li>
-                </ul>
-              </div>
-            </div>
+          <h3 style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: INK, marginTop: 24, marginBottom: 12 }}>Refund Methods</h3>
+          <ul style={ulStyle}>
+            <li style={liStyle}><strong>UPI:</strong> 1–3 working days after initiation</li>
+            <li style={liStyle}><strong>Credit / Debit cards:</strong> 5–7 working days</li>
+            <li style={liStyle}><strong>Net banking:</strong> 3–5 working days</li>
+          </ul>
 
-            <h3 className="text-lg font-semibold mb-3">Return Process</h3>
-            <ol className="list-decimal list-inside space-y-2 text-gray-700">
-              <li>
-                <strong>Initiate Return:</strong> Contact customer service
-                within 7 days of delivery
-              </li>
-              <li>
-                <strong>Return Authorization:</strong> We&apos;ll provide a
-                return authorization number (RMA)
-              </li>
-              <li>
-                <strong>Package Items:</strong> Pack items securely in original
-                packaging
-              </li>
-              <li>
-                <strong>Ship Items:</strong> Use the prepaid return label we
-                provide
-              </li>
-              <li>
-                <strong>Processing:</strong> We&apos;ll inspect and process your
-                return within 2-3 business days
-              </li>
-            </ol>
-          </section>
+          <h2 style={h2Style}>Return Shipping Costs</h2>
+          <ul style={ulStyle}>
+            <li style={liStyle}><strong>We pay return shipping</strong> for: defective/damaged items, wrong items delivered, our fulfilment error.</li>
+            <li style={liStyle}><strong>Customer pays return shipping</strong> for: change of mind, preference changes, items ordered by mistake.</li>
+          </ul>
 
-          {/* Refund Policy */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">
-              Refund Policy
-            </h2>
+          <h2 style={h2Style}>Exchanges</h2>
+          <p style={pStyle}>We offer exchanges for defective items or wrong items delivered, subject to stock availability, within 7 days of delivery. If the replacement item is higher-priced, the difference will be charged; if lower-priced, we will refund the difference.</p>
 
-            <h3 className="text-lg font-semibold mb-3">Refund Timeline</h3>
-            <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Return received & inspected:</span>
-                  <span className="font-medium">1-2 business days</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Refund processed:</span>
-                  <span className="font-medium">2-3 business days</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Bank/card credit:</span>
-                  <span className="font-medium">3-5 business days</span>
-                </div>
-                <hr className="my-2" />
-                <div className="flex justify-between font-semibold">
-                  <span>Total time:</span>
-                  <span>5-10 business days</span>
-                </div>
-              </div>
-            </div>
+          <h2 style={h2Style}>Contact</h2>
+          <p style={pStyle}>To initiate a return or refund, email <a href="mailto:contact@aromeluxe.in" style={{ color: SAFFRON }}>contact@aromeluxe.in</a> with your order number and reason. Support hours: Mon–Sat 9 AM–7 PM. Response within 24 hours.</p>
 
-            <h3 className="text-lg font-semibold mb-3">Refund Methods</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li>
-                <strong>Original Payment Method:</strong> Refunds will be
-                credited to the same payment method used for purchase
-              </li>
-              <li>
-                <strong>UPI/Digital Wallets:</strong> Refunds processed within
-                1-2 business days
-              </li>
-              <li>
-                <strong>Credit/Debit Cards:</strong> Refunds may take 3-7
-                business days depending on your bank
-              </li>
-              <li>
-                <strong>Net Banking:</strong> Refunds typically processed within
-                2-5 business days
-              </li>
-            </ul>
-
-            <h3 className="text-lg font-semibold mb-3 mt-6">Partial Refunds</h3>
-            <p className="mb-2">Partial refunds may be given for:</p>
-            <ul className="list-disc list-inside space-y-1 text-gray-700">
-              <li>Items with minor damage not caused during shipping</li>
-              <li>Items returned after 7 days but within 14 days</li>
-              <li>Items missing original packaging or accessories</li>
-              <li>Restocking fees for large or custom orders</li>
-            </ul>
-          </section>
-
-          {/* Exchange Policy */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">
-              Exchange Policy
-            </h2>
-
-            <p className="mb-4">
-              We offer exchanges for defective items or wrong items delivered.
-              Exchanges are subject to product availability and must be
-              initiated within 7 days of delivery.
-            </p>
-
-            <h3 className="text-lg font-semibold mb-3">Exchange Process</h3>
-            <ol className="list-decimal list-inside space-y-2 text-gray-700">
-              <li>Contact us to request an exchange</li>
-              <li>We&apos;ll provide an exchange authorization</li>
-              <li>Ship the item back using our prepaid label</li>
-              <li>
-                We&apos;ll send the replacement item once we receive the
-                returned item
-              </li>
-            </ol>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-              <p className="text-sm text-blue-800">
-                <strong>Note:</strong> If the replacement item has a higher
-                price, you&apos;ll be charged the difference. If it&apos;s
-                lower, we&apos;ll refund the difference.
-              </p>
-            </div>
-          </section>
-
-          {/* Shipping Costs */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">
-              Return Shipping Costs
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-semibold text-green-800 mb-2">
-                  We Pay Return Shipping
-                </h3>
-                <ul className="text-sm text-green-700 space-y-1">
-                  <li>• Defective or damaged items</li>
-                  <li>• Wrong items delivered</li>
-                  <li>• Items not matching description</li>
-                  <li>• Our shipping error</li>
-                </ul>
-              </div>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h3 className="font-semibold text-yellow-800 mb-2">
-                  Customer Pays Return Shipping
-                </h3>
-                <ul className="text-sm text-yellow-700 space-y-1">
-                  <li>• Change of mind returns</li>
-                  <li>• Size or color preference</li>
-                  <li>• Items ordered by mistake</li>
-                  <li>• Non-defective returns</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* Contact Information */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">
-              Contact Us for Returns
-            </h2>
-
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="font-semibold mb-4">Customer Service</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p>
-                    <strong>Email:</strong> contact@aromeluxe.in
-                  </p>
-                </div>
-                <div>
-                  <p>
-                    <strong>Hours:</strong> 9:00 AM - 7:00 PM (Mon-Sat)
-                  </p>
-                  <p>
-                    <strong>Response Time:</strong> Within 24 hours
-                  </p>
-                  <p>
-                    <strong>Live Chat:</strong> Available on website
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Important Notes */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">
-              Important Notes
-            </h2>
-
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <ul className="space-y-2 text-red-800 text-sm">
-                <li>
-                  • All return requests must be initiated within 7 days of
-                  delivery
-                </li>
-                <li>
-                  • Items must be in original condition with all packaging and
-                  tags
-                </li>
-                <li>• Refunds are processed only after quality inspection</li>
-                <li>
-                  • Custom or personalized items cannot be returned unless
-                  defective
-                </li>
-                <li>
-                  • International orders may have different return policies
-                </li>
-                <li>
-                  • Misuse of return policy may result in account suspension
-                </li>
-              </ul>
-            </div>
-          </section>
-
-          {/* Policy Updates */}
-          <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">
-              Policy Updates
-            </h2>
-            <p className="text-gray-700">
-              This policy may be updated from time to time. Any changes will be
-              posted on this page with an updated effective date. Continued use
-              of our service after changes constitutes acceptance of the updated
-              policy.
-            </p>
-            <p className="text-sm text-gray-500 mt-4">
-              <strong>Last Updated:</strong> January 2025
-            </p>
-          </section>
+          <p style={{ ...pStyle, fontSize: 13, opacity: 0.5 }}>This policy may be updated from time to time. Continued use of our service after changes constitutes acceptance of the updated policy.</p>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

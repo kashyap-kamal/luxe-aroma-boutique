@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Product, useCartStore } from "@/stores/cart-store";
 import { useProducts } from "@/hooks/use-products";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { getSetting } from "@/lib/settings-service";
+import { fetchProductById } from "@/lib/product-service";
+
+const SAFFRON = "#E8763A";
+const CREAM = "#F2EDE4";
+const INK = "#0E0E0C";
 
 interface ProductSpotlightProps {
   products: Product[];
@@ -15,204 +19,450 @@ interface ProductSpotlightProps {
 export default function ProductSpotlight({ products: initialProducts }: ProductSpotlightProps) {
   const { products } = useProducts(initialProducts, { featured: true, limit: 6 });
   const { addToCart } = useCartStore();
-  const [[idx, dir], setPage] = useState([0, 0]);
+  const [addedId, setAddedId] = useState<string | null>(null);
+  const [configuredProduct, setConfiguredProduct] = useState<Product | null>(null);
 
-  const product = products[idx];
+  useEffect(() => {
+    getSetting<string>("spotlight_product_id").then(async (id) => {
+      if (id) {
+        const p = await fetchProductById(id);
+        if (p) setConfiguredProduct(p);
+      }
+    }).catch(() => {});
+  }, []);
 
-  const paginate = useCallback(
-    (d: number) => {
-      setPage(([prev]) => {
-        const next = d > 0
-          ? prev === products.length - 1 ? 0 : prev + 1
-          : prev === 0 ? products.length - 1 : prev - 1;
-        return [next, d];
-      });
-    },
-    [products.length]
-  );
+  const product = configuredProduct ?? products[0];
 
-  if (!product || products.length === 0) return null;
+  if (!product) return null;
 
-  const notes = product.fragrance_notes;
-  const topNotes = notes?.top?.slice(0, 3) ?? [];
+  const notes = [
+    { tier: "TOP", name: product.fragrance_notes?.top?.[0] ?? "Saffron", duration: "0–15 min", color: SAFFRON },
+    { tier: "HEART", name: product.fragrance_notes?.middle?.[0] ?? "Rose", duration: "15 min–2 h", color: "#E8B4B8" },
+    { tier: "BASE", name: product.fragrance_notes?.base?.[0] ?? "Oud", duration: "2–10 h", color: "#C7905C" },
+  ];
+
   const discountPercent =
     product.price.on_sale && product.price.original > 0
-      ? Math.round(((product.price.original - product.price.current) / product.price.original) * 100)
-      : 0;
+      ? Math.round(
+          ((product.price.original - product.price.current) /
+            product.price.original) *
+            100
+        )
+      : 30;
+
+  const isAdded = addedId === product?.id;
 
   const handleAdd = () => {
+    if (isAdded) return;
     addToCart(product, 1);
+    setAddedId(product.id);
+    setTimeout(() => setAddedId(null), 1500);
     toast.success(`${product.name} added to cart`);
   };
 
   return (
-    <section className="py-20 md:py-28 px-6 lg:px-12 overflow-hidden" style={{ background: "#f2f4f4" }}>
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center">
-        {/* Left: product info */}
-        <div className="col-span-1 md:col-span-7 order-2 md:order-1">
-          <AnimatePresence mode="wait" custom={dir}>
-            <motion.div
-              key={product.id}
-              custom={dir}
-              initial={{ opacity: 0, x: dir > 0 ? 40 : -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: dir > 0 ? -40 : 40 }}
-              transition={{ duration: 0.35 }}
-            >
-              <div
-                className="relative p-8 md:p-12"
-                style={{
-                  background: "rgba(255,255,255,0.4)",
-                  backdropFilter: "blur(8px)",
-                  border: "1px solid rgba(173,179,180,0.1)",
-                }}
-              >
-                {/* Badge */}
-                <div
-                  className="absolute -top-4 -left-2 md:-left-4 px-4 py-1.5 font-sans uppercase tracking-widest font-semibold"
-                  style={{ fontSize: "10px", background: "#735b3a", color: "#f9f9f9" }}
-                >
-                  SIGNATURE SERIES
-                </div>
-
-                <h2
-                  className="font-serif font-bold uppercase mb-1 leading-none"
-                  style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#2d3435" }}
-                >
-                  {product.name}
-                </h2>
-
-                <p
-                  className="font-sans uppercase tracking-[0.3em] mb-8 md:mb-10"
-                  style={{ fontSize: "11px", color: "#735b3a" }}
-                >
-                  NO FADE FRAGRANCE
-                </p>
-
-                {/* Fragrance notes */}
-                <div className="space-y-5 mb-10">
-                  {topNotes.map((note) => (
-                    <div key={note} className="flex items-start gap-3">
-                      <span className="w-1.5 h-1.5 mt-2 flex-shrink-0" style={{ background: "#735b3a" }} />
-                      <div>
-                        <h4
-                          className="font-sans font-bold uppercase tracking-widest mb-0.5"
-                          style={{ fontSize: "11px", color: "#2d3435" }}
-                        >
-                          {note}
-                        </h4>
-                        <p
-                          className="font-sans font-light"
-                          style={{ fontSize: "13px", color: "#5a6061" }}
-                        >
-                          Premium {note.toLowerCase()} note for depth and character.
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Price */}
-                <div className="flex items-end gap-3 mb-6">
-                  <span
-                    className="font-serif font-bold"
-                    style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)", color: "#2d3435" }}
-                  >
-                    {product.price.currency}{product.price.current.toLocaleString("en-IN")}
-                  </span>
-                  {product.price.on_sale && (
-                    <span
-                      className="font-sans line-through mb-1"
-                      style={{ fontSize: "1.1rem", color: "rgba(90,96,97,0.6)" }}
-                    >
-                      {product.price.currency}{product.price.original.toLocaleString("en-IN")}
-                    </span>
-                  )}
-                  {discountPercent > 0 && (
-                    <span
-                      className="font-sans font-semibold uppercase mb-1 ml-1"
-                      style={{ fontSize: "11px", color: "#735b3a" }}
-                    >
-                      {discountPercent}% OFF
-                    </span>
-                  )}
-                </div>
-
-                <button
-                  onClick={handleAdd}
-                  className="w-full py-4 font-sans uppercase tracking-widest transition-all duration-300 hover:opacity-90 active:scale-[0.98]"
-                  style={{ fontSize: "12px", background: "#2d3435", color: "#f9f9f9" }}
-                >
-                  ADD TO COLLECTION
-                </button>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Carousel controls */}
-          {products.length > 1 && (
-            <div className="flex items-center gap-4 mt-6">
-              <button
-                onClick={() => paginate(-1)}
-                className="p-2 transition-colors hover:text-[#2d3435]"
-                style={{ color: "#5a6061" }}
-                aria-label="Previous"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <div className="flex gap-1.5">
-                {products.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage([i, i > idx ? 1 : -1])}
-                    className="h-1.5 rounded-full transition-all duration-300"
-                    style={{
-                      width: i === idx ? "2rem" : "0.5rem",
-                      background: i === idx ? "#2d3435" : "#adb3b4",
-                    }}
-                    aria-label={`Product ${i + 1}`}
-                  />
-                ))}
-              </div>
-              <button
-                onClick={() => paginate(1)}
-                className="p-2 transition-colors hover:text-[#2d3435]"
-                style={{ color: "#5a6061" }}
-                aria-label="Next"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          )}
+  <>
+    <section
+      style={{
+        gridTemplateColumns: "1fr 1fr",
+        borderBottom: `1px solid ${INK}`,
+        background: "#1A0908",
+        color: CREAM,
+      }}
+      className="hidden md:grid"
+    >
+      {/* LEFT: product info */}
+      <div
+        style={{
+          padding: "72px 48px",
+          borderRight: `1px solid rgba(232,118,58,0.3)`,
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 11,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: SAFFRON,
+          }}
+        >
+          FEATURE — 03 / SIGNATURE SERIES
         </div>
+        <h2
+          style={{
+            fontSize: "clamp(3.5rem, 8vw, 8rem)",
+            lineHeight: 0.88,
+            letterSpacing: "-0.04em",
+            fontWeight: 300,
+            margin: "20px 0 0",
+            fontFamily: "var(--font-fraunces), serif",
+          }}
+        >
+          {product.name.split(" ")[0]}
+          <br />
+          <em style={{ fontWeight: 300, color: SAFFRON }}>
+            {product.name.split(" ").slice(1).join(" ") || "Al Oud."}
+          </em>
+        </h2>
+        <p
+          style={{
+            fontFamily: "var(--font-inter), sans-serif",
+            fontSize: 15,
+            lineHeight: 1.6,
+            maxWidth: 440,
+            marginTop: 28,
+            opacity: 0.85,
+          }}
+        >
+          A no-fade fragrance built for ten-hour skin. Saffron up top,
+          Bulgarian rose at the heart, Cambodian oud below. Twenty-three
+          iterations until the dry-down was worth your wrist.
+        </p>
 
-        {/* Right: product image */}
-        <div className="col-span-1 md:col-span-5 order-1 md:order-2 flex justify-center">
-          <AnimatePresence mode="wait" custom={dir}>
-            <motion.div
-              key={product.id + "-img"}
-              custom={dir}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.35 }}
-              className="relative w-full max-w-md aspect-[3/4] flex items-center justify-center p-8 md:p-12"
+        {/* Notes breakdown */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            marginTop: 40,
+            border: "1px solid rgba(232,118,58,0.3)",
+          }}
+        >
+          {notes.map((note, i) => (
+            <div
+              key={note.tier}
               style={{
-                background: "#ebeeef",
-                boxShadow: "0 25px 50px -12px rgba(0,0,0,0.1)",
+                padding: 18,
+                borderRight:
+                  i < 2 ? "1px solid rgba(232,118,58,0.3)" : "none",
               }}
             >
-              <Image
-                src={product.image}
-                alt={product.name}
-                width={400}
-                height={533}
-                className="w-full h-full object-contain mix-blend-multiply"
-              />
-            </motion.div>
-          </AnimatePresence>
+              <div
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 9,
+                  letterSpacing: "0.2em",
+                  color: note.color,
+                  textTransform: "uppercase",
+                }}
+              >
+                {note.tier}
+              </div>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontStyle: "italic",
+                  marginTop: 6,
+                  fontFamily: "var(--font-fraunces), serif",
+                }}
+              >
+                {note.name}
+              </div>
+              <div
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 10,
+                  opacity: 0.5,
+                  marginTop: 4,
+                }}
+              >
+                {note.duration}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Price + CTA */}
+        <div
+          style={{
+            marginTop: 40,
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 34, fontWeight: 300 }}>
+              {product.price.currency}
+              {product.price.current.toLocaleString("en-IN")}{" "}
+              {product.price.on_sale && (
+                <span
+                  style={{
+                    fontSize: 16,
+                    opacity: 0.5,
+                    textDecoration: "line-through",
+                  }}
+                >
+                  {product.price.currency}
+                  {product.price.original.toLocaleString("en-IN")}
+                </span>
+              )}
+            </div>
+            {discountPercent > 0 && (
+              <div
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 10,
+                  color: SAFFRON,
+                  letterSpacing: "0.2em",
+                  marginTop: 4,
+                  textTransform: "uppercase",
+                }}
+              >
+                {discountPercent}% OFF — LIMITED
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={isAdded}
+            style={{
+              background: SAFFRON,
+              color: INK,
+              border: "none",
+              padding: "16px 24px",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 11,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              cursor: isAdded ? "not-allowed" : "pointer",
+              opacity: isAdded ? 0.7 : 1,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {isAdded ? "ADDED!" : "ADD TO CART →"}
+          </button>
+        </div>
+      </div>
+
+      {/* RIGHT: product image */}
+      <div
+        style={{
+          position: "relative",
+          minHeight: 600,
+          background: `radial-gradient(circle at 50% 50%, #6B2310 0%, #1A0908 70%)`,
+          overflow: "hidden",
+        }}
+      >
+        <Image
+          src="/assets/perfumes/ameer-al-oud-nobg.png"
+          alt={product.name}
+          fill
+          sizes="50vw"
+          className="object-contain"
+          style={{ padding: "48px 64px", filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.5))" }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: 28,
+            left: 28,
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.2em",
+            color: SAFFRON,
+          }}
+        >
+          PLATE II.
+          <br />
+          FIG. B — THE FLAGSHIP
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 28,
+            right: 28,
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.2em",
+            color: SAFFRON,
+            textAlign: "right",
+          }}
+        >
+          EAU DE PARFUM
+          <br />
+          SCALE 1:1
         </div>
       </div>
     </section>
+
+    {/* MOBILE SIGNATURE FEATURE */}
+    <section
+      className="flex flex-col md:hidden"
+      style={{
+        background: "#1A0908",
+        color: CREAM,
+        borderBottom: `1px solid ${INK}`,
+      }}
+    >
+      {/* Bottle panel */}
+      <div
+        style={{
+          background: `radial-gradient(circle at 50% 50%, #6B2310 0%, #1A0908 70%)`,
+          height: 320,
+          position: "relative",
+          overflow: "hidden",
+          borderBottom: "1px solid rgba(232,118,58,0.2)",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 14,
+            left: 16,
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 9,
+            letterSpacing: "0.2em",
+            color: SAFFRON,
+          }}
+        >
+          PLATE II.
+        </div>
+        <Image
+          src="/assets/perfumes/ameer-al-oud-nobg.png"
+          alt={product.name}
+          fill
+          sizes="100vw"
+          className="object-contain"
+          style={{ padding: "24px 40px", filter: "drop-shadow(0 20px 32px rgba(0,0,0,0.5))" }}
+        />
+      </div>
+
+      {/* Info */}
+      <div style={{ padding: "28px 20px 32px" }}>
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 9,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: SAFFRON,
+            marginBottom: 10,
+          }}
+        >
+          FEATURE — 03 / SIGNATURE SERIES
+        </div>
+        <h2
+          style={{
+            fontSize: "3.2rem",
+            lineHeight: 0.88,
+            letterSpacing: "-0.04em",
+            fontWeight: 300,
+            fontFamily: "var(--font-fraunces), serif",
+            marginBottom: 14,
+          }}
+        >
+          {product.name.split(" ")[0]}
+          <br />
+          <em style={{ color: SAFFRON }}>
+            {product.name.split(" ").slice(1).join(" ") || "Al Oud."}
+          </em>
+        </h2>
+        <p
+          style={{
+            fontFamily: "var(--font-inter), sans-serif",
+            fontSize: 13,
+            lineHeight: 1.6,
+            opacity: 0.8,
+            marginBottom: 20,
+          }}
+        >
+          A no-fade fragrance built for ten-hour skin. Saffron, Bulgarian rose,
+          Cambodian oud.
+        </p>
+
+        {/* Notes row */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            border: "1px solid rgba(232,118,58,0.3)",
+            marginBottom: 20,
+          }}
+        >
+          {notes.map((note, i) => (
+            <div
+              key={note.tier}
+              style={{
+                padding: "12px 10px",
+                borderRight: i < 2 ? "1px solid rgba(232,118,58,0.3)" : "none",
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 8,
+                  letterSpacing: "0.2em",
+                  color: note.color,
+                  textTransform: "uppercase",
+                }}
+              >
+                {note.tier}
+              </div>
+              <div
+                style={{
+                  fontFamily: "var(--font-fraunces), serif",
+                  fontSize: 16,
+                  fontStyle: "italic",
+                  marginTop: 4,
+                }}
+              >
+                {note.name}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 26, fontWeight: 300, fontFamily: "var(--font-fraunces), serif" }}>
+              {product.price.currency}
+              {product.price.current.toLocaleString("en-IN")}
+              {product.price.on_sale && (
+                <span
+                  style={{
+                    fontSize: 13,
+                    opacity: 0.4,
+                    textDecoration: "line-through",
+                    marginLeft: 8,
+                  }}
+                >
+                  {product.price.currency}
+                  {product.price.original.toLocaleString("en-IN")}
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={isAdded}
+            style={{
+              background: SAFFRON,
+              color: INK,
+              border: "none",
+              padding: "14px 22px",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              cursor: isAdded ? "not-allowed" : "pointer",
+              opacity: isAdded ? 0.7 : 1,
+            }}
+          >
+            {isAdded ? "ADDED!" : "ADD →"}
+          </button>
+        </div>
+      </div>
+    </section>
+  </>
   );
 }

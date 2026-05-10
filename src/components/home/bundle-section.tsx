@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import BundleCard from "@/components/bundle-card";
 import { fetchFeaturedBundles, Bundle } from "@/lib/bundle-service";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
 
 export default function BundleSection() {
   const [bundles, setBundles] = useState<Bundle[]>([]);
@@ -17,87 +18,165 @@ export default function BundleSection() {
       .finally(() => setLoaded(true));
   }, []);
 
-  // Don't render if no bundles exist
   if (loaded && bundles.length === 0) return null;
 
   return (
-    <section className="py-20 md:py-24" style={{ background: "#fcf9f8" }}>
-      <div className="luxury-container">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-10">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+    <section
+      style={{
+        borderBottom: `1px solid ${INK}`,
+        background: CREAM,
+        color: INK,
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          padding: "56px 48px 20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          borderBottom: `1px solid ${INK}`,
+        }}
+        className="hidden md:flex"
+      >
+        <div>
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+            }}
           >
-            <p
-              className="apo-chip inline-block mb-3"
-              style={{ color: "#7c43ab", background: "rgba(124,67,171,0.1)" }}
-            >
-              Discovery Sets
-            </p>
-            <h2
-              className="font-serif font-bold leading-tight"
-              style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", color: "#1c1b1b" }}
-            >
-              Explore Before You Commit
-            </h2>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Link
-              href="/bundles"
-              className="inline-flex items-center gap-1.5 font-sans text-sm font-medium transition-all duration-200 group"
-              style={{ color: "#7c43ab" }}
-            >
-              View All Sets
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </motion.div>
-        </div>
-
-        {!loaded ? (
-          // Skeleton
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div
-                  className="mb-3"
-                  style={{
-                    aspectRatio: "3/4",
-                    background: "#f0edec",
-                    borderRadius: "0.25rem",
-                  }}
-                />
-                <div
-                  className="h-3 mb-2"
-                  style={{ background: "#f0edec", borderRadius: "0.125rem", width: "60%" }}
-                />
-                <div
-                  className="h-4 mb-3"
-                  style={{ background: "#f0edec", borderRadius: "0.125rem", width: "80%" }}
-                />
-              </div>
-            ))}
+            FEATURE — 05 / DISCOVERY SETS
           </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
+          <h2
+            style={{
+              fontSize: "clamp(2.5rem, 5vw, 4rem)",
+              lineHeight: 0.95,
+              letterSpacing: "-0.03em",
+              fontWeight: 300,
+              margin: "10px 0 0",
+              fontFamily: "var(--font-fraunces), serif",
+            }}
           >
-            {bundles.map((bundle) => (
-              <BundleCard key={bundle.id} bundle={bundle} />
-            ))}
-          </motion.div>
-        )}
+            The discovery set,{" "}
+            <em style={{ fontWeight: 300 }}>reconsidered.</em>
+          </h2>
+        </div>
+        <Link
+          href="/bundles"
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 11,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            textDecoration: "underline",
+            color: INK,
+          }}
+        >
+          VIEW ALL →
+        </Link>
       </div>
+
+      {/* Mobile header */}
+      <div
+        className="flex md:hidden"
+        style={{
+          padding: "28px 20px 16px",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          borderBottom: `1px solid ${INK}`,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 9,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              marginBottom: 6,
+            }}
+          >
+            DISCOVERY SETS
+          </div>
+          <h2
+            style={{
+              fontSize: "1.8rem",
+              lineHeight: 0.95,
+              letterSpacing: "-0.02em",
+              fontWeight: 300,
+              fontFamily: "var(--font-fraunces), serif",
+            }}
+          >
+            The discovery set, <em>reconsidered.</em>
+          </h2>
+        </div>
+      </div>
+
+      {/* Bundle grid */}
+      {!loaded ? (
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: "repeat(4, 1fr)",
+          }}
+        >
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                borderRight: i < 3 ? `1px solid ${INK}` : "none",
+                padding: 24,
+              }}
+            >
+              <div
+                style={{
+                  aspectRatio: "3/4",
+                  background: "#EDE9E0",
+                  animation: "pulse 1.5s infinite",
+                }}
+              />
+              <div
+                style={{
+                  height: 12,
+                  background: "#EDE9E0",
+                  marginTop: 12,
+                  width: "60%",
+                }}
+              />
+              <div
+                style={{
+                  height: 16,
+                  background: "#EDE9E0",
+                  marginTop: 8,
+                  width: "80%",
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: `repeat(${Math.min(bundles.length, 4)}, 1fr)`,
+          }}
+        >
+          {bundles.map((bundle, i) => (
+            <div
+              key={bundle.id}
+              style={{
+                borderRight:
+                  i < bundles.length - 1 ? `1px solid ${INK}` : "none",
+              }}
+            >
+              <BundleCard bundle={bundle} />
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

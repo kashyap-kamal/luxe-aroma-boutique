@@ -1,142 +1,230 @@
 import Link from "next/link";
 
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
+
+const footerColumns = [
+  {
+    head: "SHOP",
+    items: [
+      { href: "/products", label: "ALL PERFUMES" },
+      { href: "/products?category=men", label: "MEN" },
+      { href: "/products?category=women", label: "WOMEN" },
+      { href: "/products?category=unisex", label: "UNISEX" },
+    ],
+  },
+  {
+    head: "INFO",
+    items: [
+      { href: "/shipping-delivery", label: "SHIPPING" },
+      { href: "/cancellation-refund", label: "RETURNS" },
+      { href: "/privacy-policy", label: "PRIVACY" },
+      { href: "/about", label: "ABOUT" },
+    ],
+  },
+  {
+    head: "CONTACT",
+    items: [
+      { href: "/contact", label: "GET IN TOUCH" },
+      { href: "/terms-of-service", label: "TERMS" },
+    ],
+  },
+];
+
 const Footer = () => {
   return (
-    <footer className="pt-12 pb-8" style={{ background: "#f6f3f2" }}>
-      <div className="luxury-container">
-        {/* Top row: brand + links */}
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-10 mb-10">
-          {/* Brand */}
-          <div className="max-w-xs">
-            <h3
-              className="font-serif font-bold mb-2"
-              style={{ fontSize: "1.15rem", color: "#1c1b1b" }}
-            >
-              Aromé Luxe
-            </h3>
-            <p
-              className="font-sans leading-relaxed"
-              style={{ fontSize: "0.82rem", color: "#7f7663" }}
-            >
-              Premium fragrances, honest prices. Curated for the modern
-              connoisseur who refuses to compromise.
-            </p>
-          </div>
-
-          {/* Link groups */}
-          <div className="flex flex-wrap gap-10">
-            <div>
-              <p
-                className="font-sans font-semibold mb-3 uppercase tracking-[0.08em]"
-                style={{ fontSize: "0.7rem", color: "#1c1b1b" }}
-              >
-                Shop
-              </p>
-              <ul className="space-y-2">
-                {[
-                  { href: "/products", label: "All Perfumes" },
-                  { href: "/products?category=men", label: "Men" },
-                  { href: "/products?category=women", label: "Women" },
-                  { href: "/products?category=unisex", label: "Unisex" },
-                ].map((l) => (
-                  <li key={l.href}>
-                    <Link
-                      href={l.href}
-                      className="font-sans transition-colors duration-150"
-                      style={{ fontSize: "0.85rem", color: "#7f7663" }}
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <p
-                className="font-sans font-semibold mb-3 uppercase tracking-[0.08em]"
-                style={{ fontSize: "0.7rem", color: "#1c1b1b" }}
-              >
-                Information
-              </p>
-              <ul className="space-y-2">
-                {[
-                  { href: "/shipping-delivery", label: "Shipping" },
-                  { href: "/cancellation-refund", label: "Returns" },
-                  { href: "/privacy-policy", label: "Privacy" },
-                  { href: "/about", label: "Provenance" },
-                ].map((l) => (
-                  <li key={l.href}>
-                    <Link
-                      href={l.href}
-                      className="font-sans transition-colors duration-150"
-                      style={{ fontSize: "0.85rem", color: "#7f7663" }}
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <p
-                className="font-sans font-semibold mb-3 uppercase tracking-[0.08em]"
-                style={{ fontSize: "0.7rem", color: "#1c1b1b" }}
-              >
-                Contact
-              </p>
-              <ul className="space-y-2">
-                {[
-                  { href: "/contact", label: "Get in Touch" },
-                  { href: "/terms-of-service", label: "Terms" },
-                ].map((l) => (
-                  <li key={l.href}>
-                    <Link
-                      href={l.href}
-                      className="font-sans transition-colors duration-150"
-                      style={{ fontSize: "0.85rem", color: "#7f7663" }}
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Divider */}
+    <footer
+      style={{
+        background: INK,
+        color: CREAM,
+        borderTop: `1px solid ${INK}`,
+      }}
+    >
+      {/* Main footer grid */}
+      <div
+        style={{
+          gridTemplateColumns: "2fr 1fr 1fr 1fr",
+          gap: 0,
+          borderBottom: `1px solid rgba(242,237,228,0.1)`,
+        }}
+        className="hidden md:grid"
+      >
+        {/* Brand column */}
         <div
-          className="my-6"
-          style={{ height: "1px", background: "#e5e2e1" }}
-        />
-
-        {/* Bottom row */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <p
-            className="font-sans"
-            style={{ fontSize: "0.78rem", color: "#7f7663" }}
+          style={{
+            padding: "56px 48px",
+            borderRight: `1px solid rgba(242,237,228,0.08)`,
+          }}
+        >
+          <div
+            style={{
+              fontSize: "2rem",
+              fontWeight: 300,
+              fontFamily: "var(--font-fraunces), serif",
+              letterSpacing: "-0.02em",
+            }}
           >
-            &copy; {new Date().getFullYear()} Aromé Luxe. All rights reserved.
-          </p>
-          <div className="flex gap-5">
-            {[
-              { href: "/", label: "Home" },
-              { href: "/products", label: "Perfumes" },
-              { href: "/cart", label: "Cart" },
-            ].map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="font-sans font-medium transition-colors duration-150"
-                style={{ fontSize: "0.78rem", color: "#7f7663" }}
-              >
-                {l.label}
-              </Link>
-            ))}
+            Aromé <em style={{ fontStyle: "italic", color: SAFFRON }}>Luxe.</em>
+          </div>
+          <div
+            style={{
+              marginTop: 16,
+              opacity: 0.45,
+              lineHeight: 1.7,
+              maxWidth: 300,
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+            }}
+          >
+            PREMIUM FRAGRANCES, HONEST PRICES.
+            <br />
+            CURATED FOR THE CONNOISSEUR WHO
+            <br />
+            REFUSES TO COMPROMISE.
           </div>
         </div>
+
+        {/* Link columns */}
+        {footerColumns.map((col) => (
+          <div
+            key={col.head}
+            style={{
+              padding: "56px 32px",
+              borderRight: `1px solid rgba(242,237,228,0.08)`,
+            }}
+          >
+            <div
+              style={{
+                color: SAFFRON,
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 10,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                marginBottom: 20,
+              }}
+            >
+              {col.head}
+            </div>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {col.items.map((item) => (
+                <li key={item.href} style={{ marginBottom: 12 }}>
+                  <Link
+                    href={item.href}
+                    style={{
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      fontSize: 10,
+                      letterSpacing: "0.15em",
+                      textTransform: "uppercase",
+                      color: CREAM,
+                      opacity: 0.55,
+                      textDecoration: "none",
+                    }}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* Mobile footer */}
+      <div className="flex flex-col md:hidden" style={{ padding: "40px 20px" }}>
+        <div
+          style={{
+            fontSize: "1.6rem",
+            fontWeight: 300,
+            fontFamily: "var(--font-fraunces), serif",
+            marginBottom: 16,
+          }}
+        >
+          Aromé <em style={{ fontStyle: "italic", color: SAFFRON }}>Luxe.</em>
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 24,
+            marginBottom: 32,
+          }}
+        >
+          {footerColumns.map((col) => (
+            <div key={col.head}>
+              <div
+                style={{
+                  color: SAFFRON,
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 9,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  marginBottom: 12,
+                }}
+              >
+                {col.head}
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {col.items.map((item) => (
+                  <li key={item.href} style={{ marginBottom: 8 }}>
+                    <Link
+                      href={item.href}
+                      style={{
+                        fontFamily: "var(--font-jetbrains-mono), monospace",
+                        fontSize: 9,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: CREAM,
+                        opacity: 0.5,
+                        textDecoration: "none",
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Colophon */}
+      <div
+        style={{
+          padding: "20px 48px",
+          borderTop: `1px solid rgba(242,237,228,0.08)`,
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontSize: 10,
+          letterSpacing: "0.12em",
+          opacity: 0.3,
+          textTransform: "uppercase",
+        }}
+        className="hidden md:flex"
+      >
+        <span>© MMXXVI AROMÉ LUXE — ALL RIGHTS RESERVED</span>
+        <span>SET IN FRAUNCES &amp; JETBRAINS MONO</span>
+        <span>BOMBAY · INDIA</span>
+      </div>
+
+      {/* Mobile colophon */}
+      <div
+        className="flex md:hidden"
+        style={{
+          padding: "16px 20px",
+          borderTop: `1px solid rgba(242,237,228,0.08)`,
+          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontSize: 9,
+          letterSpacing: "0.1em",
+          opacity: 0.3,
+          textTransform: "uppercase",
+        }}
+      >
+        © MMXXVI AROMÉ LUXE
       </div>
     </footer>
   );

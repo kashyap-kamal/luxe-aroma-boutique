@@ -1,41 +1,135 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
 
 interface CartSummaryProps {
   subtotal: number;
 }
 
 const CartSummary: React.FC<CartSummaryProps> = ({ subtotal }) => {
-  // Removed hardcoded shipping and tax - will be calculated at checkout
-  // Total shown here is just the subtotal (product prices only)
-  const total = subtotal;
-
   return (
-    <div className="bg-gray-50 p-6 rounded-lg">
-      <h3 className="text-lg font-medium mb-4">Order Summary</h3>
-
-      <div className="space-y-3 mb-6">
-        <div className="flex justify-between">
-          <span className="text-gray-600">Subtotal</span>
-          <span>₹{subtotal.toLocaleString()}</span>
-        </div>
-        <div className="border-t pt-3 mt-3">
-          <div className="flex justify-between font-medium text-lg">
-            <span>Total</span>
-            <span>₹{total.toLocaleString()}</span>
-          </div>
-        </div>
-        <div className="text-sm text-gray-500">
-          <p>GST & shipping included</p>
-        </div>
+    <div style={{ border: `1px solid ${INK}`, background: CREAM }}>
+      <div
+        style={{
+          padding: "16px 20px",
+          borderBottom: `1px solid ${INK}`,
+          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontSize: 10,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: INK,
+        }}
+      >
+        ORDER SUMMARY
       </div>
 
-      <div className="mt-auto pt-4 border-t">
+      <div style={{ padding: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+          <span
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              opacity: 0.6,
+              color: INK,
+            }}
+          >
+            Subtotal
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-fraunces), serif",
+              fontSize: "1rem",
+              fontWeight: 300,
+              color: INK,
+            }}
+          >
+            ₹{subtotal.toLocaleString("en-IN")}
+          </span>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20, paddingBottom: 20, borderBottom: `1px dotted ${INK}` }}>
+          <span
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              opacity: 0.6,
+              color: INK,
+            }}
+          >
+            Shipping
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              color: SAFFRON,
+              letterSpacing: "0.1em",
+            }}
+          >
+            CALC. AT CHECKOUT
+          </span>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
+          <span
+            style={{
+              fontFamily: "var(--font-fraunces), serif",
+              fontSize: "1.1rem",
+              fontWeight: 300,
+              color: INK,
+            }}
+          >
+            Total
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-fraunces), serif",
+              fontSize: "1.3rem",
+              fontWeight: 300,
+              color: INK,
+            }}
+          >
+            ₹{subtotal.toLocaleString("en-IN")}
+          </span>
+        </div>
+
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 9,
+            letterSpacing: "0.1em",
+            opacity: 0.5,
+            color: INK,
+            marginBottom: 20,
+          }}
+        >
+          GST & shipping calculated at checkout
+        </div>
+
         <Link href="/checkout">
-          <Button asChild className="w-full bg-luxe-blue hover:bg-luxe-violet">
-            <span>Proceed to Checkout</span>
-          </Button>
+          <button
+            style={{
+              width: "100%",
+              background: INK,
+              color: CREAM,
+              border: "none",
+              padding: "16px 20px",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              cursor: "pointer",
+            }}
+          >
+            PROCEED TO CHECKOUT →
+          </button>
         </Link>
       </div>
     </div>

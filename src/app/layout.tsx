@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Noto_Serif, Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Fraunces, JetBrains_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { LayoutWrapper } from "@/components/layout-wrapper";
 import { Toaster } from "sonner";
@@ -7,13 +7,21 @@ import PerformanceMonitor from "@/components/performance-monitor";
 import { baseMetadata } from "@/lib/metadata";
 import { AuthProvider } from "@/components/auth/auth-provider";
 
-const notoSerif = Noto_Serif({
-  variable: "--font-noto-serif",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "700"],
   style: ["normal", "italic"],
   display: "swap",
   preload: true,
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  preload: false,
 });
 
 const inter = Inter({
@@ -26,6 +34,11 @@ const inter = Inter({
 
 // Use centralized metadata
 export const metadata: Metadata = baseMetadata;
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export default function RootLayout({
   children,
@@ -66,7 +79,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${notoSerif.variable} ${inter.variable} antialiased`}
+        className={`${fraunces.variable} ${jetbrainsMono.variable} ${inter.variable} antialiased`}
       >
         <AuthProvider>
           <LayoutWrapper>

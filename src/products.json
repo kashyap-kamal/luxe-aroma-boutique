@@ -10,323 +10,200 @@
         "id": 68,
         "name": "Ameer Al Oud",
         "category": "unisex",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["oud","oriental","woody","date-night","evening","winter","long-lasting","bestseller"],
+        "fragrance_notes": { "top": ["Saffron","Rose","Oud"], "middle": ["Amber","Sandalwood","Patchouli"], "base": ["Musk","Vetiver","Cedarwood"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 61,
         "name": "Aventus",
         "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["fresh","woody","office-wear","everyday-fresh","all-season","bestseller"],
+        "fragrance_notes": { "top": ["Pink Pepper","Ginger","Bergamot"], "middle": ["Sage","Geranium","Violet Leaf"], "base": ["Cedarwood","Fougere","Tonka Bean"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 435,
         "name": "Aqua Di Gio",
         "category": "men",
-        "tags": ["New Launch"],
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["fresh","aquatic","citrus","office-wear","everyday-fresh","summer","all-season","bestseller","new-launch"],
+        "fragrance_notes": { "top": ["Bergamot","Sea Notes","Neroli"], "middle": ["Jasmine","Rosemary","Patchouli"], "base": ["Cedarwood","Amber","Musk"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 501,
         "name": "Bin Sheikh",
         "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["oud","oriental","spicy","date-night","evening","winter","long-lasting"],
+        "fragrance_notes": { "top": ["Cardamom","Saffron","Apple"], "middle": ["Rose","Oud","Leather"], "base": ["Sandalwood","Amber","Musk"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 502,
         "name": "Blue De Chanel",
         "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["oud","woody","oriental","date-night","evening","winter","long-lasting"],
+        "fragrance_notes": { "top": ["Oud","Saffron","Rose"], "middle": ["Amber","Sandalwood","Patchouli"], "base": ["Musk","Vanilla","Vetiver"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 70,
         "name": "Cool Water",
         "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["fresh","aquatic","citrus","everyday-fresh","office-wear","summer","bestseller"],
+        "fragrance_notes": { "top": ["Mint","Lavender","Coriander"], "middle": ["Jasmine","Neroli","Geranium"], "base": ["Sandalwood","Cedarwood","Musk"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 439,
         "name": "Dunhill Icon",
         "category": "men",
-        "tags": ["New Launch"],
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["woody","fresh","office-wear","all-season","new-launch"],
+        "fragrance_notes": { "top": ["Bergamot","Lavender","Cardamom"], "middle": ["Sage","Iris","Pepper"], "base": ["Vetiver","Leather","Agarwood"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 72,
         "name": "Hawas",
         "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["fresh","woody","aquatic","date-night","everyday-fresh","summer","all-season","bestseller","long-lasting"],
+        "fragrance_notes": { "top": ["Bergamot","Cinnamon","Pineapple"], "middle": ["Ambroxan","Rose","Woody Notes"], "base": ["Amber","Musk","Sandalwood"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 508,
         "name": "Most Wanted",
         "category": "men",
-        "tags": ["New Launch"],
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["spicy","oriental","sweet","date-night","evening","winter","long-lasting","new-launch"],
+        "fragrance_notes": { "top": ["Mandarin Orange","Bergamot","Grapefruit"], "middle": ["Chocolate","Coffee","Rose"], "base": ["Vanilla","Tonka Bean","Cashmeran"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 503,
         "name": "Sauvage",
         "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["fresh","woody","spicy","office-wear","everyday-fresh","all-season","bestseller","long-lasting"],
+        "fragrance_notes": { "top": ["Pepper","Bergamot","Lavender"], "middle": ["Geranium","Patchouli","Vetiver"], "base": ["Cedar","Labdanum","Ambroxan"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 504,
         "name": "Ultra Male",
         "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["sweet","spicy","fresh","date-night","evening","all-season","long-lasting"],
+        "fragrance_notes": { "top": ["Pear","Cardamom","Bergamot"], "middle": ["Lavender","Mint","Pomarose"], "base": ["Vanilla","Amber","Cashmeran"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 505,
         "name": "1 Million",
         "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["sweet","spicy","oriental","date-night","evening","all-season","bestseller","long-lasting"],
+        "fragrance_notes": { "top": ["Blood Mandarin","Grapefruit","Mint"], "middle": ["Rose","Cinnamon","Spices"], "base": ["Leather","Amber","Woody"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 506,
         "name": "Versace Oud",
-        "category": "men",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "category": "unisex",
+        "tags": ["oud","woody","oriental","date-night","evening","winter","long-lasting"],
+        "fragrance_notes": { "top": ["Saffron","Ginger"], "middle": ["Oud","Cedarwood","Patchouli"], "base": ["Leather","Amber","Tonka Bean"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 507,
         "name": "Gucci Flora",
         "category": "women",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["floral","fresh","citrus","everyday-fresh","office-wear","summer","all-season"],
+        "fragrance_notes": { "top": ["Citrus","Peony","Pear"], "middle": ["Rose","Jasmine","Osmanthus"], "base": ["Patchouli","Sandalwood","Musk"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 509,
         "name": "Baccarat Rouge 540",
         "category": "unisex",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["oriental","sweet","woody","date-night","evening","all-season","long-lasting","bestseller"],
+        "fragrance_notes": { "top": ["Saffron","Jasmine"], "middle": ["Amberwood","Ambergris","Cedar"], "base": ["Fir Balsam","Musk","Cashmeran"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 510,
         "name": "Gucci Guilty",
         "category": "unisex",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["fresh","floral","citrus","everyday-fresh","date-night","all-season"],
+        "fragrance_notes": { "top": ["Pink Pepper","Mandarin","Lavender"], "middle": ["Lilac","Geranium","Orange Blossom"], "base": ["Patchouli","Cedarwood","Amber"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 511,
         "name": "Khamrah",
         "category": "unisex",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["oriental","sweet","spicy","date-night","evening","winter","long-lasting"],
+        "fragrance_notes": { "top": ["Cinnamon","Bergamot","Elemi"], "middle": ["Dates","Turkish Rose","Praline"], "base": ["Amber","Vanilla","Sandalwood"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 512,
         "name": "Oud For Greatness",
         "category": "unisex",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["oud","oriental","spicy","date-night","evening","winter","long-lasting"],
+        "fragrance_notes": { "top": ["Saffron","Nutmeg","Ginger"], "middle": ["Oud","Rose","Incense"], "base": ["Amber","Sandalwood","Castoreum"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 513,
         "name": "Tam Dao",
         "category": "unisex",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["woody","fresh","floral","office-wear","everyday-fresh","all-season"],
+        "fragrance_notes": { "top": ["Cypress","Myrtle"], "middle": ["Sandalwood","Rose","Iris"], "base": ["Cedarwood","Musk","Amber"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       },
       {
         "id": 514,
         "name": "Tobacco Vanilla",
         "category": "unisex",
-        "price": {
-          "original": 700,
-          "current": 399,
-          "currency": "₹",
-          "on_sale": true
-        },
-        "rating": {
-          "stars": 0,
-          "out_of": 5
-        },
+        "tags": ["oriental","sweet","woody","date-night","evening","winter","long-lasting","bestseller"],
+        "fragrance_notes": { "top": ["Tobacco Leaf","Spices"], "middle": ["Vanilla","Tonka Bean","Cacao"], "base": ["Dried Fruits","Woody Notes","Suede"] },
+        "price": { "original": 700, "current": 399, "currency": "₹", "on_sale": true },
+        "rating": { "stars": 0, "out_of": 5 },
         "status": "in_stock"
       }
     ],

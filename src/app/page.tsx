@@ -8,6 +8,7 @@ import { homepageConfig } from "@/lib/homepage-config";
 
 // Components
 import HeroSection from "@/components/home/hero-section";
+import TickerSection from "@/components/home/ticker-section";
 import CollectionsSection from "@/components/home/collections-section";
 import FeaturedSection from "@/components/home/featured-section";
 import ProductSpotlight from "@/components/home/product-spotlight";
@@ -31,14 +32,12 @@ export default async function Home() {
   const featuredProducts = await getFeaturedProducts(8);
 
   return (
-    <main className="flex-grow overflow-x-hidden" style={{ background: "#f9f9f9" }}>
+    <main className="flex-grow overflow-x-hidden" style={{ background: "#F2EDE4" }}>
       {homepageConfig.showHero && (
         <HeroSection products={featuredProducts} />
       )}
 
-      {homepageConfig.showWhyChooseUs && (
-        <WhyChooseUs />
-      )}
+      <TickerSection />
 
       {homepageConfig.showCollections && (
         <Suspense fallback={<Loading text="Loading collections..." className="py-16" />}>
@@ -72,6 +71,10 @@ export default async function Home() {
         <Suspense fallback={<TestimonialSkeleton />}>
           <Testimonials />
         </Suspense>
+      )}
+
+      {homepageConfig.showWhyChooseUs && (
+        <WhyChooseUs />
       )}
 
       {homepageConfig.showNewsletter && (

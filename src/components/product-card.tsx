@@ -2,70 +2,78 @@
 
 import React, { useState, useCallback } from "react";
 import Link from "next/link";
-import { ShoppingBag, Check } from "lucide-react";
 import { Product, useCartStore } from "@/stores/cart-store";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
 
 interface ProductCardProps {
   product: Product;
+  fullWidthMobile?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart } = useCartStore();
+const ProductCard: React.FC<ProductCardProps> = ({ product, fullWidthMobile = false }) => {
+  const { addToCart, openSidebar } = useCartStore();
   const [added, setAdded] = useState(false);
 
   const discountPercent =
     product.price.on_sale && product.price.original > 0
       ? Math.round(
-          ((product.price.original - product.price.current) /
-            product.price.original) *
-            100
+          ((product.price.original - product.price.current) / product.price.original) * 100
         )
       : 0;
 
-  // Build a concise scent note string from top notes (first 3)
-  const scentSummary = (() => {
-    const notes = product.fragrance_notes?.top ?? [];
-    return notes.slice(0, 3).join(" · ");
-  })();
+  const topNotes = (product.fragrance_notes?.top ?? []).slice(0, 3).join(" · ");
 
   const handleAddToCart = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      if (added) return;
       addToCart(product, 1);
+      openSidebar();
       setAdded(true);
       setTimeout(() => setAdded(false), 1500);
     },
-    [addToCart, product]
+    [added, addToCart, openSidebar, product]
   );
 
   return (
-    <div
-      className="group overflow-hidden transition-all duration-200"
-      style={{ background: "#ffffff" }}
-    >
-      <Link href={`/products/${product.id}`} className="block">
+    <div style={{ background: CREAM, display: "flex", flexDirection: "column", height: "100%" }}>
+      <Link href={`/products/${product.id}`} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         {/* Image */}
         <div
-          className="relative overflow-hidden"
-          style={{ background: "#f6f3f2", aspectRatio: "3/4" }}
+          style={{
+            position: "relative",
+            aspectRatio: "3/4",
+            background: "#EDE9E0",
+            overflow: "hidden",
+            borderBottom: `1px solid ${INK}`,
+          }}
         >
           <Image
             src={product.image}
             alt={product.name}
-            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-[1.04]"
-            width={400}
-            height={533}
+            fill
+            sizes={fullWidthMobile ? "(max-width: 640px) 100vw, 33vw" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
+            className="object-cover transition-transform duration-700 hover:scale-[1.04]"
           />
+
           {discountPercent > 0 && (
             <span
-              className="absolute top-3 left-3 text-[10px] font-sans font-semibold px-2 py-0.5 tracking-wide"
               style={{
-                background: "rgba(212,175,55,0.15)",
-                color: "#735c00",
-                borderRadius: "0.125rem",
+                position: "absolute",
+                top: 10,
+                right: 10,
+                background: SAFFRON,
+                color: INK,
+                padding: "3px 8px",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 9,
+                letterSpacing: "0.15em",
               }}
             >
               {discountPercent}% OFF
@@ -73,81 +81,104 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        {/* Content */}
-        <div className="pt-3 pb-4 px-2">
-          {/* Scent notes — Apothecary chip style */}
-          {scentSummary && (
-            <p
-              className="mb-1.5 font-sans tracking-[0.1em] uppercase"
-              style={{ fontSize: "0.6rem", color: "#7f7663" }}
-            >
-              {scentSummary}
-            </p>
-          )}
-
+        {/* Info */}
+        <div style={{ padding: "14px 14px 8px", flexGrow: 1 }}>
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 9,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              opacity: 0.5,
+              marginBottom: 6,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: INK,
+            }}
+          >
+            {topNotes || " "}
+          </div>
           <h3
-            className="font-serif font-medium leading-snug mb-2 line-clamp-2 transition-colors duration-200 group-hover:text-primary"
-            style={{ fontSize: "clamp(0.9rem, 2vw, 1.05rem)", color: "#1c1b1b" }}
+            style={{
+              fontFamily: "var(--font-fraunces), serif",
+              fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)",
+              fontWeight: 300,
+              letterSpacing: "-0.01em",
+              color: INK,
+              lineHeight: 1.2,
+              marginBottom: 10,
+            }}
           >
             {product.name}
           </h3>
-
-          {/* Price */}
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="font-sans font-semibold" style={{ color: "#1c1b1b" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: 8,
+              paddingTop: 10,
+              borderTop: `1px dotted ${INK}`,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-fraunces), serif",
+                fontSize: "1rem",
+                fontWeight: 300,
+                color: INK,
+              }}
+            >
               {product.price.currency}{product.price.current.toLocaleString("en-IN")}
             </span>
             {product.price.on_sale && (
               <span
-                className="font-sans text-xs line-through"
-                style={{ color: "#7f7663" }}
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 10,
+                  textDecoration: "line-through",
+                  opacity: 0.4,
+                  color: INK,
+                }}
               >
                 {product.price.currency}{product.price.original.toLocaleString("en-IN")}
               </span>
             )}
           </div>
-
-          {/* Add to Cart button */}
-          <motion.button
-            onClick={handleAddToCart}
-            className="w-full flex items-center justify-center gap-1.5 py-2.5 font-sans text-xs font-medium tracking-wide transition-all duration-200"
-            style={{
-              background: added ? "rgba(115,92,0,0.06)" : "#735c00",
-              color: added ? "#735c00" : "#ffffff",
-              borderRadius: "0.25rem",
-              border: added ? "1px solid rgba(115,92,0,0.3)" : "1px solid transparent",
-            }}
-            animate={added ? { scale: [1, 1.03, 1] } : {}}
-            transition={{ duration: 0.25 }}
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              {added ? (
-                <motion.span
-                  key="added"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  className="flex items-center gap-1.5"
-                >
-                  <Check className="h-3.5 w-3.5" />
-                  Added!
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="add"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  className="flex items-center gap-1.5"
-                >
-                  <ShoppingBag className="h-3.5 w-3.5" />
-                  Add to Cart
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </motion.button>
         </div>
       </Link>
+
+      {/* Add to cart */}
+      <div style={{ padding: "0 14px 14px", marginTop: "auto" }}>
+        <button
+          onClick={handleAddToCart}
+          style={{
+            width: "100%",
+            background: added ? "transparent" : INK,
+            color: added ? SAFFRON : CREAM,
+            border: added ? `1px solid ${SAFFRON}` : "none",
+            padding: "10px 14px",
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 9,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            cursor: added ? "default" : "pointer",
+            transition: "all 150ms",
+          }}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {added ? (
+              <motion.span key="added" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                ADDED ✓
+              </motion.span>
+            ) : (
+              <motion.span key="add" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                ADD →
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
+      </div>
     </div>
   );
 };

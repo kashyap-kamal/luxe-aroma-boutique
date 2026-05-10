@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -123,90 +123,105 @@
 }
 
 /* ============================================================
-   DESIGN TOKENS — Apothecary Editorial (Stitch Design System)
+   DESIGN TOKENS — Saffron Press (Editorial Broadsheet)
    ============================================================ */
 @theme {
-  /* Fonts — Noto Serif (editorial) + Inter (clinical/clean) */
+  /* Fonts — Fraunces (display serif) + JetBrains Mono (labels) + Inter (body) */
   --font-sans:
     var(--font-inter, “Inter”), ui-sans-serif, system-ui, -apple-system,
     “Segoe UI”, Roboto, “Helvetica Neue”, Arial, sans-serif;
   --font-serif:
-    var(--font-noto-serif, “Noto Serif”), ui-serif, Georgia, Cambria,
+    var(--font-fraunces, “Fraunces”), ui-serif, Georgia, Cambria,
     “Times New Roman”, Times, serif;
+  --font-mono:
+    var(--font-jetbrains-mono, “JetBrains Mono”), ui-monospace,
+    “SF Mono”, “Fira Code”, Consolas, monospace;
 
-  /* === Material Design 3 Color Tokens === */
+  /* === Saffron Press Color Tokens === */
 
-  /* Primary — dark gold (interactive signals, used sparingly) */
-  --color-primary: #735c00;
-  --color-primary-foreground: #ffffff;
-  --color-primary-container: #d4af37;
-  --color-on-primary-container: #554300;
+  /* Primary — saffron orange */
+  --color-primary: #E8763A;
+  --color-primary-foreground: #F2EDE4;
+  --color-primary-container: #E8763A;
+  --color-on-primary-container: #0E0E0C;
 
-  /* Secondary — intellectual violet */
-  --color-secondary: #7c43ab;
-  --color-secondary-foreground: #ffffff;
-  --color-secondary-container: #cb8ffd;
-  --color-on-secondary-container: #581d87;
+  /* Secondary — ink black */
+  --color-secondary: #0E0E0C;
+  --color-secondary-foreground: #F2EDE4;
+  --color-secondary-container: #3A3833;
+  --color-on-secondary-container: #F2EDE4;
 
-  /* Tertiary — neutral gray */
-  --color-tertiary: #5a5f62;
-  --color-tertiary-foreground: #ffffff;
-  --color-tertiary-container: #afb3b6;
+  /* Tertiary — warm mid-tone */
+  --color-tertiary: #3A3833;
+  --color-tertiary-foreground: #F2EDE4;
+  --color-tertiary-container: #6B5F50;
 
   /* Error */
   --color-destructive: #ba1a1a;
   --color-destructive-foreground: #ffffff;
 
-  /* Surface hierarchy (tonal layering — no hard borders) */
-  --color-background: #fcf9f8;
-  --color-foreground: #1c1b1b;
+  /* Surface — cream paper */
+  --color-background: #F2EDE4;
+  --color-foreground: #0E0E0C;
 
-  --color-surface: #fcf9f8;
-  --color-surface-bright: #fcf9f8;
-  --color-surface-dim: #dcd9d9;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f6f3f2;
-  --color-surface-container: #f0edec;
-  --color-surface-container-high: #ebe7e7;
-  --color-surface-container-highest: #e5e2e1;
-  --color-surface-variant: #e5e2e1;
-  --color-on-surface: #1c1b1b;
-  --color-on-surface-variant: #4d4635;
+  --color-surface: #F2EDE4;
+  --color-surface-bright: #FAF7F2;
+  --color-surface-dim: #DDD8CE;
+  --color-surface-container-lowest: #FAF7F2;
+  --color-surface-container-low: #F7F3EB;
+  --color-surface-container: #EDE9E0;
+  --color-surface-container-high: #E5E1D8;
+  --color-surface-container-highest: #DDD8CE;
+  --color-surface-variant: #DDD8CE;
+  --color-on-surface: #0E0E0C;
+  --color-on-surface-variant: #3A3833;
 
-  /* Outline (ghost borders only — 15% opacity in use) */
-  --color-outline: #7f7663;
-  --color-outline-variant: #d0c5af;
+  /* Outline — ink borders */
+  --color-outline: #0E0E0C;
+  --color-outline-variant: #3A3833;
 
   /* shadcn/ui semantic aliases */
-  --color-card: #ffffff;
-  --color-card-foreground: #1c1b1b;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #1c1b1b;
-  --color-muted: #f0edec;
-  --color-muted-foreground: #4d4635;
-  --color-accent: #f0edec;
-  --color-accent-foreground: #1c1b1b;
-  --color-border: #d0c5af;
-  --color-input: #d0c5af;
-  --color-ring: #735c00;
+  --color-card: #FAF7F2;
+  --color-card-foreground: #0E0E0C;
+  --color-popover: #FAF7F2;
+  --color-popover-foreground: #0E0E0C;
+  --color-muted: #EDE9E0;
+  --color-muted-foreground: #3A3833;
+  --color-accent: #EDE9E0;
+  --color-accent-foreground: #0E0E0C;
+  --color-border: #0E0E0C;
+  --color-input: #0E0E0C;
+  --color-ring: #E8763A;
 
-  /* Radius — architectural stability, NOT pill shapes */
-  --radius: 0.25rem;
+  /* Radius — architectural stability, NO pill shapes */
+  --radius: 0rem;
+
+  /* === Saffron Press palette aliases === */
+  --color-sp-cream: #F2EDE4;
+  --color-sp-ink: #0E0E0C;
+  --color-sp-saffron: #E8763A;
+  --color-sp-warm: #3A3833;
+  --color-sp-dark: #1A0908;
 
   /* === Legacy “luxe-*” aliases (keep existing classes working) === */
-  --color-luxe-gold: #d4af37;        /* primary-container → muted gold */
-  --color-luxe-blue: #7c43ab;        /* secondary → violet (replaces purple primary) */
-  --color-luxe-violet: #581d87;      /* darker violet */
-  --color-luxe-black: #1c1b1b;
-  --color-luxe-sandy: #e9c349;       /* primary-fixed-dim */
-  --color-luxe-aliceBlue: #f6f3f2;   /* surface-container-low */
-  --color-luxe-cream: #fcf9f8;       /* surface */
+  --color-luxe-gold: #E8763A;
+  --color-luxe-blue: #0E0E0C;
+  --color-luxe-violet: #3A3833;
+  --color-luxe-black: #0E0E0C;
+  --color-luxe-sandy: #E8763A;
+  --color-luxe-aliceBlue: #F7F3EB;
+  --color-luxe-cream: #F2EDE4;
 }
 
 /* Base styles */
+html {
+  overflow-x: hidden;
+}
 body {
   @apply bg-background text-foreground font-sans;
   font-feature-settings: "kern" 1, "liga" 1;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -218,46 +233,87 @@ h1, h2, h3, h4, h5, h6 {
   @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
-/* Buttons — rectangular (no pill), matte glass feel */
+/* Buttons — rectangular, editorial */
 .btn-primary {
-  @apply bg-primary hover:bg-on-primary-container text-primary-foreground font-medium py-2 px-4 transition-colors duration-200;
-  border-radius: var(--radius);
+  background: #0E0E0C;
+  color: #F2EDE4;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 1.25rem 2rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 150ms ease;
 }
+.btn-primary:hover { opacity: 0.85; }
 
 .btn-secondary {
-  @apply bg-luxe-gold hover:bg-amber-600 text-luxe-black font-medium py-2 px-4 transition-colors duration-200;
-  border-radius: var(--radius);
+  background: transparent;
+  color: #0E0E0C;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 1.25rem 2rem;
+  border: 1px solid #0E0E0C;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+.btn-secondary:hover {
+  background: #0E0E0C;
+  color: #F2EDE4;
 }
 
 .gold-gradient {
-  @apply bg-gradient-to-r from-amber-300 to-luxe-gold;
+  background: linear-gradient(90deg, #E8763A, #C24F1B);
 }
 
 .luxury-gradient {
-  @apply bg-gradient-to-r from-luxe-blue to-luxe-violet;
+  background: linear-gradient(90deg, #0E0E0C, #3A3833);
 }
 
-/* Glassmorphism — for floating nav, overlays (No-Line Rule compliant) */
+/* Glass surface */
 .glass-surface {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(242, 237, 228, 0.85);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
 }
 
-/* Ghost border — 15% opacity for inputs/cards needing containment */
+/* Ghost border */
 .ghost-border {
-  outline: 1px solid rgba(208, 197, 175, 0.15);
+  outline: 1px solid rgba(14, 14, 12, 0.15);
 }
 
-/* Apothecary chip — for fragrance notes */
+/* Apothecary chip / section label — JetBrains Mono uppercase */
 .apo-chip {
-  @apply bg-surface-container-high text-on-surface-variant;
-  font-size: 0.65rem;
-  font-family: var(--font-sans);
-  letter-spacing: 0.08em;
+  color: #0E0E0C;
+  background: transparent;
+  font-size: 0.6875rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  border-radius: 0.125rem;
-  padding: 0.125rem 0.375rem;
+  padding: 0;
+}
+
+/* Editorial ink rule */
+.ink-rule {
+  border-bottom: 1px solid #0E0E0C;
+}
+
+/* Ticker animation */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-inner {
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+  animation: ticker 22s linear infinite;
+}
+.ticker-inner:hover {
+  animation-play-state: paused;
 }
 
 /* Scrollbar hide */

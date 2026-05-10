@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { ShoppingBag, Menu, X, Search, User, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingBag, X, Search, User, ChevronDown, LogOut } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/stores/cart-store";
-import { useUser } from "@/stores/auth-store";
+import { useUser, useLogout } from "@/stores/auth-store";
+import { signOut } from "@/lib/auth-service";
 import { UserMenu } from "@/components/auth/user-menu";
+import { useUIStore } from "@/stores/ui-store";
 import {
   motion,
-  useScroll,
-  useMotionValueEvent,
   AnimatePresence,
 } from "framer-motion";
 
@@ -36,41 +37,55 @@ const rightLinks = [
 
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [moodOpen, setMoodOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { cartItems, bundleItems } = useCartStore();
   const user = useUser();
-  const { scrollY } = useScroll();
+  const logout = useLogout();
+  const router = useRouter();
+  const { navDrawerOpen, closeNavDrawer } = useUIStore();
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    setIsScrolled(latest > 10);
-  });
+  useEffect(() => {
+    if (isSearchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    } else {
+      setSearchValue("");
+    }
+  }, [isSearchOpen]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchValue.trim();
+    if (q) {
+      router.push(`/products?q=${encodeURIComponent(q)}`);
+    } else {
+      router.push("/products");
+    }
+    setIsSearchOpen(false);
+  };
 
   const itemCount =
     cartItems.reduce((t, i) => t + i.quantity, 0) +
     bundleItems.reduce((t, i) => t + i.quantity, 0);
 
   const navLinkClass =
-    "font-sans uppercase tracking-widest transition-all duration-200 whitespace-nowrap";
+    "transition-all duration-200 whitespace-nowrap";
 
   return (
     <>
-      {/* Sticky navbar — sits right below the sticky promo banner */}
+      {/* Sticky navbar — Saffron Press editorial wordmark */}
       <header
-        className="sticky top-0 z-50 transition-shadow duration-300"
+        className="sticky top-0 z-50"
         style={{
-          background: isScrolled
-            ? "rgba(249, 249, 249, 0.97)"
-            : "rgba(249, 249, 249, 0.93)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          boxShadow: isScrolled ? "0 1px 0 rgba(0,0,0,0.05)" : "none",
+          background: "#F2EDE4",
+          borderBottom: "1px solid #0E0E0C",
         }}
       >
-        {/* Desktop nav: 3-column grid */}
-        <nav className="hidden lg:grid grid-cols-[1fr_auto_1fr] items-center px-8 xl:px-12 py-5 xl:py-6">
+        {/* Desktop nav: 3-column wordmark layout */}
+        <nav className="hidden lg:grid grid-cols-[1fr_auto_1fr] items-center px-8 xl:px-12 py-4 xl:py-5">
           {/* Left links */}
           <div className="flex gap-6 xl:gap-8 items-center">
             {/* SHOP BY MOOD — dropdown */}
@@ -80,8 +95,17 @@ const Navbar = () => {
               onMouseLeave={() => setMoodOpen(false)}
             >
               <button
-                className={`${navLinkClass} hover:text-[#2d3435] pb-0.5 flex items-center gap-1`}
-                style={{ fontSize: "11px", color: "#5c5b5b" }}
+                className={`${navLinkClass} flex items-center gap-1`}
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "11px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "#0E0E0C",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
               >
                 SHOP BY MOOD
                 <ChevronDown className="h-3 w-3 transition-transform" style={{ transform: moodOpen ? "rotate(180deg)" : "" }} />
@@ -89,19 +113,29 @@ const Navbar = () => {
               <AnimatePresence>
                 {moodOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute top-full left-0 mt-2 py-2 min-w-[180px] z-50"
-                    style={{ background: "#f9f9f9", boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute top-full left-0 mt-0 py-1 min-w-[180px] z-50"
+                    style={{
+                      background: "#F2EDE4",
+                      border: "1px solid #0E0E0C",
+                      borderTop: "none",
+                    }}
                   >
                     {moodSubLinks.map((link) => (
                       <Link
                         key={link.href + link.label}
                         href={link.href}
-                        className="block px-4 py-2 font-sans text-xs transition-colors hover:bg-[#f2f4f4]"
-                        style={{ color: "#5c5b5b" }}
+                        className="block px-4 py-2 transition-colors hover:bg-[#0E0E0C] hover:text-[#F2EDE4]"
+                        style={{
+                          fontFamily: "var(--font-jetbrains-mono), monospace",
+                          fontSize: "10px",
+                          letterSpacing: "0.15em",
+                          textTransform: "uppercase",
+                          color: "#0E0E0C",
+                        }}
                         onClick={() => setMoodOpen(false)}
                       >
                         {link.label}
@@ -117,25 +151,34 @@ const Navbar = () => {
               <Link
                 key={link.label}
                 href={link.href}
-                className={`${navLinkClass} hover:text-[#2d3435] pb-0.5 border-b border-transparent hover:border-[#2d3435]`}
-                style={{ fontSize: "11px", color: "#5c5b5b" }}
+                className={navLinkClass}
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "11px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "#0E0E0C",
+                }}
               >
                 {link.label}
               </Link>
             ))}
           </div>
 
-          {/* Center logo */}
+          {/* Center logo — editorial Fraunces wordmark */}
           <Link href="/" className="px-6 xl:px-10">
             <h1
-              className="font-serif font-bold uppercase whitespace-nowrap"
+              className="font-serif whitespace-nowrap"
               style={{
-                fontSize: "clamp(1.3rem, 2vw, 1.75rem)",
-                letterSpacing: "-0.02em",
-                color: "#2D3435",
+                fontSize: "clamp(1.4rem, 2vw, 2rem)",
+                fontWeight: 300,
+                letterSpacing: "-0.03em",
+                color: "#0E0E0C",
+                fontFamily: "var(--font-fraunces), serif",
+                fontVariationSettings: '"opsz" 72',
               }}
             >
-              AROMÉ LUXE
+              Aromé <em style={{ fontStyle: "italic" }}>Luxe</em>
             </h1>
           </Link>
 
@@ -145,28 +188,43 @@ const Navbar = () => {
               <Link
                 key={link.label}
                 href={link.href}
-                className={`${navLinkClass} hover:text-[#2d3435]`}
-                style={{ fontSize: "11px", color: "#5c5b5b" }}
+                className={navLinkClass}
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "11px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: link.label === "BESTSELLERS" ? "#E8763A" : "#0E0E0C",
+                  textDecoration: link.label === "BESTSELLERS" ? "underline" : "none",
+                }}
               >
                 {link.label}
               </Link>
             ))}
 
-            <div className="flex items-center gap-4 ml-2" style={{ color: "#2d3435" }}>
-              <Link href="/products" className="transition-transform hover:scale-110" aria-label="Search">
-                <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
-              </Link>
+            <div className="flex items-center gap-4 ml-2" style={{ color: "#0E0E0C" }}>
+              <button className="transition-opacity hover:opacity-60" aria-label="Search" onClick={() => setIsSearchOpen(true)}>
+                <Search className="h-[17px] w-[17px]" strokeWidth={1.5} />
+              </button>
               {user ? (
                 <UserMenu />
               ) : (
-                <Link href="/auth/signin" className="transition-transform hover:scale-110" aria-label="Sign in">
-                  <User className="h-[18px] w-[18px]" strokeWidth={1.5} />
+                <Link href="/auth/signin" className="transition-opacity hover:opacity-60" aria-label="Sign in">
+                  <User className="h-[17px] w-[17px]" strokeWidth={1.5} />
                 </Link>
               )}
-              <Link href="/cart" className="relative transition-transform hover:scale-110" aria-label="Cart">
-                <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              <Link href="/cart" className="relative transition-opacity hover:opacity-60" aria-label="Cart">
+                <ShoppingBag className="h-[17px] w-[17px]" strokeWidth={1.5} />
                 {itemCount > 0 && (
-                  <Badge className="absolute -top-1.5 -right-2 bg-[#2d3435] text-[#f9f9f9] text-[9px] h-4 min-w-4 flex items-center justify-center rounded-full border-none p-0 font-sans">
+                  <Badge
+                    className="absolute -top-1.5 -right-2 text-[9px] h-4 min-w-4 flex items-center justify-center border-none p-0"
+                    style={{
+                      background: "#E8763A",
+                      color: "#F2EDE4",
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      borderRadius: 0,
+                    }}
+                  >
                     {itemCount}
                   </Badge>
                 )}
@@ -179,34 +237,112 @@ const Navbar = () => {
         <nav className="lg:hidden flex justify-between items-center px-5 py-4">
           <Link href="/">
             <h1
-              className="font-serif font-bold uppercase"
-              style={{ fontSize: "1.15rem", letterSpacing: "-0.02em", color: "#2D3435" }}
+              className="font-serif"
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: 300,
+                letterSpacing: "-0.02em",
+                color: "#0E0E0C",
+                fontFamily: "var(--font-fraunces), serif",
+              }}
             >
-              AROMÉ LUXE
+              Aromé <em style={{ fontStyle: "italic" }}>Luxe</em>
             </h1>
           </Link>
-          <div className="flex items-center gap-3.5" style={{ color: "#2d3435" }}>
-            <Link href="/products" aria-label="Search">
-              <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
-            </Link>
+          <div className="flex items-center gap-4" style={{ color: "#0E0E0C" }}>
+            <button aria-label="Search" onClick={() => setIsSearchOpen(true)}>
+              <Search className="h-[17px] w-[17px]" strokeWidth={1.5} />
+            </button>
             <Link href="/cart" className="relative" aria-label="Cart">
-              <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              <ShoppingBag className="h-[17px] w-[17px]" strokeWidth={1.5} />
               {itemCount > 0 && (
-                <Badge className="absolute -top-1.5 -right-2 bg-[#2d3435] text-[#f9f9f9] text-[9px] h-4 min-w-4 flex items-center justify-center rounded-full border-none p-0 font-sans">
+                <Badge
+                  className="absolute -top-1.5 -right-2 text-[9px] h-4 min-w-4 flex items-center justify-center border-none p-0"
+                  style={{
+                    background: "#E8763A",
+                    color: "#F2EDE4",
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    borderRadius: 0,
+                  }}
+                >
                   {itemCount}
                 </Badge>
               )}
             </Link>
-            <button className="transition-transform hover:scale-110" onClick={() => setIsMenuOpen(true)} aria-label="Open menu">
-              <Menu className="h-5 w-5" strokeWidth={1.5} />
-            </button>
           </div>
         </nav>
       </header>
 
-      {/* Mobile drawer */}
+      {/* Search overlay */}
       <AnimatePresence>
-        {isMenuOpen && (
+        {isSearchOpen && (
+          <motion.div
+            key="search-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[60] flex flex-col"
+          >
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setIsSearchOpen(false)}
+            />
+            {/* Search bar panel */}
+            <div
+              className="relative z-10 w-full px-4 sm:px-8 pt-5 pb-4"
+              style={{
+                background: "#F2EDE4",
+                borderBottom: "1px solid #0E0E0C",
+              }}
+            >
+              <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 max-w-2xl mx-auto">
+                <Search className="h-5 w-5 flex-shrink-0" style={{ color: "#0E0E0C" }} strokeWidth={1.5} />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Escape" && setIsSearchOpen(false)}
+                  placeholder="Search fragrances..."
+                  className="flex-1 bg-transparent outline-none"
+                  style={{
+                    fontSize: "1rem",
+                    color: "#0E0E0C",
+                    fontFamily: "var(--font-inter), sans-serif",
+                  }}
+                  autoFocus
+                />
+                {searchValue && (
+                  <button type="button" onClick={() => setSearchValue("")} aria-label="Clear">
+                    <X className="h-4 w-4" style={{ color: "#0E0E0C" }} />
+                  </button>
+                )}
+                <button type="button" onClick={() => setIsSearchOpen(false)} aria-label="Close search" className="ml-1">
+                  <X className="h-5 w-5" style={{ color: "#0E0E0C" }} strokeWidth={1.5} />
+                </button>
+              </form>
+              <p
+                className="text-center mt-2.5"
+                style={{
+                  fontSize: "10px",
+                  color: "#3A3833",
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Press Enter to search &nbsp;·&nbsp; Esc to close
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile drawer — fullscreen, slides from LEFT */}
+      <AnimatePresence>
+        {navDrawerOpen && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
@@ -214,44 +350,122 @@ const Navbar = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={closeNavDrawer}
             />
             <motion.div
-              initial={{ x: "100%" }}
+              initial={{ x: "-100%" }}
               animate={{ x: "0%" }}
-              exit={{ x: "100%" }}
+              exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 220 }}
-              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm z-50 flex flex-col"
-              style={{ background: "#f9f9f9" }}
+              className="fixed top-0 left-0 bottom-0 w-full z-50 flex flex-col overflow-y-auto"
+              style={{ background: "#F2EDE4" }}
             >
-              <div className="flex justify-between items-center px-6 py-5">
-                <h2 className="font-serif font-bold uppercase" style={{ fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#2D3435" }}>
-                  AROMÉ LUXE
+              {/* Drawer header */}
+              <div
+                className="flex justify-between items-center px-6 py-5 flex-shrink-0"
+                style={{ borderBottom: "1px solid #0E0E0C" }}
+              >
+                <h2
+                  style={{
+                    fontSize: "1.3rem",
+                    fontWeight: 300,
+                    letterSpacing: "-0.02em",
+                    color: "#0E0E0C",
+                    fontFamily: "var(--font-fraunces), serif",
+                  }}
+                >
+                  Aromé <em style={{ fontStyle: "italic" }}>Luxe</em>
                 </h2>
-                <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)} aria-label="Close menu">
-                  <X className="h-5 w-5" />
+                <Button variant="ghost" size="icon" onClick={closeNavDrawer} aria-label="Close menu">
+                  <X className="h-5 w-5" style={{ color: "#0E0E0C" }} />
                 </Button>
               </div>
-              <nav className="flex-1 px-6 py-6 flex flex-col gap-1 overflow-y-auto">
+
+              {/* Login / Account block */}
+              <div className="px-6 pt-5 pb-5 flex-shrink-0" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+                {user ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 flex-shrink-0" style={{ color: "#E8763A" }} />
+                      <p className="font-sans text-sm font-medium" style={{ color: "#0E0E0C", fontFamily: "var(--font-inter), sans-serif" }}>
+                        Hello, {user.user_metadata?.full_name?.split(" ")[0] || user.email}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Link
+                        href="/orders"
+                        onClick={closeNavDrawer}
+                        className="flex-1 py-2 text-center font-sans text-xs tracking-widest uppercase transition-opacity hover:opacity-70"
+                        style={{ background: "rgba(232,118,58,0.1)", color: "#E8763A", border: "1px solid rgba(232,118,58,0.3)", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                      >
+                        My Orders
+                      </Link>
+                      <button
+                        onClick={async () => {
+                          await signOut();
+                          logout();
+                          closeNavDrawer();
+                          router.push("/");
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 font-sans text-xs tracking-widest uppercase transition-opacity hover:opacity-70"
+                        style={{ background: "transparent", color: "#0E0E0C", border: "1px solid rgba(14,14,12,0.2)", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                      >
+                        <LogOut className="h-3.5 w-3.5" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      <User className="h-4 w-4 flex-shrink-0" style={{ color: "#0E0E0C", opacity: 0.5 }} />
+                      <p className="font-sans text-xs" style={{ color: "#0E0E0C", opacity: 0.6, fontFamily: "var(--font-inter), sans-serif" }}>
+                        Sign in for order tracking &amp; exclusive offers
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Link
+                        href="/auth/signin"
+                        onClick={closeNavDrawer}
+                        className="flex-1 py-2 text-center text-xs tracking-widest uppercase transition-opacity hover:opacity-80"
+                        style={{ background: "#0E0E0C", color: "#F2EDE4", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/auth/signup"
+                        onClick={closeNavDrawer}
+                        className="flex-1 py-2 text-center text-xs tracking-widest uppercase transition-opacity hover:opacity-80"
+                        style={{ background: "transparent", color: "#0E0E0C", border: "1px solid #0E0E0C", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                      >
+                        Create Account
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Nav links */}
+              <nav className="flex-shrink-0 px-6 py-4 flex flex-col gap-1">
                 {/* Shop by Mood — expandable */}
                 <div>
                   <button
-                    className="w-full flex items-center justify-between py-3 font-sans uppercase tracking-widest transition-colors"
-                    style={{ fontSize: "12px", color: "#5c5b5b" }}
+                    className="w-full flex items-center justify-between py-3 uppercase tracking-widest transition-opacity hover:opacity-60"
+                    style={{ fontSize: "11px", color: "#0E0E0C", fontFamily: "var(--font-jetbrains-mono), monospace", borderBottom: "1px solid rgba(14,14,12,0.1)" }}
                     onClick={() => setMobileExpanded(!mobileExpanded)}
                   >
                     Shop by Mood
                     <ChevronDown className="h-3 w-3 transition-transform" style={{ transform: mobileExpanded ? "rotate(180deg)" : "" }} />
                   </button>
                   {mobileExpanded && (
-                    <div className="pl-4 pb-2 space-y-1">
+                    <div className="pl-4 pb-2 space-y-0">
                       {moodSubLinks.map((link) => (
                         <Link
                           key={link.href + link.label}
                           href={link.href}
-                          className="block py-2 font-sans text-xs transition-colors"
-                          style={{ color: "#5c5b5b" }}
-                          onClick={() => setIsMenuOpen(false)}
+                          className="block py-2 text-xs tracking-wider uppercase transition-opacity hover:opacity-60"
+                          style={{ color: "#0E0E0C", opacity: 0.7, fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                          onClick={closeNavDrawer}
                         >
                           {link.label}
                         </Link>
@@ -259,7 +473,6 @@ const Navbar = () => {
                     </div>
                   )}
                 </div>
-                {/* Other links */}
                 {[
                   { href: "/products?category=men", label: "Men" },
                   { href: "/products?category=women", label: "Women" },
@@ -271,49 +484,24 @@ const Navbar = () => {
                 ].map((link, i) => (
                   <motion.div
                     key={link.label}
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: (i + 1) * 0.05, duration: 0.25 }}
+                    transition={{ delay: (i + 1) * 0.04, duration: 0.22 }}
                   >
                     <Link
                       href={link.href}
-                      className="block py-3 font-sans uppercase tracking-widest transition-colors"
-                      style={{ fontSize: "12px", color: "#5c5b5b" }}
-                      onClick={() => setIsMenuOpen(false)}
+                      className="block py-3 uppercase tracking-widest transition-opacity hover:opacity-60"
+                      style={{ fontSize: "11px", color: "#0E0E0C", fontFamily: "var(--font-jetbrains-mono), monospace", borderBottom: "1px solid rgba(14,14,12,0.07)" }}
+                      onClick={closeNavDrawer}
                     >
                       {link.label}
                     </Link>
                   </motion.div>
                 ))}
-                <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-                  {!user && (
-                    <Link
-                      href="/auth/signin"
-                      className="block py-3 font-sans uppercase tracking-widest transition-colors"
-                      style={{ fontSize: "12px", color: "#5c5b5b" }}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Sign In
-                    </Link>
-                  )}
-                  <Link
-                    href="/cart"
-                    className="flex items-center gap-3 py-3 font-sans text-sm transition-colors"
-                    style={{ color: "#2d3435" }}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <ShoppingBag className="h-4 w-4" />
-                    Cart
-                    {itemCount > 0 && (
-                      <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full text-xs font-bold" style={{ background: "#2d3435", color: "#f9f9f9" }}>
-                        {itemCount}
-                      </span>
-                    )}
-                  </Link>
-                </div>
               </nav>
-              <div className="px-6 py-5" style={{ background: "#f2f4f4" }}>
-                <p className="font-sans uppercase" style={{ fontSize: "10px", letterSpacing: "0.15em", color: "#5a6061" }}>
+
+              <div className="px-6 py-5 flex-shrink-0" style={{ borderTop: "1px solid rgba(14,14,12,0.1)" }}>
+                <p className="uppercase" style={{ fontSize: "10px", letterSpacing: "0.15em", color: "#0E0E0C", opacity: 0.4, fontFamily: "var(--font-jetbrains-mono), monospace" }}>
                   &copy; {new Date().getFullYear()} Aromé Luxe
                 </p>
               </div>

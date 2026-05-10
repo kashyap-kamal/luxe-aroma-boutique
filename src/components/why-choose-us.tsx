@@ -1,55 +1,106 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
-import { BadgeCheck, Truck, RotateCcw, Headphones } from "lucide-react";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
 
 const trustItems = [
-  { icon: BadgeCheck, label: "100% AUTHENTIC" },
-  { icon: Truck, label: "FREE DELIVERY" },
-  { icon: RotateCcw, label: "EASY RETURNS" },
-  { icon: Headphones, label: "EXPERT SUPPORT" },
+  "100% AUTHENTIC",
+  "FREE DELIVERY",
+  "EASY RETURNS",
+  "EXPERT SUPPORT",
+  "FROM ₹499",
+  "NO MIDDLEMEN",
 ];
 
 const WhyChooseUs: React.FC = () => {
   return (
-    <section
-      className="py-10 md:py-12 px-6 lg:px-12"
+    <div
       style={{
-        background: "#f9f9f9",
-        borderTop: "1px solid rgba(173,179,180,0.1)",
-        borderBottom: "1px solid rgba(173,179,180,0.1)",
+        background: CREAM,
+        borderTop: `1px solid ${INK}`,
+        borderBottom: `1px solid ${INK}`,
+        overflow: "hidden",
       }}
     >
-      <div className="max-w-7xl mx-auto flex flex-wrap justify-between gap-6 md:gap-8">
-        {trustItems.map((item, index) => (
-          <motion.div
-            key={item.label}
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.35, delay: index * 0.06 }}
-            className="flex items-center gap-3 group"
+      {/* Desktop: horizontal trust strip */}
+      <div
+        className="hidden md:grid"
+        style={{
+          gridTemplateColumns: `repeat(${trustItems.length}, 1fr)`,
+        }}
+      >
+        {trustItems.map((item, i) => (
+          <div
+            key={item}
+            style={{
+              padding: "18px 20px",
+              borderRight: i < trustItems.length - 1 ? `1px solid ${INK}` : "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
           >
-            <item.icon
-              className="h-[18px] w-[18px] shrink-0 transition-colors group-hover:text-[#2d3435]"
-              style={{ color: "#735b3a" }}
-              strokeWidth={1.5}
-            />
             <span
-              className="font-sans font-semibold uppercase transition-colors group-hover:text-[#2d3435]"
               style={{
-                fontSize: "10px",
-                letterSpacing: "0.2em",
-                color: "#5a6061",
+                color: SAFFRON,
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 10,
               }}
             >
-              {item.label}
+              ★
             </span>
-          </motion.div>
+            <span
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 10,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: INK,
+              }}
+            >
+              {item}
+            </span>
+          </div>
         ))}
       </div>
-    </section>
+
+      {/* Mobile: 2-column grid */}
+      <div
+        className="grid md:hidden"
+        style={{ gridTemplateColumns: "1fr 1fr" }}
+      >
+        {trustItems.map((item, i) => (
+          <div
+            key={item}
+            style={{
+              padding: "14px 16px",
+              borderRight: i % 2 === 0 ? `1px solid ${INK}` : "none",
+              borderBottom: i < trustItems.length - 2 ? `1px solid ${INK}` : "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span style={{ color: SAFFRON, fontSize: 9 }}>★</span>
+            <span
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 9,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: INK,
+              }}
+            >
+              {item}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 

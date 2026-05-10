@@ -3,71 +3,123 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { usePaymentStore } from "@/stores/payment-store";
-import { Loader2, ShoppingBag } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import type { CustomerInfo, OrderItem } from "@/types/cashfree";
 import { useCartStore } from "@/stores/cart-store";
 import { billingCalculator, type BillingBreakdown } from "@/lib/billing";
+import { getFreeShipping, getShippingRate, type FreeShippingSetting, type ShippingRateSetting } from "@/lib/settings-service";
 import { toast } from "sonner";
 import Script from "next/script";
 import PincodeChecker from "@/components/pincode-checker";
 
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const SAFFRON = "#E8763A";
+const DARK = "#1A0908";
+
+const fieldStyle: React.CSSProperties = {
+  width: "100%",
+  background: "transparent",
+  border: `1px solid ${INK}`,
+  padding: "12px 14px",
+  fontFamily: "var(--font-inter), sans-serif",
+  fontSize: 14,
+  color: INK,
+  outline: "none",
+  borderRadius: 0,
+  appearance: "none",
+};
+
+const fieldErrorStyle: React.CSSProperties = {
+  ...fieldStyle,
+  borderColor: SAFFRON,
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+  fontSize: 10,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase" as const,
+  color: INK,
+  marginBottom: 6,
+};
+
+const errorTextStyle: React.CSSProperties = {
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+  fontSize: 9,
+  letterSpacing: "0.12em",
+  color: SAFFRON,
+  marginTop: 4,
+};
+
+const panelStyle: React.CSSProperties = {
+  border: `1px solid ${INK}`,
+  marginBottom: 2,
+};
+
+const sectionHeadStyle: React.CSSProperties = {
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+  fontSize: 10,
+  letterSpacing: "0.2em",
+  textTransform: "uppercase" as const,
+  color: SAFFRON,
+  marginBottom: 20,
+};
+
 // Order Summary Component
 const OrderSummary: React.FC<{
-  billing: {
-    subtotal: number;
-    discount: number;
-    discountPercentage: number;
-    tax: number;
-    taxPercentage: number;
-    shipping: number;
-    total: number;
-    currency: string;
-  };
+  billing: BillingBreakdown;
   shippingCharge: number;
-}> = ({ billing, shippingCharge }) => {
+  shippingLabel: string;
+}> = ({ billing, shippingCharge, shippingLabel }) => {
   const totalWithShipping = billing.total + shippingCharge;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 h-fit">
-      <h2 className="text-xl font-medium mb-4">Order Summary</h2>
+    <div style={{ border: `1px solid ${INK}`, background: CREAM }}>
+      <div style={{ padding: "20px 24px", borderBottom: `1px solid ${INK}` }}>
+        <div style={sectionHeadStyle}>ORDER SUMMARY</div>
+      </div>
 
-      <div className="space-y-3">
-        <div className="flex justify-between">
-          <span>Subtotal</span>
-          <span>{billingCalculator.formatCurrency(billing.subtotal)}</span>
-        </div>
-
-        {billing.discount > 0 && (
-          <div className="flex justify-between text-green-600">
-            <span>Discount ({billing.discountPercentage.toFixed(0)}%)</span>
-            <span>-{billingCalculator.formatCurrency(billing.discount)}</span>
+      <div style={{ padding: "20px 24px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, color: INK, opacity: 0.7 }}>Subtotal</span>
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 12 }}>{billingCalculator.formatCurrency(billing.subtotal)}</span>
           </div>
-        )}
 
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>GST</span>
-          <span>Included</span>
-        </div>
+          {billing.discount > 0 && (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <span style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, color: INK, opacity: 0.7 }}>
+                Discount ({billing.discountPercentage.toFixed(0)}%)
+              </span>
+              <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 12, color: SAFFRON }}>
+                -{billingCalculator.formatCurrency(billing.discount)}
+              </span>
+            </div>
+          )}
 
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>Shipping</span>
-          <span>
-            {shippingCharge > 0
-              ? billingCalculator.formatCurrency(shippingCharge)
-              : "Check pincode"}
-          </span>
-        </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, color: INK, opacity: 0.7 }}>GST</span>
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 12, opacity: 0.5 }}>INCLUDED</span>
+          </div>
 
-        <Separator />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, color: INK, opacity: 0.7 }}>Shipping</span>
+            <span style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 12,
+              color: shippingCharge === 0 && shippingLabel !== "Check pincode" ? SAFFRON : INK,
+            }}>
+              {shippingLabel}
+            </span>
+          </div>
 
-        <div className="flex justify-between text-lg font-medium">
-          <span>Total</span>
-          <span>{billingCalculator.formatCurrency(totalWithShipping)}</span>
+          <div style={{ borderTop: `1px solid ${INK}`, marginTop: 4, paddingTop: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span style={{ fontFamily: "var(--font-fraunces), serif", fontSize: 18, fontWeight: 300 }}>Total</span>
+            <span style={{ fontFamily: "var(--font-fraunces), serif", fontSize: 22, fontWeight: 300 }}>{billingCalculator.formatCurrency(totalWithShipping)}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -85,19 +137,16 @@ const CheckoutContent: React.FC = () => {
     error: paymentError,
   } = usePaymentStore();
 
-  // Check if user was redirected back from cancelled payment
   useEffect(() => {
     const paymentStatus = searchParams.get("payment");
     if (paymentStatus === "cancelled") {
       toast.info("Payment Cancelled", {
         description: "You can continue shopping or try again when ready.",
       });
-      // Clean up URL
       router.replace("/checkout");
     }
   }, [searchParams, router]);
 
-  // Form state - empty initial values for production
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     firstName: "",
     lastName: "",
@@ -114,9 +163,9 @@ const CheckoutContent: React.FC = () => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isPincodeServiceable, setIsPincodeServiceable] = useState(false);
   const [shippingCharge, setShippingCharge] = useState(0);
+  const [freeShippingSetting, setFreeShippingSetting] = useState<FreeShippingSetting>({ enabled: true, threshold: 0 });
+  const [shippingRateSetting, setShippingRateSetting] = useState<ShippingRateSetting>({ amount: 49, currency: "₹" });
 
-  // Billing state - initialized after hydration to prevent SSR mismatch
-  // Cart data comes from sessionStorage which is not available during SSR
   const [billing, setBilling] = useState<BillingBreakdown>({
     subtotal: 0,
     discount: 0,
@@ -129,11 +178,15 @@ const CheckoutContent: React.FC = () => {
   });
   const [isMounted, setIsMounted] = useState(false);
 
-  // Update billing after component mounts (client-side only)
-  // This prevents hydration mismatch since cart data comes from sessionStorage
+  useEffect(() => {
+    Promise.all([getFreeShipping(), getShippingRate()]).then(([fs, sr]) => {
+      setFreeShippingSetting(fs);
+      setShippingRateSetting(sr);
+    }).catch(() => {});
+  }, []);
+
   useEffect(() => {
     setIsMounted(true);
-    // Refresh cart prices from DB, then calculate billing
     refreshPrices().then((pricesChanged) => {
       if (pricesChanged) {
         toast.info("Prices Updated", {
@@ -144,33 +197,47 @@ const CheckoutContent: React.FC = () => {
       setBilling(breakdown);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, []);
 
-  // Update billing whenever cart items change (after mount)
   useEffect(() => {
     if (isMounted) {
       const breakdown = getBillingBreakdown();
       setBilling(breakdown);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartItems, isMounted]); // Update when cart items change
+  }, [cartItems, isMounted]);
 
-  // Handle pincode serviceability change
+  const computeShippingCharge = (shiprocketPrepaid: number): number => {
+    if (freeShippingSetting.enabled) return 0;
+    if (freeShippingSetting.threshold > 0 && billing.subtotal >= freeShippingSetting.threshold) return 0;
+    return shippingRateSetting.amount > 0 ? shippingRateSetting.amount : shiprocketPrepaid;
+  };
+
+  const shippingLabel = (() => {
+    if (freeShippingSetting.enabled) return "FREE";
+    if (!isPincodeServiceable) return "Check pincode";
+    const effective = computeShippingCharge(shippingCharge);
+    if (effective === 0) return "FREE";
+    return billingCalculator.formatCurrency(effective);
+  })();
+
+  const effectiveShippingCharge = freeShippingSetting.enabled
+    ? 0
+    : isPincodeServiceable
+      ? computeShippingCharge(shippingCharge)
+      : 0;
+
   const handlePincodeServiceabilityChange = (
     isServiceable: boolean,
     info?: {
       pincode: string;
       serviceable: boolean;
       deliveryTime?: string;
-      charges?: {
-        cod: number;
-        prepaid: number;
-      };
+      charges?: { cod: number; prepaid: number };
       error?: string;
     }
   ) => {
     setIsPincodeServiceable(isServiceable);
-
     if (isServiceable && info?.charges) {
       setShippingCharge(info.charges.prepaid);
     } else {
@@ -178,39 +245,18 @@ const CheckoutContent: React.FC = () => {
     }
   };
 
-  /**
-   * Validate form data
-   */
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
-    // Required field validation
-    if (!customerInfo.firstName.trim()) {
-      errors.firstName = "First name is required";
-    }
-    if (!customerInfo.lastName.trim()) {
-      errors.lastName = "Last name is required";
-    }
-    if (!customerInfo.email.trim()) {
-      errors.email = "Email is required";
-    }
-    if (!customerInfo.phone.trim()) {
-      errors.phone = "Phone number is required";
-    }
-    if (!customerInfo.address.trim()) {
-      errors.address = "Address is required";
-    }
-    if (!customerInfo.city.trim()) {
-      errors.city = "City is required";
-    }
-    if (!customerInfo.state.trim()) {
-      errors.state = "State is required";
-    }
-    if (!customerInfo.postalCode.trim()) {
-      errors.postalCode = "Postal code is required";
-    }
+    if (!customerInfo.firstName.trim()) errors.firstName = "First name is required";
+    if (!customerInfo.lastName.trim()) errors.lastName = "Last name is required";
+    if (!customerInfo.email.trim()) errors.email = "Email is required";
+    if (!customerInfo.phone.trim()) errors.phone = "Phone number is required";
+    if (!customerInfo.address.trim()) errors.address = "Address is required";
+    if (!customerInfo.city.trim()) errors.city = "City is required";
+    if (!customerInfo.state.trim()) errors.state = "State is required";
+    if (!customerInfo.postalCode.trim()) errors.postalCode = "Postal code is required";
 
-    // Email validation (only if email is provided)
     if (customerInfo.email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(customerInfo.email.trim())) {
@@ -218,25 +264,12 @@ const CheckoutContent: React.FC = () => {
       }
     }
 
-    // Phone validation (more forgiving - accepts various formats)
     if (customerInfo.phone.trim()) {
-      // Remove all non-digit characters for validation
       const cleanPhone = customerInfo.phone.replace(/\D/g, "");
-
-      // Check if it's a valid Indian mobile number
-      // Accept 10 digits (without country code) or 12 digits (with 91)
       if (cleanPhone.length === 10) {
-        // 10 digit number should start with 6-9
-        if (!/^[6-9]/.test(cleanPhone)) {
-          errors.phone =
-            "Indian mobile numbers should start with 6, 7, 8, or 9";
-        }
+        if (!/^[6-9]/.test(cleanPhone)) errors.phone = "Indian mobile numbers should start with 6, 7, 8, or 9";
       } else if (cleanPhone.length === 12) {
-        // 12 digit number should start with 91 followed by 6-9
-        if (!/^91[6-9]/.test(cleanPhone)) {
-          errors.phone =
-            "Please enter a valid Indian mobile number (91XXXXXXXXXX)";
-        }
+        if (!/^91[6-9]/.test(cleanPhone)) errors.phone = "Please enter a valid Indian mobile number (91XXXXXXXXXX)";
       } else if (cleanPhone.length < 10) {
         errors.phone = "Phone number is too short";
       } else {
@@ -244,13 +277,9 @@ const CheckoutContent: React.FC = () => {
       }
     }
 
-    // Terms acceptance
-    if (!acceptTerms) {
-      errors.terms = "Please accept the terms and conditions";
-    }
+    if (!acceptTerms) errors.terms = "Please accept the terms and conditions";
 
-    // Pincode serviceability check
-    if (!isPincodeServiceable) {
+    if (!freeShippingSetting.enabled && !isPincodeServiceable) {
       errors.pincode = "Please check pincode serviceability before proceeding";
     }
 
@@ -258,68 +287,34 @@ const CheckoutContent: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
-  /**
-   * Handle input changes
-   */
   const handleInputChange = (field: keyof CustomerInfo, value: string) => {
     setCustomerInfo((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (formErrors[field]) {
       setFormErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
-  /**
-   * Handle form submission and payment processing
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Clear previous payment state
     clearPaymentState();
 
-    // Validate cart
     if (cartItems.length === 0) {
-      toast.error("Cart is empty", {
-        description: "Please add items to your cart before checking out.",
-      });
+      toast.error("Cart is empty", { description: "Please add items to your cart before checking out." });
       return;
     }
 
-    // Validate form
     const isValid = validateForm();
-
     if (!isValid) {
-      toast.error("Form validation failed", {
-        description:
-          "Please correct the errors highlighted below and try again.",
-      });
-
-      // Scroll to first error
+      toast.error("Form validation failed", { description: "Please correct the errors highlighted below and try again." });
       const firstErrorField = Object.keys(formErrors)[0];
       if (firstErrorField) {
         const element = document.getElementById(firstErrorField);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
-          element.focus();
-        }
+        if (element) { element.scrollIntoView({ behavior: "smooth", block: "center" }); element.focus(); }
       }
       return;
     }
 
-    // // Check environment variables
-    // const razorpayKeyId = process.env.VITE_RAZORPAY_KEY_ID;
-    //
-    // if (!razorpayKeyId) {
-    //   toast.error("Configuration Error", {
-    //     description:
-    //       "Payment system is not properly configured. Please contact support.",
-    //   });
-    //   return;
-    // }
-
     try {
-      // Prepare order items
       const orderItems: OrderItem[] = cartItems.map((item) => ({
         productId: item.product.id,
         productName: item.product.name,
@@ -328,95 +323,85 @@ const CheckoutContent: React.FC = () => {
         total: item.product.price.current * item.quantity,
       }));
 
-      // Prepare order details with shipping from Shiprocket
-      const totalWithShipping = billing.total + shippingCharge;
+      const totalWithShipping = billing.total + effectiveShippingCharge;
       const orderDetails = {
         customerInfo,
         items: orderItems,
         subtotal: billing.subtotal,
         discount: billing.discount,
         tax: billing.tax,
-        shipping: shippingCharge,
+        shipping: effectiveShippingCharge,
         total: totalWithShipping,
         paymentMethod: "online",
         notes: "Order placed via web checkout.",
       };
 
-      // Process payment with shipping included in total
-      // Note: With Cashfree redirectTarget: "_self", the page will redirect to Cashfree checkout
-      // The Promise returns immediately after opening checkout, not after payment completes
-      const result = await processPayment(
-        totalWithShipping,
-        customerInfo,
-        orderDetails
-      );
+      const result = await processPayment(totalWithShipping, customerInfo, orderDetails);
 
       if (result.success && result.orderId) {
-        // Store order details in sessionStorage for use after Cashfree redirect
-        // The order success page will handle payment verification
         if (typeof window !== "undefined") {
-          sessionStorage.setItem(
-            "pending_order_details",
-            JSON.stringify({
-              orderId: result.orderId,
-              customerInfo,
-              orderItems,
-              billing: {
-                ...billing,
-                shipping: shippingCharge,
-                total: billing.total + shippingCharge,
-              },
-            })
-          );
+          sessionStorage.setItem("pending_order_details", JSON.stringify({
+            orderId: result.orderId,
+            customerInfo,
+            orderItems,
+            billing: { ...billing, shipping: effectiveShippingCharge, total: billing.total + effectiveShippingCharge },
+          }));
         }
-
-        // Clear cart before redirect (Cashfree will redirect the page)
         clearCart();
-
-        // Note: We don't navigate here - Cashfree will redirect to the return URL
-        // The return URL is set in the order creation: /order-success/{order_id}
-        // Cashfree will replace {order_id} with the actual order ID
-        toast.info("Redirecting to payment...", {
-          description: "Please complete your payment on the next page.",
-        });
-
-        // The page will redirect automatically via Cashfree checkout
-        // No need to manually navigate - Cashfree handles the redirect
+        toast.info("Redirecting to payment...", { description: "Please complete your payment on the next page." });
       } else {
-        // Payment initialization failed
-        toast.error("Payment Failed", {
-          description:
-            paymentError ||
-            "Please try again or contact support if the issue persists.",
-        });
+        toast.error("Payment Failed", { description: paymentError || "Please try again or contact support if the issue persists." });
       }
     } catch (error) {
-      console.error("💥 Checkout error:", error);
-      toast.error("Checkout Error", {
-        description: "An unexpected error occurred. Please try again.",
-      });
+      console.error("Checkout error:", error);
+      toast.error("Checkout Error", { description: "An unexpected error occurred. Please try again." });
     }
   };
 
+  const Field = ({
+    id,
+    label,
+    children,
+    colSpan,
+  }: {
+    id: string;
+    label: string;
+    children: React.ReactNode;
+    colSpan?: boolean;
+  }) => (
+    <div style={colSpan ? { gridColumn: "1 / -1" } : {}}>
+      <label htmlFor={id} style={labelStyle}>{label}</label>
+      {children}
+      {formErrors[id] && <div style={errorTextStyle}>{formErrors[id]}</div>}
+    </div>
+  );
+
   return (
     <>
-      <main className="flex-grow pt-8 pb-8">
-        <div className="luxury-container">
-          <div className="flex items-center gap-2 mb-6">
-            <ShoppingBag className="h-6 w-6" />
-            <h1 className="text-3xl font-serif font-bold">Secure Checkout</h1>
+      {/* Hero header */}
+      <div style={{ background: DARK, color: CREAM, borderBottom: `1px solid ${INK}` }} className="px-5 md:px-12" >
+        <div style={{ paddingTop: 40, paddingBottom: 40 }}>
+          <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: SAFFRON, marginBottom: 10 }}>
+            SECURE CHECKOUT
           </div>
+          <h1 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "clamp(2.5rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 0.9, letterSpacing: "-0.03em", margin: 0 }}>
+            Your <em style={{ color: SAFFRON }}>order.</em>
+          </h1>
+        </div>
+      </div>
 
-          {/* Display form validation errors */}
+      <main style={{ background: CREAM, color: INK }} className="px-5 md:px-12">
+        <div style={{ paddingTop: 40, paddingBottom: 80 }}>
+          {/* Form-level errors */}
           {Object.keys(formErrors).length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <h3 className="font-medium text-red-800 mb-2">
-                Please fix the following errors:
-              </h3>
-              <ul className="list-disc list-inside space-y-1 text-sm text-red-700">
+            <div style={{ border: `1px solid ${SAFFRON}`, padding: "16px 20px", marginBottom: 24, background: "rgba(232,118,58,0.06)" }}>
+              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: SAFFRON, marginBottom: 8 }}>
+                PLEASE FIX THE FOLLOWING
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                 {Object.entries(formErrors).map(([field, message]) => (
-                  <li key={field}>
-                    <span className="font-medium capitalize">
+                  <li key={field} style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, color: INK, opacity: 0.8, marginBottom: 4 }}>
+                    <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, textTransform: "capitalize" }}>
                       {field.replace(/([A-Z])/g, " $1").trim()}:
                     </span>{" "}
                     {message}
@@ -426,310 +411,147 @@ const CheckoutContent: React.FC = () => {
             </div>
           )}
 
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Checkout Form */}
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            {/* Left: form */}
             <div className="w-full lg:w-2/3">
               {cartItems.length === 0 ? (
-                <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                  <h2 className="text-xl font-medium mb-4">
-                    Your Cart is Empty
-                  </h2>
-                  <p className="text-gray-600 mb-6">
-                    Please add some products to your cart before proceeding to
-                    checkout.
+                <div style={{ ...panelStyle, padding: "48px 32px", textAlign: "center" }}>
+                  <div style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "2rem", fontWeight: 300, marginBottom: 12 }}>
+                    Your cart is <em style={{ color: SAFFRON }}>empty.</em>
+                  </div>
+                  <p style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 14, opacity: 0.6, marginBottom: 24 }}>
+                    Please add items to your cart before checking out.
                   </p>
-                  <Button
+                  <button
                     onClick={() => router.push("/products")}
-                    className="bg-brown-600 hover:bg-brown-700"
+                    style={{ background: INK, color: CREAM, border: "none", padding: "16px 32px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
                   >
-                    Browse Products
-                  </Button>
+                    BROWSE FRAGRANCES →
+                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>
                   {/* Shipping Information */}
-                  <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <h2 className="text-xl font-medium mb-4">
-                      Shipping Information
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name *</Label>
-                        <Input
-                          id="firstName"
-                          value={customerInfo.firstName}
-                          onChange={(e) =>
-                            handleInputChange("firstName", e.target.value)
-                          }
-                          className={
-                            formErrors.firstName ? "border-red-500" : ""
-                          }
-                          required
-                        />
-                        {formErrors.firstName && (
-                          <p className="text-sm text-red-500">
-                            {formErrors.firstName}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name *</Label>
-                        <Input
-                          id="lastName"
-                          value={customerInfo.lastName}
-                          onChange={(e) =>
-                            handleInputChange("lastName", e.target.value)
-                          }
-                          className={
-                            formErrors.lastName ? "border-red-500" : ""
-                          }
-                          required
-                        />
-                        {formErrors.lastName && (
-                          <p className="text-sm text-red-500">
-                            {formErrors.lastName}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email Address *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={customerInfo.email}
-                          onChange={(e) =>
-                            handleInputChange("email", e.target.value)
-                          }
-                          className={formErrors.email ? "border-red-500" : ""}
-                          required
-                        />
-                        {formErrors.email && (
-                          <p className="text-sm text-red-500">
-                            {formErrors.email}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number *</Label>
-                        <Input
-                          id="phone"
-                          value={customerInfo.phone}
-                          onChange={(e) =>
-                            handleInputChange("phone", e.target.value)
-                          }
-                          className={formErrors.phone ? "border-red-500" : ""}
-                          placeholder="+91 98765 43210"
-                          required
-                        />
-                        {formErrors.phone && (
-                          <p className="text-sm text-red-500">
-                            {formErrors.phone}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="address">Address *</Label>
-                        <Input
-                          id="address"
-                          value={customerInfo.address}
-                          onChange={(e) =>
-                            handleInputChange("address", e.target.value)
-                          }
-                          className={formErrors.address ? "border-red-500" : ""}
-                          required
-                        />
-                        {formErrors.address && (
-                          <p className="text-sm text-red-500">
-                            {formErrors.address}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="city">City *</Label>
-                        <Input
-                          id="city"
-                          value={customerInfo.city}
-                          onChange={(e) =>
-                            handleInputChange("city", e.target.value)
-                          }
-                          className={formErrors.city ? "border-red-500" : ""}
-                          required
-                        />
-                        {formErrors.city && (
-                          <p className="text-sm text-red-500">
-                            {formErrors.city}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="state">State *</Label>
-                        <Input
-                          id="state"
-                          value={customerInfo.state}
-                          onChange={(e) =>
-                            handleInputChange("state", e.target.value)
-                          }
-                          className={formErrors.state ? "border-red-500" : ""}
-                          required
-                        />
-                        {formErrors.state && (
-                          <p className="text-sm text-red-500">
-                            {formErrors.state}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="postalCode">Postal Code *</Label>
-                        <Input
-                          id="postalCode"
-                          value={customerInfo.postalCode}
-                          onChange={(e) =>
-                            handleInputChange("postalCode", e.target.value)
-                          }
-                          className={
-                            formErrors.postalCode ? "border-red-500" : ""
-                          }
-                          required
-                        />
-                        {formErrors.postalCode && (
-                          <p className="text-sm text-red-500">
-                            {formErrors.postalCode}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="country">Country</Label>
-                        <Input
-                          id="country"
-                          value={customerInfo.country}
-                          onChange={(e) =>
-                            handleInputChange("country", e.target.value)
-                          }
-                          required
-                        />
+                  <div style={panelStyle}>
+                    <div style={{ padding: "20px 24px", borderBottom: `1px solid ${INK}` }}>
+                      <div style={sectionHeadStyle}>01 / SHIPPING INFORMATION</div>
+                    </div>
+                    <div style={{ padding: "24px" }}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Field id="firstName" label="First Name *">
+                          <input id="firstName" value={customerInfo.firstName} onChange={(e) => handleInputChange("firstName", e.target.value)} style={formErrors.firstName ? fieldErrorStyle : fieldStyle} required />
+                        </Field>
+                        <Field id="lastName" label="Last Name *">
+                          <input id="lastName" value={customerInfo.lastName} onChange={(e) => handleInputChange("lastName", e.target.value)} style={formErrors.lastName ? fieldErrorStyle : fieldStyle} required />
+                        </Field>
+                        <Field id="email" label="Email Address *">
+                          <input id="email" type="email" value={customerInfo.email} onChange={(e) => handleInputChange("email", e.target.value)} style={formErrors.email ? fieldErrorStyle : fieldStyle} required />
+                        </Field>
+                        <Field id="phone" label="Phone Number *">
+                          <input id="phone" value={customerInfo.phone} onChange={(e) => handleInputChange("phone", e.target.value)} placeholder="+91 98765 43210" style={formErrors.phone ? fieldErrorStyle : fieldStyle} required />
+                        </Field>
+                        <Field id="address" label="Address *" colSpan>
+                          <input id="address" value={customerInfo.address} onChange={(e) => handleInputChange("address", e.target.value)} style={formErrors.address ? fieldErrorStyle : fieldStyle} required />
+                        </Field>
+                        <Field id="city" label="City *">
+                          <input id="city" value={customerInfo.city} onChange={(e) => handleInputChange("city", e.target.value)} style={formErrors.city ? fieldErrorStyle : fieldStyle} required />
+                        </Field>
+                        <Field id="state" label="State *">
+                          <input id="state" value={customerInfo.state} onChange={(e) => handleInputChange("state", e.target.value)} style={formErrors.state ? fieldErrorStyle : fieldStyle} required />
+                        </Field>
+                        <Field id="postalCode" label="Postal Code *">
+                          <input id="postalCode" value={customerInfo.postalCode} onChange={(e) => handleInputChange("postalCode", e.target.value)} style={formErrors.postalCode ? fieldErrorStyle : fieldStyle} required />
+                        </Field>
+                        <Field id="country" label="Country">
+                          <input id="country" value={customerInfo.country} onChange={(e) => handleInputChange("country", e.target.value)} style={fieldStyle} required />
+                        </Field>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Pincode Serviceability Check */}
-                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                      <h3 className="font-medium mb-3">
-                        Check Delivery Availability
-                      </h3>
-                      <PincodeChecker
-                        onServiceabilityChange={
-                          handlePincodeServiceabilityChange
-                        }
-                        initialPincode={customerInfo.postalCode}
-                      />
-                      {formErrors.pincode && (
-                        <p className="text-sm text-red-500 mt-2">
-                          {formErrors.pincode}
+                  {/* Pincode check */}
+                  <div style={{ ...panelStyle, marginTop: 2 }}>
+                    <div style={{ padding: "20px 24px", borderBottom: `1px solid ${INK}` }}>
+                      <div style={sectionHeadStyle}>02 / DELIVERY CHECK</div>
+                    </div>
+                    <div style={{ padding: "24px" }}>
+                      <PincodeChecker onServiceabilityChange={handlePincodeServiceabilityChange} initialPincode={customerInfo.postalCode} />
+                      {formErrors.pincode && <div style={{ ...errorTextStyle, marginTop: 8 }}>{formErrors.pincode}</div>}
+                    </div>
+                  </div>
+
+                  {/* Payment info */}
+                  <div style={{ ...panelStyle, marginTop: 2, background: DARK, color: CREAM }}>
+                    <div style={{ padding: "20px 24px" }}>
+                      <div style={{ ...sectionHeadStyle, marginBottom: 10 }}>03 / PAYMENT</div>
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        <Lock style={{ width: 14, height: 14, flexShrink: 0, marginTop: 2, color: SAFFRON }} strokeWidth={1.5} />
+                        <p style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, lineHeight: 1.6, opacity: 0.75, margin: 0 }}>
+                          All payments are processed securely through Cashfree. Choose UPI, Card, or Net Banking on the next page.
                         </p>
-                      )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Payment Info */}
-                  <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        <strong>Secure Payment:</strong> All payments are
-                        processed securely through Cashfree. You&apos;ll be able to choose
-                        your preferred payment method (UPI, Card, Net Banking) on the next page.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Terms and Conditions */}
-                  <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div className="flex items-start space-x-2">
+                  {/* Terms */}
+                  <div style={{ ...panelStyle, marginTop: 2, padding: "20px 24px" }}>
+                    <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
                       <input
                         type="checkbox"
                         id="acceptTerms"
                         checked={acceptTerms}
                         onChange={(e) => setAcceptTerms(e.target.checked)}
-                        className="mt-1"
+                        style={{ marginTop: 3, width: 14, height: 14, accentColor: INK, flexShrink: 0 }}
                       />
-                      <Label
-                        htmlFor="acceptTerms"
-                        className="text-sm cursor-pointer"
-                      >
+                      <span style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, lineHeight: 1.5, color: INK, opacity: 0.8 }}>
                         I agree to the{" "}
-                        <Link
-                          href="/terms-of-service"
-                          className="text-brown-600 underline"
-                        >
-                          Terms of Service
-                        </Link>{" "}
+                        <Link href="/terms-of-service" style={{ color: INK, textDecoration: "underline" }}>Terms of Service</Link>{" "}
                         and{" "}
-                        <Link
-                          href="/privacy-policy"
-                          className="text-brown-600 underline"
-                        >
-                          Privacy Policy
-                        </Link>
-                      </Label>
-                    </div>
-                    {formErrors.terms && (
-                      <p className="text-sm text-red-500 mt-2">
-                        {formErrors.terms}
-                      </p>
-                    )}
+                        <Link href="/privacy-policy" style={{ color: INK, textDecoration: "underline" }}>Privacy Policy</Link>
+                      </span>
+                    </label>
+                    {formErrors.terms && <div style={{ ...errorTextStyle, marginTop: 8 }}>{formErrors.terms}</div>}
                   </div>
 
-                  {/* Mobile Order Summary */}
-                  <div className="lg:hidden mb-6">
-                    <OrderSummary billing={billing} shippingCharge={shippingCharge} />
+                  {/* Mobile order summary */}
+                  <div className="lg:hidden" style={{ marginTop: 2 }}>
+                    <OrderSummary billing={billing} shippingCharge={effectiveShippingCharge} shippingLabel={shippingLabel} />
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Button
+                  {/* Action buttons */}
+                  <div style={{ marginTop: 2, display: "flex", gap: 2 }} className="flex-col sm:flex-row">
+                    <button
                       type="button"
-                      variant="outline"
-                      className="flex-1"
                       onClick={() => router.push("/cart")}
                       disabled={isProcessing}
+                      style={{ flex: 1, background: "transparent", color: INK, border: `1px solid ${INK}`, padding: "18px 24px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer", opacity: isProcessing ? 0.5 : 1 }}
                     >
-                      Back to Cart
-                    </Button>
-
-                    <Button
+                      ← BACK TO CART
+                    </button>
+                    <button
                       type="submit"
-                      className="flex-1 bg-luxe-blue hover:bg-luxe-violet text-white font-semibold py-3 px-6 rounded-lg shadow-md"
-                      style={{
-                        backgroundColor: "#623cea",
-                        color: "white",
-                        border: "2px solid #623cea",
-                      }}
                       disabled={isProcessing || cartItems.length === 0}
+                      style={{ flex: 1, background: isProcessing || cartItems.length === 0 ? "#3A3833" : SAFFRON, color: INK, border: "none", padding: "18px 24px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", cursor: isProcessing || cartItems.length === 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
                     >
                       {isProcessing ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processing Payment...
+                          <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />
+                          PROCESSING...
                         </>
                       ) : (
-                        `Pay ${billingCalculator.formatCurrency(billing.total + shippingCharge)}`
+                        `PAY ${billingCalculator.formatCurrency(billing.total + effectiveShippingCharge)} →`
                       )}
-                    </Button>
+                    </button>
                   </div>
                 </form>
               )}
             </div>
 
-            {/* Desktop Order Summary */}
-            <div className="hidden lg:block w-1/3">
-              <OrderSummary billing={billing} shippingCharge={shippingCharge} />
+            {/* Desktop order summary */}
+            <div className="hidden lg:block lg:w-1/3">
+              <div style={{ position: "sticky", top: 90 }}>
+                <OrderSummary billing={billing} shippingCharge={effectiveShippingCharge} shippingLabel={shippingLabel} />
+              </div>
             </div>
           </div>
         </div>
@@ -743,10 +565,12 @@ const Checkout: React.FC = () => {
   return (
     <Suspense
       fallback={
-        <main className="flex-grow flex items-center justify-center py-8">
-          <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-brown-600 mx-auto mb-4" />
-            <p>Loading checkout...</p>
+        <main style={{ background: CREAM, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 400 }}>
+          <div style={{ textAlign: "center" }}>
+            <Loader2 style={{ width: 32, height: 32, margin: "0 auto 16px", color: SAFFRON, animation: "spin 1s linear infinite" }} />
+            <p style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: INK, opacity: 0.5 }}>
+              LOADING CHECKOUT...
+            </p>
           </div>
         </main>
       }
