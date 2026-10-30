@@ -320,8 +320,19 @@ serve(async (req) => {
           : { data: orderData };
         const resolvedOrderData = latestOrderData || orderData;
 
+        // Redeem coupon idempotently on verified PAID transition
+        if (resolvedOrderData?.id) {
+          const { error: couponRpcError } = await supabase.rpc("redeem_order_coupon", {
+            p_order_id: resolvedOrderData.id,
+          });
+          if (couponRpcError) {
+            console.warn("Coupon redemption RPC note:", couponRpcError.message);
+          }
+        }
+
         // Automatically create Shiprocket shipment order after payment success
-        if (resolvedOrderData && !resolvedOrderData.shiprocket_awb) {
+        if (resolvedOrderData && !resolvedOrderData.shiprocket_order_id && !resolvedOrderData.shiprocket_awb) {
+          let shiprocketRequest: Record<string, unknown> | null = null;
           try {
             console.log(`Creating Shiprocket order for ${order_id}`);
             
@@ -404,11 +415,11 @@ serve(async (req) => {
               sku: item.product_id || `SKU-${order_id}`,
               units: item.quantity || 1,
               selling_price: item.price || item.total || 0,
-              hsn: "",
+              hsn: "3303",
             }));
 
             // Prepare Shiprocket order request with validated fields
-            const shiprocketRequest = {
+            shiprocketRequest = {
               name: customerName,
               email: customerEmail,
               phone: phone,
@@ -542,8 +553,8 @@ serve(async (req) => {
               })
               .eq("cashfree_order_id", order_id);
           }
-        } else if (orderData?.shiprocket_awb) {
-          console.log(`Shiprocket order already exists for ${order_id}. AWB: ${orderData.shiprocket_awb}`);
+        } else if (resolvedOrderData?.shiprocket_order_id || resolvedOrderData?.shiprocket_awb) {
+          console.log(`Shiprocket order already exists for ${order_id}. Shiprocket ID: ${resolvedOrderData.shiprocket_order_id || "n/a"}, AWB: ${resolvedOrderData.shiprocket_awb || "pending"}`);
         }
 
         // Send order confirmation notification
@@ -592,38 +603,31 @@ serve(async (req) => {
         break;
 
       case "ACTIVE":
-        // Order created but payment pending
         console.log(`Order ${order_id} is active, payment pending`);
-        
-        // Update order status if order exists
         await supabase
           .from("orders")
           .update({
             order_status: "ACTIVE",
             updated_at: new Date().toISOString(),
           })
-          .eq("cashfree_order_id", order_id);
-
+          .eq("cashfree_order_id", order_id)
+          .neq("order_status", "PAID");
         break;
 
       case "EXPIRED":
-        // Payment session expired
         console.log(`Order ${order_id} payment session expired`);
-
         await supabase
           .from("orders")
           .update({
             order_status: "EXPIRED",
             updated_at: new Date().toISOString(),
           })
-          .eq("cashfree_order_id", order_id);
-
+          .eq("cashfree_order_id", order_id)
+          .neq("order_status", "PAID");
         break;
 
       case "CANCELLED":
-        // Payment cancelled by user
         console.log(`Order ${order_id} payment cancelled`);
-
         await supabase
           .from("orders")
           .update({
@@ -631,21 +635,20 @@ serve(async (req) => {
             payment_status: "CANCELLED",
             updated_at: new Date().toISOString(),
           })
-          .eq("cashfree_order_id", order_id);
-
+          .eq("cashfree_order_id", order_id)
+          .neq("order_status", "PAID");
         break;
 
       default:
         console.log(`Order ${order_id} status: ${order_status}`);
-        
-        // Update order with any status change
         await supabase
           .from("orders")
           .update({
             order_status: order_status,
             updated_at: new Date().toISOString(),
           })
-          .eq("cashfree_order_id", order_id);
+          .eq("cashfree_order_id", order_id)
+          .neq("order_status", "PAID");
     }
 
     // Mark webhook as processed

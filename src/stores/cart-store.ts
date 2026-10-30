@@ -3,7 +3,9 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { billingCalculator, BillingBreakdown, BillingItem } from "@/lib/billing";
 import { fetchProducts } from "@/lib/product-service";
-import { Bundle } from "@/lib/bundle-service";
+import { Bundle, fetchBundles } from "@/lib/bundle-service";
+import type { CouponRow } from "@/lib/coupon-service";
+import { calculateCouponDiscount, roundCurrency } from "@/lib/checkout-pricing";
 
 export interface Product {
   id: string;
@@ -46,6 +48,7 @@ export interface BundleCartItem {
 interface CartStore {
   cartItems: CartItem[];
   bundleItems: BundleCartItem[];
+  appliedCoupon: CouponRow | null;
   sidebarOpen: boolean;
   openSidebar: () => void;
   closeSidebar: () => void;
@@ -55,6 +58,8 @@ interface CartStore {
   addBundleToCart: (bundle: Bundle, quantity: number) => void;
   removeBundleFromCart: (bundleId: string) => void;
   updateBundleQuantity: (bundleId: string, quantity: number) => void;
+  applyCoupon: (coupon: CouponRow) => void;
+  removeCoupon: () => void;
   clearCart: () => void;
   refreshPrices: () => Promise<boolean>;
   getBillingBreakdown: () => BillingBreakdown;
@@ -67,6 +72,7 @@ const createCartStore: StateCreator<
 > = (set, get) => ({
   cartItems: [],
   bundleItems: [],
+  appliedCoupon: null,
   sidebarOpen: false,
   openSidebar: () => set((state) => { state.sidebarOpen = true; }),
   closeSidebar: () => set((state) => { state.sidebarOpen = false; }),
@@ -149,22 +155,38 @@ const createCartStore: StateCreator<
     });
   },
 
+  applyCoupon: (coupon) => {
+    set((state) => {
+      state.appliedCoupon = coupon;
+    });
+  },
+
+  removeCoupon: () => {
+    set((state) => {
+      state.appliedCoupon = null;
+    });
+  },
+
   clearCart: () => {
     set((state) => {
       state.cartItems.length = 0;
       state.bundleItems.length = 0;
+      state.appliedCoupon = null;
     });
   },
 
   refreshPrices: async () => {
-    const { cartItems } = get();
-    if (cartItems.length === 0) return false;
+    const { cartItems, bundleItems } = get();
+    if (cartItems.length === 0 && bundleItems.length === 0) return false;
 
     try {
-      const dbProducts = await fetchProducts();
-      if (dbProducts.length === 0) return false;
+      const [dbProducts, dbBundles] = await Promise.all([
+        cartItems.length > 0 ? fetchProducts() : Promise.resolve([]),
+        bundleItems.length > 0 ? fetchBundles() : Promise.resolve([]),
+      ]);
 
       const productMap = new Map(dbProducts.map((p) => [p.id, p]));
+      const bundleMap = new Map(dbBundles.map((b) => [b.id, b]));
       let pricesChanged = false;
 
       set((state) => {
@@ -181,6 +203,18 @@ const createCartStore: StateCreator<
             item.product.status = dbProduct.status;
           }
         }
+        for (const item of state.bundleItems as BundleCartItem[]) {
+          const dbBundle = bundleMap.get(item.bundle.id);
+          if (dbBundle) {
+            if (
+              item.bundle.price.current !== dbBundle.price.current ||
+              item.bundle.price.original !== dbBundle.price.original
+            ) {
+              pricesChanged = true;
+            }
+            item.bundle = dbBundle;
+          }
+        }
       });
 
       return pricesChanged;
@@ -190,7 +224,7 @@ const createCartStore: StateCreator<
   },
 
   getBillingBreakdown: () => {
-    const { cartItems, bundleItems } = get();
+    const { cartItems, bundleItems, appliedCoupon } = get();
     const billingItems: BillingItem[] = [
       ...cartItems.map((item) => ({
         id: item.product.id,
@@ -209,7 +243,17 @@ const createCartStore: StateCreator<
         hsnCode: "3303",
       })),
     ];
-    return billingCalculator.calculateBilling(billingItems);
+    const base = billingCalculator.calculateBilling(billingItems);
+    const couponCheck = calculateCouponDiscount(base.subtotal, appliedCoupon);
+    const discount = couponCheck.valid ? couponCheck.discount : 0;
+    const discountPercentage = base.subtotal > 0 ? roundCurrency((discount / base.subtotal) * 100) : 0;
+    const total = roundCurrency(Math.max(0, base.subtotal - discount) + base.tax + base.shipping);
+    return {
+      ...base,
+      discount,
+      discountPercentage,
+      total,
+    };
   },
 
   getBillingItems: () => {
@@ -242,6 +286,7 @@ export const useCartStore = create<CartStore>()(
     partialize: (state) => ({
       cartItems: state.cartItems,
       bundleItems: state.bundleItems,
+      appliedCoupon: state.appliedCoupon,
     }),
   }),
 );

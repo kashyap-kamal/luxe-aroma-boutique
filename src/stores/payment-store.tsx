@@ -12,20 +12,22 @@ export interface PaymentState {
   error: string | null;
 }
 
-// Payment Context Interface
+export interface ProcessPaymentExtras {
+  bundleItems?: Array<{ bundleId: string; quantity: number }>;
+  couponCode?: string | null;
+  shiprocketPrepaid?: number;
+}
+
 interface PaymentStoreType extends PaymentState {
-  // Payment operations
   processPayment: (
     amount: number,
     customerInfo: CustomerInfo,
-    orderDetails: Omit<OrderDetails, "id" | "paymentStatus" | "orderDate">
+    orderDetails: Omit<OrderDetails, "id" | "paymentStatus" | "orderDate">,
+    extras?: ProcessPaymentExtras
   ) => Promise<{ success: boolean; orderId?: string }>;
-
-  // State management
+  markOrderPaid: (orderId: string, verifiedOrder?: OrderDetails) => void;
   clearPaymentState: () => void;
   setPaymentError: (error: string | null) => void;
-
-  // Order management
   getOrderHistory: () => OrderDetails[];
   getOrderById: (orderId: string) => OrderDetails | null;
 }
@@ -41,7 +43,8 @@ const createPaymentStore: StateCreator<
   processPayment: async (
     amount: number,
     customerInfo: CustomerInfo,
-    orderDetails: Omit<OrderDetails, "id" | "paymentStatus" | "orderDate">
+    orderDetails: Omit<OrderDetails, "id" | "paymentStatus" | "orderDate">,
+    extras?: ProcessPaymentExtras
   ): Promise<{ success: boolean; orderId?: string }> => {
     set((s) => {
       s.isProcessing = true;
@@ -50,23 +53,15 @@ const createPaymentStore: StateCreator<
     });
 
     try {
-      // validate
       if (amount <= 0) throw new Error("Invalid payment amount");
-      if (
-        !customerInfo.email ||
-        !customerInfo.firstName ||
-        !customerInfo.phone
-      ) {
+      if (!customerInfo.email || !customerInfo.firstName || !customerInfo.phone) {
         throw new Error("Customer information is incomplete");
       }
 
-      // Include shipping address for Cashfree One Click Checkout
-      // This tells Cashfree to save the address and make it available for Shiprocket integration
       const paymentCustomerInfo = {
         name: `${customerInfo.firstName} ${customerInfo.lastName ?? ""}`.trim(),
         email: customerInfo.email,
         contact: customerInfo.phone,
-        // Shipping address fields (required for automatic Shiprocket shipment creation)
         address: customerInfo.address,
         city: customerInfo.city,
         state: customerInfo.state,
@@ -74,35 +69,35 @@ const createPaymentStore: StateCreator<
         country: customerInfo.country || "India",
       };
 
-      // Prepare cart items for Cashfree
-      const cartItems = orderDetails.items.map((item) => ({
-        productId: item.productId,
-        productName: item.productName,
-        price: item.price,
-        quantity: item.quantity,
-        imageUrl: undefined, // Can be enhanced later with product images
-      }));
+      const productCartItems = orderDetails.items
+        .filter((item) => item.itemType !== "bundle")
+        .map((item) => ({
+          productId: item.productId,
+          productName: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+          imageUrl: undefined,
+        }));
 
-      // call Cashfree payment service
       const result = await cashfreePaymentService.processPayment(
         amount,
         paymentCustomerInfo,
         orderDetails,
-        cartItems
+        productCartItems,
+        extras
       );
 
       if (result.success && result.orderId) {
-        // Create order in order management system
         const billingItems = orderDetails.items.map((item) => ({
           id: item.productId,
           name: item.productName,
           price: item.price,
           quantity: item.quantity,
-          category: "Perfume",
+          category: item.itemType === "bundle" ? "bundle" : "Perfume",
           hsnCode: "3303",
         }));
 
-        const order = orderManager.createOrder({
+        orderManager.createOrder({
           customerInfo: {
             firstName: customerInfo.firstName,
             lastName: customerInfo.lastName || "",
@@ -120,19 +115,14 @@ const createPaymentStore: StateCreator<
           notes: orderDetails.notes,
         });
 
-        // Update order with payment success
-        orderManager.updateOrder(order.id, {
-          status: "confirmed",
-          paymentStatus: "completed",
-        });
-
+        // Keep PENDING until Cashfree redirect returns and verify-cashfree-payment confirms PAID
         set((s) => {
           s.isProcessing = false;
-          s.paymentStatus = PaymentStatus.SUCCESS;
+          s.paymentStatus = PaymentStatus.PENDING;
           s.currentOrder = {
             ...orderDetails,
             id: result.orderId!,
-            paymentStatus: PaymentStatus.SUCCESS,
+            paymentStatus: PaymentStatus.PENDING,
             orderDate: new Date(),
           };
           s.error = null;
@@ -148,8 +138,7 @@ const createPaymentStore: StateCreator<
         return { success: false };
       }
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Payment processing failed";
+      const msg = err instanceof Error ? err.message : "Payment processing failed";
       set((s) => {
         s.isProcessing = false;
         s.paymentStatus = PaymentStatus.FAILED;
@@ -158,6 +147,29 @@ const createPaymentStore: StateCreator<
       console.error("Payment processing error:", err);
       return { success: false };
     }
+  },
+  markOrderPaid: (orderId, verifiedOrder) => {
+    try {
+      const localOrders = orderManager.getAllOrders();
+      const matched = localOrders.find((o) => o.payment?.cashfreeOrderId === orderId || o.id === orderId);
+      if (matched) {
+        orderManager.updateOrder(matched.id, {
+          status: "confirmed",
+          paymentStatus: "completed",
+        });
+      }
+    } catch (e) {
+      console.error("Error updating local order status:", e);
+    }
+
+    set((s) => {
+      s.paymentStatus = PaymentStatus.SUCCESS;
+      if (verifiedOrder) {
+        s.currentOrder = verifiedOrder;
+      } else if (s.currentOrder && s.currentOrder.id === orderId) {
+        s.currentOrder.paymentStatus = PaymentStatus.SUCCESS;
+      }
+    });
   },
   clearPaymentState: () => {
     set(store.getInitialState(), true);
@@ -171,12 +183,8 @@ const createPaymentStore: StateCreator<
     try {
       const orders = localStorage.getItem("orders");
       if (!orders) return [];
-
-      const parsedOrders = JSON.parse(orders);
-
-      // Fix Date deserialization - convert date strings back to Date objects
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return parsedOrders.map((order: any) => ({
+      const parsedOrders = JSON.parse(orders) as Array<OrderDetails & { orderDate: string }>;
+      return parsedOrders.map((order) => ({
         ...order,
         orderDate: new Date(order.orderDate),
       }));
@@ -188,7 +196,13 @@ const createPaymentStore: StateCreator<
   getOrderById: (orderId) => {
     try {
       const orders = get().getOrderHistory();
-      return orders.find((order) => order.id === orderId) || null;
+      return (
+        orders.find(
+          (order) =>
+            order.id === orderId ||
+            (order as OrderDetails & { cashfreeOrderId?: string }).cashfreeOrderId === orderId
+        ) || null
+      );
     } catch (error) {
       console.error("Error loading order:", error);
       return null;

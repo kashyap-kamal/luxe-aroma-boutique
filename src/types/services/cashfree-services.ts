@@ -91,7 +91,12 @@ export const createCashfreeOrder = async (
     quantity: number;
     imageUrl?: string;
   }>,
-  returnUrl: string
+  returnUrl: string,
+  extras?: {
+    bundleItems?: Array<{ bundleId: string; quantity: number }>;
+    couponCode?: string | null;
+    shiprocketPrepaid?: number;
+  }
 ): Promise<CashfreeOrderResponse> => {
   try {
     // Validate Supabase configuration (required for Edge Function calls)
@@ -118,6 +123,9 @@ export const createCashfreeOrder = async (
             amount,
             customerInfo,
             cartItems,
+            bundleItems: extras?.bundleItems ?? [],
+            couponCode: extras?.couponCode ?? undefined,
+            shiprocketPrepaid: extras?.shiprocketPrepaid ?? 0,
             returnUrl,
           },
         }
@@ -130,8 +138,20 @@ export const createCashfreeOrder = async (
 
     return response;
   } catch (error) {
+    if (error && typeof error === "object" && "response" in error) {
+      try {
+        const errBody = await (error as { response: Response }).response.json() as { error?: string };
+        if (errBody?.error) {
+          throw new Error(errBody.error);
+        }
+      } catch (inner) {
+        if (inner instanceof Error && inner.message !== "Failed to create payment order. Please try again.") {
+          throw inner;
+        }
+      }
+    }
     console.error("Error creating Cashfree order:", error);
-    throw new Error("Failed to create payment order. Please try again.");
+    throw error instanceof Error ? error : new Error("Failed to create payment order. Please try again.");
   }
 };
 
@@ -366,7 +386,12 @@ export class CashfreePaymentService {
       price: number;
       quantity: number;
       imageUrl?: string;
-    }>
+    }>,
+    extras?: {
+      bundleItems?: Array<{ bundleId: string; quantity: number }>;
+      couponCode?: string | null;
+      shiprocketPrepaid?: number;
+    }
   ): Promise<{ success: boolean; orderId?: string; error?: string }> {
     try {
       // Step 1: Load Cashfree SDK
@@ -379,7 +404,8 @@ export class CashfreePaymentService {
         amount,
         customerInfo,
         cartItems,
-        returnUrl
+        returnUrl,
+        extras
       );
 
       // Step 3: Store order ID in sessionStorage for use after redirect

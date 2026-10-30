@@ -8,6 +8,12 @@ import { Loader2, Lock } from "lucide-react";
 import type { CustomerInfo, OrderItem } from "@/types/cashfree";
 import { useCartStore } from "@/stores/cart-store";
 import { billingCalculator, type BillingBreakdown } from "@/lib/billing";
+import { validateCoupon } from "@/lib/coupon-service";
+import {
+  calculateShippingCharge,
+  computeCheckoutTotals,
+  formatBundleOrderLineName,
+} from "@/lib/checkout-pricing";
 import { getFreeShipping, getShippingRate, type FreeShippingSetting, type ShippingRateSetting } from "@/lib/settings-service";
 import { toast } from "sonner";
 import Script from "next/script";
@@ -73,16 +79,99 @@ const OrderSummary: React.FC<{
   billing: BillingBreakdown;
   shippingCharge: number;
   shippingLabel: string;
-}> = ({ billing, shippingCharge, shippingLabel }) => {
+  appliedCouponCode: string | null;
+  onApplyCoupon: (code: string) => Promise<void>;
+  onRemoveCoupon: () => void;
+  lineItems: Array<{ key: string; name: string; quantity: number; lineTotal: number }>;
+}> = ({
+  billing,
+  shippingCharge,
+  shippingLabel,
+  appliedCouponCode,
+  onApplyCoupon,
+  onRemoveCoupon,
+  lineItems,
+}) => {
+  const [couponInput, setCouponInput] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const totalWithShipping = billing.total + shippingCharge;
+
+  const submitCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+    setApplyingCoupon(true);
+    try {
+      await onApplyCoupon(couponInput);
+      setCouponInput("");
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
 
   return (
     <div style={{ border: `1px solid ${INK}`, background: CREAM }}>
       <div style={{ padding: "20px 24px", borderBottom: `1px solid ${INK}` }}>
-        <div style={sectionHeadStyle}>ORDER SUMMARY</div>
+        <div style={{ ...sectionHeadStyle, marginBottom: 0 }}>ORDER SUMMARY</div>
       </div>
 
       <div style={{ padding: "20px 24px" }}>
+        {lineItems.length > 0 && (
+          <div style={{ marginBottom: 16, paddingBottom: 14, borderBottom: `1px dotted ${INK}`, display: "flex", flexDirection: "column", gap: 8 }}>
+            {lineItems.map((li) => (
+              <div key={li.key} style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 12 }}>
+                <span style={{ fontFamily: "var(--font-inter), sans-serif", color: INK, opacity: 0.85 }}>
+                  {li.name} × {li.quantity}
+                </span>
+                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, whiteSpace: "nowrap" }}>
+                  {billingCalculator.formatCurrency(li.lineTotal)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ marginBottom: 16, paddingBottom: 14, borderBottom: `1px dotted ${INK}` }}>
+          {appliedCouponCode && billing.discount > 0 ? (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.14em", color: SAFFRON }}>
+                COUPON: {appliedCouponCode}
+              </span>
+              <button
+                type="button"
+                onClick={onRemoveCoupon}
+                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: INK, textDecoration: "underline", opacity: 0.7 }}
+              >
+                REMOVE
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: 6 }}>
+              <input
+                type="text"
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    void submitCoupon(e);
+                  }
+                }}
+                placeholder="COUPON CODE"
+                aria-label="Coupon code"
+                style={{ flex: 1, background: "transparent", border: `1px solid ${INK}`, padding: "9px 10px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.14em", color: INK, outline: "none" }}
+              />
+              <button
+                type="button"
+                disabled={applyingCoupon || !couponInput.trim()}
+                onClick={(e) => void submitCoupon(e)}
+                style={{ background: INK, color: CREAM, border: "none", padding: "9px 14px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", cursor: applyingCoupon || !couponInput.trim() ? "not-allowed" : "pointer", opacity: applyingCoupon || !couponInput.trim() ? 0.5 : 1 }}
+              >
+                {applyingCoupon ? "..." : "APPLY"}
+              </button>
+            </div>
+          )}
+        </div>
+
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, color: INK, opacity: 0.7 }}>Subtotal</span>
@@ -129,7 +218,16 @@ const OrderSummary: React.FC<{
 const CheckoutContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { cartItems, clearCart, getBillingBreakdown, refreshPrices } = useCartStore();
+  const {
+    cartItems,
+    bundleItems,
+    appliedCoupon,
+    applyCoupon,
+    removeCoupon,
+    getBillingBreakdown,
+    refreshPrices,
+  } = useCartStore();
+  const hasCartEntries = cartItems.length > 0 || bundleItems.length > 0;
   const {
     processPayment,
     isProcessing,
@@ -205,27 +303,59 @@ const CheckoutContent: React.FC = () => {
       setBilling(breakdown);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartItems, isMounted]);
+  }, [cartItems, bundleItems, appliedCoupon, isMounted]);
 
   const computeShippingCharge = (shiprocketPrepaid: number): number => {
-    if (freeShippingSetting.enabled) return 0;
-    if (freeShippingSetting.threshold > 0 && billing.subtotal >= freeShippingSetting.threshold) return 0;
-    return shippingRateSetting.amount > 0 ? shippingRateSetting.amount : shiprocketPrepaid;
+    return calculateShippingCharge(
+      billing.total,
+      freeShippingSetting,
+      shippingRateSetting,
+      shiprocketPrepaid
+    );
   };
 
+  const alwaysFreeShipping = freeShippingSetting.enabled && freeShippingSetting.threshold <= 0;
+
   const shippingLabel = (() => {
-    if (freeShippingSetting.enabled) return "FREE";
-    if (!isPincodeServiceable) return "Check pincode";
+    if (alwaysFreeShipping) return "FREE";
+    if (!isPincodeServiceable && computeShippingCharge(shippingCharge) !== 0) return "Check pincode";
     const effective = computeShippingCharge(shippingCharge);
     if (effective === 0) return "FREE";
     return billingCalculator.formatCurrency(effective);
   })();
 
-  const effectiveShippingCharge = freeShippingSetting.enabled
+  const effectiveShippingCharge = alwaysFreeShipping
     ? 0
-    : isPincodeServiceable
-      ? computeShippingCharge(shippingCharge)
-      : 0;
+    : computeShippingCharge(shippingCharge);
+
+  const summaryLines = [
+    ...cartItems.map((item) => ({
+      key: `p-${item.product.id}`,
+      name: item.product.name,
+      quantity: item.quantity,
+      lineTotal: item.product.price.current * item.quantity,
+    })),
+    ...bundleItems.map((item) => ({
+      key: `b-${item.bundle.id}`,
+      name: formatBundleOrderLineName(
+        item.bundle.name,
+        item.bundle.items.map((bi) => ({ name: bi.product.name, quantity: bi.quantity }))
+      ),
+      quantity: item.quantity,
+      lineTotal: item.bundle.price.current * item.quantity,
+    })),
+  ];
+
+  const handleCheckoutCouponApply = async (code: string) => {
+    const subtotalNow = getBillingBreakdown().subtotal;
+    const res = await validateCoupon(code, subtotalNow);
+    if (res.valid && res.coupon) {
+      applyCoupon(res.coupon);
+      toast.success(`Coupon ${res.coupon.code} applied`);
+    } else {
+      toast.error(res.error || "Invalid coupon code");
+    }
+  };
 
   const handlePincodeServiceabilityChange = (
     isServiceable: boolean,
@@ -279,7 +409,7 @@ const CheckoutContent: React.FC = () => {
 
     if (!acceptTerms) errors.terms = "Please accept the terms and conditions";
 
-    if (!freeShippingSetting.enabled && !isPincodeServiceable) {
+    if (!alwaysFreeShipping && !isPincodeServiceable) {
       errors.pincode = "Please check pincode serviceability before proceeding";
     }
 
@@ -298,7 +428,7 @@ const CheckoutContent: React.FC = () => {
     e.preventDefault();
     clearPaymentState();
 
-    if (cartItems.length === 0) {
+    if (!hasCartEntries) {
       toast.error("Cart is empty", { description: "Please add items to your cart before checking out." });
       return;
     }
@@ -315,40 +445,107 @@ const CheckoutContent: React.FC = () => {
     }
 
     try {
-      const orderItems: OrderItem[] = cartItems.map((item) => ({
-        productId: item.product.id,
-        productName: item.product.name,
-        price: item.product.price.current,
-        quantity: item.quantity,
-        total: item.product.price.current * item.quantity,
-      }));
+      const preflight = computeCheckoutTotals({
+        productLines: cartItems.map((ci) => ({
+          id: ci.product.id,
+          name: ci.product.name,
+          price: ci.product.price.current,
+          quantity: ci.quantity,
+          inStock: ci.product.status !== "out_of_stock" && ci.product.status !== "discontinued",
+        })),
+        bundleLines: bundleItems.map((bi) => ({
+          id: bi.bundle.id,
+          name: bi.bundle.name,
+          price: bi.bundle.price.current,
+          quantity: bi.quantity,
+          active: bi.bundle.status === "active",
+          constituents: bi.bundle.items.map((c) => ({
+            name: c.product.name,
+            quantity: c.quantity,
+            inStock: c.product.status !== "out_of_stock" && c.product.status !== "discontinued",
+          })),
+        })),
+        coupon: appliedCoupon,
+        freeShipping: freeShippingSetting,
+        shippingRate: shippingRateSetting,
+        shiprocketPrepaid: shippingCharge,
+      });
 
+      if (preflight.availabilityError) {
+        toast.error("Item Unavailable", { description: preflight.availabilityError });
+        return;
+      }
+
+      const orderItems: OrderItem[] = [
+        ...cartItems.map((item) => ({
+          productId: item.product.id,
+          itemType: "product" as const,
+          productName: item.product.name,
+          price: item.product.price.current,
+          quantity: item.quantity,
+          total: item.product.price.current * item.quantity,
+        })),
+        ...bundleItems.map((item) => ({
+          productId: item.bundle.id,
+          bundleId: item.bundle.id,
+          itemType: "bundle" as const,
+          productName: formatBundleOrderLineName(
+            item.bundle.name,
+            item.bundle.items.map((bi) => ({ name: bi.product.name, quantity: bi.quantity }))
+          ),
+          price: item.bundle.price.current,
+          quantity: item.quantity,
+          total: item.bundle.price.current * item.quantity,
+        })),
+      ];
+
+      const activeCouponCode =
+        appliedCoupon && billing.discount > 0 ? appliedCoupon.code : null;
       const totalWithShipping = billing.total + effectiveShippingCharge;
       const orderDetails = {
         customerInfo,
         items: orderItems,
         subtotal: billing.subtotal,
         discount: billing.discount,
+        couponCode: activeCouponCode,
         tax: billing.tax,
         shipping: effectiveShippingCharge,
         total: totalWithShipping,
         paymentMethod: "online",
-        notes: "Order placed via web checkout.",
+        notes: activeCouponCode
+          ? `Order placed via web checkout. Coupon: ${activeCouponCode}`
+          : "Order placed via web checkout.",
       };
 
-      const result = await processPayment(totalWithShipping, customerInfo, orderDetails);
+      const result = await processPayment(totalWithShipping, customerInfo, orderDetails, {
+        bundleItems: bundleItems.map((b) => ({
+          bundleId: b.bundle.id,
+          quantity: b.quantity,
+        })),
+        couponCode: activeCouponCode,
+        shiprocketPrepaid: shippingCharge,
+      });
 
       if (result.success && result.orderId) {
         if (typeof window !== "undefined") {
-          sessionStorage.setItem("pending_order_details", JSON.stringify({
-            orderId: result.orderId,
-            customerInfo,
-            orderItems,
-            billing: { ...billing, shipping: effectiveShippingCharge, total: billing.total + effectiveShippingCharge },
-          }));
+          sessionStorage.setItem(
+            "pending_order_details",
+            JSON.stringify({
+              orderId: result.orderId,
+              customerInfo,
+              orderItems,
+              couponCode: activeCouponCode,
+              billing: {
+                ...billing,
+                shipping: effectiveShippingCharge,
+                total: totalWithShipping,
+              },
+            })
+          );
         }
-        clearCart();
-        toast.info("Redirecting to payment...", { description: "Please complete your payment on the next page." });
+        toast.info("Redirecting to payment...", {
+          description: "Please complete your payment on the next page.",
+        });
       } else {
         toast.error("Payment Failed", { description: paymentError || "Please try again or contact support if the issue persists." });
       }
@@ -414,7 +611,7 @@ const CheckoutContent: React.FC = () => {
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* Left: form */}
             <div className="w-full lg:w-2/3">
-              {cartItems.length === 0 ? (
+              {!hasCartEntries ? (
                 <div style={{ ...panelStyle, padding: "48px 32px", textAlign: "center" }}>
                   <div style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "2rem", fontWeight: 300, marginBottom: 12 }}>
                     Your cart is <em style={{ color: SAFFRON }}>empty.</em>
@@ -515,7 +712,7 @@ const CheckoutContent: React.FC = () => {
 
                   {/* Mobile order summary */}
                   <div className="lg:hidden" style={{ marginTop: 2 }}>
-                    <OrderSummary billing={billing} shippingCharge={effectiveShippingCharge} shippingLabel={shippingLabel} />
+                    <OrderSummary billing={billing} shippingCharge={effectiveShippingCharge} shippingLabel={shippingLabel} appliedCouponCode={appliedCoupon?.code ?? null} onApplyCoupon={handleCheckoutCouponApply} onRemoveCoupon={removeCoupon} lineItems={summaryLines} />
                   </div>
 
                   {/* Action buttons */}
@@ -530,8 +727,8 @@ const CheckoutContent: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      disabled={isProcessing || cartItems.length === 0}
-                      style={{ flex: 1, background: isProcessing || cartItems.length === 0 ? "#3A3833" : SAFFRON, color: INK, border: "none", padding: "18px 24px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", cursor: isProcessing || cartItems.length === 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+                      disabled={isProcessing || !hasCartEntries}
+                      style={{ flex: 1, background: isProcessing || !hasCartEntries ? "#3A3833" : SAFFRON, color: INK, border: "none", padding: "18px 24px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", cursor: isProcessing || !hasCartEntries ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
                     >
                       {isProcessing ? (
                         <>
@@ -550,7 +747,7 @@ const CheckoutContent: React.FC = () => {
             {/* Desktop order summary */}
             <div className="hidden lg:block lg:w-1/3">
               <div style={{ position: "sticky", top: 90 }}>
-                <OrderSummary billing={billing} shippingCharge={effectiveShippingCharge} shippingLabel={shippingLabel} />
+                <OrderSummary billing={billing} shippingCharge={effectiveShippingCharge} shippingLabel={shippingLabel} appliedCouponCode={appliedCoupon?.code ?? null} onApplyCoupon={handleCheckoutCouponApply} onRemoveCoupon={removeCoupon} lineItems={summaryLines} />
               </div>
             </div>
           </div>

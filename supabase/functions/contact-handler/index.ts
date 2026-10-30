@@ -35,7 +35,7 @@ Deno.serve(async (req: Request) => {
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY') || '',
     )
 
     const { method } = req
@@ -177,21 +177,28 @@ async function handleContactSubmission(req: Request, supabaseClient: any): Promi
 
 async function handleGetMessages(req: Request, supabaseClient: any): Promise<Response> {
   try {
-    // Check for authentication token
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
+    const authHeader = req.headers.get('Authorization') || ''
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim()
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    let isAuthorized = Boolean(serviceKey && token === serviceKey)
+    if (!isAuthorized && token) {
+      const { data: userRes, error: userErr } = await supabaseClient.auth.getUser(token)
+      if (!userErr && userRes?.user) {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('role')
+          .eq('id', userRes.user.id)
+          .maybeSingle()
+        isAuthorized = profile?.role === 'admin'
+      }
+    }
+    if (!isAuthorized) {
       const response: ContactResponse = {
         success: false,
-        message: 'Authentication required',
+        message: 'Admin authentication required',
         error: 'UNAUTHORIZED'
       }
-      return new Response(
-        JSON.stringify(response),
-        { 
-          status: 401, 
-          headers: corsHeaders 
-        }
-      )
+      return new Response(JSON.stringify(response), { status: 401, headers: corsHeaders })
     }
 
     // Get query parameters

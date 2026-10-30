@@ -54,7 +54,11 @@ export interface CashfreeOrderResponse {
   order_amount: number;
   order_currency: string;
   order_status: string;
-  payment_session_id_expiry: string;
+  payment_session_id_expiry?: string;
+  subtotal_amount?: number;
+  discount_amount?: number;
+  shipping_amount?: number;
+  coupon_code?: string | null;
 }
 
 // Cashfree Payment Status Response
@@ -95,6 +99,25 @@ export interface CashfreePaymentStatus {
     pincode: string;
     country: string;
   };
+  db_order?: {
+    items: Array<{
+      product_id?: string;
+      bundle_id?: string;
+      product_name?: string;
+      price?: number;
+      quantity?: number;
+      type?: "product" | "bundle";
+    }>;
+    subtotal_amount: number;
+    discount_amount: number;
+    shipping_amount: number;
+    coupon_code: string | null;
+    payment_method: string;
+    shiprocket_awb: string | null;
+    shiprocket_status: string | null;
+    created_at: string;
+    notes: string | null;
+  } | null;
 }
 
 // Cashfree Checkout Options Interface
@@ -120,6 +143,8 @@ export interface OrderDetails {
   customerInfo: CustomerInfo;
   items: OrderItem[];
   subtotal: number;
+  discount?: number;
+  couponCode?: string | null;
   tax: number;
   shipping: number;
   total: number;
@@ -145,6 +170,8 @@ export interface CustomerInfo {
 // Order Item Interface
 export interface OrderItem {
   productId: string;
+  bundleId?: string;
+  itemType?: "product" | "bundle";
   productName: string;
   price: number;
   quantity: number;

@@ -88,25 +88,7 @@ serve(async (req) => {
       );
     }
 
-    // Check if user already exists BEFORE attempting signup
-    // This prevents unnecessary email sending and rate limit issues
-    try {
-      const { data: existingUser } = await supabase.auth.admin.getUserByEmail(email);
-      if (existingUser?.user) {
-        return new Response(
-          JSON.stringify({ error: "User with this email already exists" }),
-          {
-            status: 409,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-    } catch (checkError) {
-      // If check fails, continue with signup attempt
-      console.log("User existence check failed, continuing with signup");
-    }
-
-    // Create user account using signUp
+        // Create user account using signUp
     // Only sends email if user doesn't exist
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,

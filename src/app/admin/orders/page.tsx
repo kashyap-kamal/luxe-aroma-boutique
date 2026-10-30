@@ -25,7 +25,10 @@ export default function AdminOrdersPage() {
 
   const loadOrders = () => {
     setLoading(true)
-    const filters: OrderFilters = { search: search || undefined, status: statusFilter || undefined }
+    const filters: OrderFilters = {
+      search: search || undefined,
+      status: statusFilter && statusFilter !== "all_statuses" ? statusFilter : undefined,
+    }
     if (dateRange === 'custom' && dateFrom && dateTo) {
       filters.dateFrom = new Date(dateFrom).toISOString()
       filters.dateTo = new Date(dateTo + 'T23:59:59').toISOString()

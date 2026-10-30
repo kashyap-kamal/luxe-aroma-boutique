@@ -1,6 +1,5 @@
 // Supabase Edge Function: Create Cashfree Order
-// Validates product prices server-side against the database before creating a payment order.
-// This prevents price tampering from the frontend.
+// Validates product prices, bundle prices/stock, coupons, and shipping server-side.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -11,16 +10,26 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+function round2(n: number): number {
+  return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Parse request
-    const { amount, customerInfo, cartItems, bundleItems, returnUrl } = await req.json();
+    const {
+      amount,
+      customerInfo,
+      cartItems,
+      bundleItems,
+      couponCode,
+      shiprocketPrepaid,
+      returnUrl,
+    } = await req.json();
 
-    // Validate required fields
     if (!customerInfo?.email || !customerInfo?.name || !customerInfo?.contact) {
       return new Response(
         JSON.stringify({ error: "Missing required customer information" }),
@@ -28,8 +37,8 @@ serve(async (req) => {
       );
     }
 
-    const hasCartItems = cartItems && cartItems.length > 0;
-    const hasBundleItems = bundleItems && bundleItems.length > 0;
+    const hasCartItems = Array.isArray(cartItems) && cartItems.length > 0;
+    const hasBundleItems = Array.isArray(bundleItems) && bundleItems.length > 0;
     if (!hasCartItems && !hasBundleItems) {
       return new Response(
         JSON.stringify({ error: "Cart is empty" }),
@@ -44,21 +53,21 @@ serve(async (req) => {
       );
     }
 
-    // Initialize Supabase with service role (bypasses RLS)
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    let serverTotal = 0;
+    let subtotal = 0;
     const validatedItems: Array<{
       product_id: string;
+      bundle_id?: string;
       product_name: string;
       price: number;
       quantity: number;
       type: "product" | "bundle";
     }> = [];
 
-    // ── Validate regular product prices ──
+    // 1. Validate individual products
     if (hasCartItems) {
       const productIds = (cartItems as Array<{ productId: string }>).map((item) => item.productId);
       const { data: dbProducts, error: dbError } = await supabase
@@ -77,7 +86,10 @@ serve(async (req) => {
       const productMap = new Map(dbProducts.map((p: { id: string }) => [p.id, p]));
       for (const item of cartItems) {
         const dbProduct = productMap.get(item.productId) as {
-          id: string; name: string; price_current: number; status: string;
+          id: string;
+          name: string;
+          price_current: number;
+          status: string;
         } | undefined;
 
         if (!dbProduct) {
@@ -93,23 +105,24 @@ serve(async (req) => {
           );
         }
         const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
-        serverTotal += Number(dbProduct.price_current) * quantity;
+        const unitPrice = Number(dbProduct.price_current);
+        subtotal += unitPrice * quantity;
         validatedItems.push({
           product_id: item.productId,
           product_name: dbProduct.name,
-          price: Number(dbProduct.price_current),
+          price: unitPrice,
           quantity,
           type: "product",
         });
       }
     }
 
-    // ── Validate bundle prices ──
+    // 2. Validate bundles + constituent bottle stock
     if (hasBundleItems) {
       const bundleIds = (bundleItems as Array<{ bundleId: string }>).map((item) => item.bundleId);
       const { data: dbBundles, error: bundleError } = await supabase
         .from("product_bundles")
-        .select("id, name, price_current, status")
+        .select("id, name, price_current, status, bundle_items(quantity, sort_order, products(id, name, status))")
         .in("id", bundleIds);
 
       if (bundleError || !dbBundles) {
@@ -123,7 +136,15 @@ serve(async (req) => {
       const bundleMap = new Map(dbBundles.map((b: { id: string }) => [b.id, b]));
       for (const item of bundleItems) {
         const dbBundle = bundleMap.get(item.bundleId) as {
-          id: string; name: string; price_current: number; status: string;
+          id: string;
+          name: string;
+          price_current: number;
+          status: string;
+          bundle_items?: Array<{
+            quantity: number;
+            sort_order: number;
+            products: { id: string; name: string; status: string } | null;
+          }>;
         } | undefined;
 
         if (!dbBundle) {
@@ -132,32 +153,170 @@ serve(async (req) => {
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
-        if (dbBundle.status === "sold_out") {
+        if (dbBundle.status !== "active") {
           return new Response(
-            JSON.stringify({ error: `${dbBundle.name} is currently sold out` }),
+            JSON.stringify({ error: `${dbBundle.name} is currently unavailable` }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
+
+        const sortedConstituents = [...(dbBundle.bundle_items ?? [])].sort(
+          (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+        );
+        for (const c of sortedConstituents) {
+          if (c.products && (c.products.status === "out_of_stock" || c.products.status === "discontinued")) {
+            return new Response(
+              JSON.stringify({
+                error: `${dbBundle.name} cannot be ordered because ${c.products.name} is out of stock`,
+              }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        }
+
+        const constituentLabel = sortedConstituents
+          .filter((c) => c.products?.name)
+          .map((c) => {
+            const q = Math.max(1, Number(c.quantity) || 1);
+            return q > 1 ? `${c.products!.name} x${q}` : c.products!.name;
+          })
+          .join(" + ");
+        const lineName = constituentLabel
+          ? `${dbBundle.name}: ${constituentLabel}`
+          : dbBundle.name;
+
         const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
-        serverTotal += Number(dbBundle.price_current) * quantity;
+        const unitPrice = Number(dbBundle.price_current);
+        subtotal += unitPrice * quantity;
         validatedItems.push({
           product_id: item.bundleId,
-          product_name: dbBundle.name,
-          price: Number(dbBundle.price_current),
+          bundle_id: item.bundleId,
+          product_name: lineName,
+          price: unitPrice,
           quantity,
           type: "bundle",
         });
       }
     }
 
-    // Log discrepancy between client and server totals
-    if (Math.abs(serverTotal - amount) > 1) {
+    subtotal = round2(subtotal);
+
+    // 3. Validate coupon across full cart subtotal (Products + Bundles)
+    let appliedCouponId: string | null = null;
+    let appliedCouponCode: string | null = null;
+    let discountAmount = 0;
+
+    if (typeof couponCode === "string" && couponCode.trim().length > 0) {
+      const normalizedCode = couponCode.trim().toUpperCase();
+      const { data: couponRow, error: couponError } = await supabase
+        .from("coupons")
+        .select("*")
+        .eq("code", normalizedCode)
+        .single();
+
+      if (couponError || !couponRow) {
+        return new Response(
+          JSON.stringify({ error: "Invalid coupon code" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const now = new Date();
+      if (!couponRow.is_active) {
+        return new Response(
+          JSON.stringify({ error: "This coupon is no longer active" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (couponRow.starts_at && new Date(couponRow.starts_at) > now) {
+        return new Response(
+          JSON.stringify({ error: "This coupon is not yet active" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (couponRow.ends_at && new Date(couponRow.ends_at) < now) {
+        return new Response(
+          JSON.stringify({ error: "This coupon has expired" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (
+        couponRow.usage_limit !== null &&
+        couponRow.usage_limit !== undefined &&
+        Number(couponRow.usage_count || 0) >= Number(couponRow.usage_limit)
+      ) {
+        return new Response(
+          JSON.stringify({ error: "This coupon has been fully redeemed" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const minOrder = Number(couponRow.min_order_amount || 0);
+      if (minOrder > 0 && subtotal < minOrder) {
+        return new Response(
+          JSON.stringify({ error: `Minimum order of ₹${minOrder} required for ${normalizedCode}` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (couponRow.discount_type === "percentage") {
+        discountAmount = subtotal * (Number(couponRow.discount_value || 0) / 100);
+        if (couponRow.max_discount_amount !== null && Number(couponRow.max_discount_amount) > 0) {
+          discountAmount = Math.min(discountAmount, Number(couponRow.max_discount_amount));
+        }
+      } else {
+        discountAmount = Number(couponRow.discount_value || 0);
+      }
+      discountAmount = Math.min(subtotal, Math.max(0, round2(discountAmount)));
+      appliedCouponId = couponRow.id;
+      appliedCouponCode = normalizedCode;
+    }
+
+    const discountedSubtotal = round2(Math.max(0, subtotal - discountAmount));
+
+    // 4. Compute shipping against post-coupon discountedSubtotal
+    const { data: settingsRows } = await supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["free_shipping", "shipping_rate"]);
+
+    const settingsMap = new Map(
+      (settingsRows ?? []).map((r: { key: string; value: unknown }) => [r.key, r.value])
+    );
+    const freeShipping = (settingsMap.get("free_shipping") as { enabled?: boolean; threshold?: number } | undefined) ?? {
+      enabled: true,
+      threshold: 0,
+    };
+    const shippingRate = (settingsMap.get("shipping_rate") as { amount?: number } | undefined) ?? {
+      amount: 49,
+    };
+
+    let shippingAmount = 0;
+    const threshold = Number(freeShipping.threshold || 0);
+    if (freeShipping.enabled && threshold <= 0) {
+      shippingAmount = 0;
+    } else if (threshold > 0 && discountedSubtotal >= threshold) {
+      shippingAmount = 0;
+    } else {
+      const configuredRate = Number(shippingRate.amount || 0);
+      shippingAmount = round2(
+        configuredRate > 0 ? configuredRate : Math.max(0, Number(shiprocketPrepaid) || 0)
+      );
+    }
+
+    const serverTotal = round2(discountedSubtotal + shippingAmount);
+    if (serverTotal < 1) {
+      return new Response(
+        JSON.stringify({ error: "Minimum payable order amount is ₹1.00" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (Math.abs(serverTotal - Number(amount || 0)) > 1) {
       console.warn(
         `Price discrepancy detected: client=${amount}, server=${serverTotal}. Using server total.`
       );
     }
 
-    // Get Cashfree credentials
     const CASHFREE_CLIENT_ID = Deno.env.get("CASHFREE_CLIENT_ID");
     const CASHFREE_SECRET_KEY = Deno.env.get("CASHFREE_SECRET_KEY");
     const CASHFREE_ENVIRONMENT = Deno.env.get("CASHFREE_ENVIRONMENT") || "sandbox";
@@ -173,10 +332,8 @@ serve(async (req) => {
       ? "https://api.cashfree.com"
       : "https://sandbox.cashfree.com";
 
-    // Generate unique order ID
-    const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const orderId = `order_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
-    // Build Cashfree order payload with SERVER-VALIDATED total
     const cashfreePayload: Record<string, unknown> = {
       order_id: orderId,
       order_amount: serverTotal,
@@ -192,7 +349,6 @@ serve(async (req) => {
       },
     };
 
-    // Add shipping address if provided
     if (customerInfo.address) {
       (cashfreePayload.order_meta as Record<string, unknown>).shipping_address = {
         address_line1: customerInfo.address,
@@ -203,7 +359,6 @@ serve(async (req) => {
       };
     }
 
-    // Create order with Cashfree
     const cashfreeResponse = await fetch(`${cashfreeApiUrl}/pg/orders`, {
       method: "POST",
       headers: {
@@ -217,7 +372,6 @@ serve(async (req) => {
     });
 
     const cashfreeData = await cashfreeResponse.json();
-
     if (!cashfreeResponse.ok) {
       console.error("Cashfree order creation failed:", cashfreeData);
       return new Response(
@@ -226,7 +380,6 @@ serve(async (req) => {
       );
     }
 
-    // Store order in Supabase
     const shippingAddress = customerInfo.address
       ? {
           address: customerInfo.address,
@@ -237,7 +390,7 @@ serve(async (req) => {
         }
       : null;
 
-    const { error: insertError } = await supabase.from("orders").insert({
+    const baseOrderRow = {
       cashfree_order_id: cashfreeData.order_id,
       order_amount: serverTotal,
       order_currency: "INR",
@@ -248,27 +401,44 @@ serve(async (req) => {
       customer_phone: customerInfo.contact,
       items: validatedItems,
       shipping_address: shippingAddress,
+    };
+
+    const { error: insertError } = await supabase.from("orders").insert({
+      ...baseOrderRow,
+      subtotal_amount: subtotal,
+      coupon_id: appliedCouponId,
+      coupon_code: appliedCouponCode,
+      discount_amount: discountAmount,
+      shipping_amount: shippingAmount,
     });
 
     if (insertError) {
-      console.error("Error storing order:", insertError);
-      // Don't fail the payment flow — order can be reconciled from Cashfree webhook
+      console.warn("Extended orders insert failed, retrying base row:", insertError.message);
+      const { error: fallbackError } = await supabase.from("orders").insert({
+        ...baseOrderRow,
+        notes: appliedCouponCode
+          ? `Coupon: ${appliedCouponCode} (-₹${discountAmount}), Shipping: ₹${shippingAmount}`
+          : null,
+      });
+      if (fallbackError) {
+        console.error("Error storing order:", fallbackError);
+      }
     }
 
-    // Return response to frontend
     return new Response(
       JSON.stringify({
         order_id: cashfreeData.order_id,
         order_token: cashfreeData.order_token,
         payment_session_id: cashfreeData.payment_session_id,
         order_amount: serverTotal,
+        subtotal_amount: subtotal,
+        discount_amount: discountAmount,
+        shipping_amount: shippingAmount,
+        coupon_code: appliedCouponCode,
         order_currency: "INR",
         order_status: cashfreeData.order_status,
       }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Error creating order:", error);
@@ -276,10 +446,7 @@ serve(async (req) => {
       JSON.stringify({
         error: error instanceof Error ? error.message : "Order creation failed",
       }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

@@ -7,6 +7,10 @@ export interface OrderRow {
   customer_name: string
   customer_phone: string
   order_amount: number
+  subtotal_amount?: number | null
+  coupon_code?: string | null
+  discount_amount?: number | null
+  shipping_amount?: number | null
   order_currency: string
   order_status: string
   payment_status: string | null

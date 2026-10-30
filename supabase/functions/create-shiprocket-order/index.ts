@@ -3,6 +3,26 @@
 // Credentials are stored in Supabase secrets
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+async function isServiceRoleOrAdmin(req: Request): Promise<boolean> {
+  const authHeader = req.headers.get("Authorization") || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+  if (!token) return false;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  if (serviceKey && token === serviceKey) return true;
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  if (!supabaseUrl || !serviceKey) return false;
+  const supabaseAdmin = createClient(supabaseUrl, serviceKey);
+  const { data: userRes, error: userErr } = await supabaseAdmin.auth.getUser(token);
+  if (userErr || !userRes?.user) return false;
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("role")
+    .eq("id", userRes.user.id)
+    .maybeSingle();
+  return profile?.role === "admin";
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -71,6 +91,12 @@ serve(async (req) => {
   }
 
   try {
+    if (!(await isServiceRoleOrAdmin(req))) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const baseUrl = Deno.env.get("SHIPROCKET_BASE_URL") || "https://apiv2.shiprocket.in/v1/external";
 
     // Seller details from environment
