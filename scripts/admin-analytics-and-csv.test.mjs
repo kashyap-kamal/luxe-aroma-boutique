@@ -1,9 +1,10 @@
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-const root = process.cwd();
+const root = fileURLToPath(new URL("..", import.meta.url));
 
 test("should bucket paid orders into IST dates, exclude unpaid orders, and rank top-5 items", async () => {
   const modPath = path.join(root, "src/lib/admin-reporting.mjs");

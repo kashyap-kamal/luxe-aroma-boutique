@@ -1,9 +1,10 @@
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-const root = process.cwd();
+const root = fileURLToPath(new URL("..", import.meta.url));
 
 test("should not ship unmounted 23MB 3D glb asset or dead auth/three dependencies", () => {
   assert.equal(

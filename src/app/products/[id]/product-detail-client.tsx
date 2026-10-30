@@ -35,14 +35,16 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
   const { addToCart } = useCartStore();
   const [quantity, setQuantity] = useState(1);
 
+  const currentPrice = product.price.current;
+
   useEffect(() => {
     trackEvent({
       eventType: "product_view",
       productId: product.id,
       itemName: product.name,
-      valueInr: product.price.current,
+      valueInr: currentPrice,
     });
-  }, [product.id, product.name, product.price.current]);
+  }, [product.id, product.name, currentPrice]);
   const [added, setAdded] = useState(false);
 
   const discountPercent =

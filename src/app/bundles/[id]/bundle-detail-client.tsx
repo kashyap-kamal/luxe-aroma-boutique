@@ -30,14 +30,16 @@ export default function BundleDetailClient({ bundle }: BundleDetailClientProps) 
   ];
   const [quantity, setQuantity] = useState(1);
 
+  const currentPrice = bundle.price.current;
+
   useEffect(() => {
     trackEvent({
       eventType: "product_view",
       bundleId: bundle.id,
       itemName: bundle.name,
-      valueInr: bundle.price.current,
+      valueInr: currentPrice,
     });
-  }, [bundle.id, bundle.name, bundle.price.current]);
+  }, [bundle.id, bundle.name, currentPrice]);
   const [added, setAdded] = useState(false);
 
   const discountPercent =
