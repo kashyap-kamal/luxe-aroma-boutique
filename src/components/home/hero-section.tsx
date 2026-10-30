@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/stores/cart-store";
@@ -23,6 +24,18 @@ interface HeroSectionProps {
 
 export default function HeroSection({ products: initialProducts }: HeroSectionProps) {
   const { products } = useProducts(initialProducts, { featured: true, limit: 8 });
+  const [viewport, setViewport] = useState<"ssr" | "desktop" | "mobile">("ssr");
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const sync = () => setViewport(mq.matches ? "desktop" : "mobile");
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  const showDesktop = viewport !== "mobile";
+  const showMobile = viewport !== "desktop";
   const minPrice = products.length > 0
     ? Math.min(...products.map(p => p.price.current))
     : 499;
@@ -64,6 +77,7 @@ export default function HeroSection({ products: initialProducts }: HeroSectionPr
       </div>
 
       {/* HERO — asymmetric editorial grid */}
+      {showDesktop && (
       <section
         className="hidden md:grid"
         style={{
@@ -383,7 +397,10 @@ export default function HeroSection({ products: initialProducts }: HeroSectionPr
         </div>
       </section>
 
+      )}
+
       {/* MOBILE HERO */}
+      {showMobile && (
       <section
         className="flex flex-col md:hidden"
         style={{ borderBottom: `1px solid ${INK}` }}
@@ -420,6 +437,7 @@ export default function HeroSection({ products: initialProducts }: HeroSectionPr
               padding: "20px 36px",
               filter: "drop-shadow(0 20px 32px rgba(0,0,0,0.5))",
             }}
+            priority
           />
         </div>
 
@@ -511,6 +529,7 @@ export default function HeroSection({ products: initialProducts }: HeroSectionPr
           </div>
         </div>
       </section>
+      )}
     </div>
   );
 }
