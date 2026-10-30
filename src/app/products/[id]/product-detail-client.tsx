@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/analytics-service";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Product } from "@/lib/data-service";
@@ -33,6 +34,15 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
   const router = useRouter();
   const { addToCart } = useCartStore();
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    trackEvent({
+      eventType: "product_view",
+      productId: product.id,
+      itemName: product.name,
+      valueInr: product.price.current,
+    });
+  }, [product.id, product.name, product.price.current]);
   const [added, setAdded] = useState(false);
 
   const discountPercent =

@@ -6,6 +6,7 @@ import { fetchProducts } from "@/lib/product-service";
 import { Bundle, fetchBundles } from "@/lib/bundle-service";
 import type { CouponRow } from "@/lib/coupon-service";
 import { calculateCouponDiscount, roundCurrency } from "@/lib/checkout-pricing";
+import { trackEvent } from "@/lib/analytics-service";
 
 export interface Product {
   id: string;
@@ -78,6 +79,7 @@ const createCartStore: StateCreator<
   closeSidebar: () => set((state) => { state.sidebarOpen = false; }),
 
   addToCart: (product, quantity) => {
+    trackEvent({ eventType: "add_to_cart", productId: product.id, itemName: product.name, valueInr: product.price.current * quantity });
     set((state) => {
       const existingItem = (state.cartItems as CartItem[]).find(
         (i) => i.product.id === product.id,
@@ -117,6 +119,7 @@ const createCartStore: StateCreator<
   },
 
   addBundleToCart: (bundle, quantity) => {
+    trackEvent({ eventType: "add_to_cart", bundleId: bundle.id, itemName: bundle.name, valueInr: bundle.price.current * quantity });
     set((state) => {
       const existing = (state.bundleItems as BundleCartItem[]).find(
         (i) => i.bundle.id === bundle.id,

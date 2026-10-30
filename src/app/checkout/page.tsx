@@ -9,6 +9,7 @@ import type { CustomerInfo, OrderItem } from "@/types/cashfree";
 import { useCartStore } from "@/stores/cart-store";
 import { billingCalculator, type BillingBreakdown } from "@/lib/billing";
 import { validateCoupon } from "@/lib/coupon-service";
+import { trackEvent } from "@/lib/analytics-service";
 import {
   calculateShippingCharge,
   computeCheckoutTotals,
@@ -281,6 +282,13 @@ const CheckoutContent: React.FC = () => {
       setFreeShippingSetting(fs);
       setShippingRateSetting(sr);
     }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (hasCartEntries) {
+      trackEvent({ eventType: "begin_checkout", pagePath: "/checkout" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

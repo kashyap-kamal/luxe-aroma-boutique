@@ -11,7 +11,8 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import { Search, Loader2, ExternalLink } from 'lucide-react'
+import { Search, Loader2, ExternalLink, Download } from 'lucide-react'
+import { ordersToCsv, toIstDateKey } from '@/lib/admin-reporting'
 import { toast } from 'sonner'
 
 export default function AdminOrdersPage() {
@@ -46,6 +47,24 @@ export default function AdminOrdersPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     loadOrders()
+  }
+
+  const handleExportCsv = () => {
+    if (orders.length === 0) {
+      toast.info('No orders to export for current filter')
+      return
+    }
+    const csv = ordersToCsv(orders as unknown as Record<string, unknown>[])
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `aromeluxe-orders-${toIstDateKey(new Date())}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success(`Exported ${orders.length} order${orders.length === 1 ? '' : 's'} to CSV`)
   }
 
   const paymentColor = (s: string | null) => {
@@ -98,6 +117,10 @@ export default function AdminOrdersPage() {
           </SelectContent>
         </Select>
         <Button onClick={loadOrders} variant="outline">Apply</Button>
+        <Button onClick={handleExportCsv} variant="outline" disabled={loading || orders.length === 0} className="gap-2">
+          <Download className="h-4 w-4" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Table */}

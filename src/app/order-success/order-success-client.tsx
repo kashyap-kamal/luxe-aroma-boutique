@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { usePaymentStore } from "@/stores/payment-store";
 import { useCartStore } from "@/stores/cart-store";
 import { verifyPaymentStatus } from "@/types/services/cashfree-services";
+import { trackEvent } from "@/lib/analytics-service";
 import {
   CheckCircle,
   Clock,
@@ -155,6 +156,17 @@ const OrderSuccessClient: React.FC<OrderSuccessClientProps> = ({
 
       clearCart();
       markOrderPaid(orderId, verifiedOrder);
+      if (typeof window !== "undefined") {
+        const dedupeKey = `aromeluxe_tracked_purchase_${orderId}`;
+        if (!sessionStorage.getItem(dedupeKey)) {
+          sessionStorage.setItem(dedupeKey, "1");
+          trackEvent({
+            eventType: "purchase",
+            orderId,
+            valueInr: verifiedOrder.total,
+          });
+        }
+      }
       if (typeof window !== "undefined") {
         sessionStorage.removeItem("pending_cashfree_order_id");
         sessionStorage.removeItem("pending_cashfree_session_id");

@@ -1,6 +1,8 @@
 "use client"
 
+import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { trackEvent } from '@/lib/analytics-service'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import PromoBanner from '@/components/promo-banner'
@@ -10,6 +12,12 @@ import MobileBottomNav from '@/components/mobile-bottom-nav'
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isAdmin = pathname?.startsWith('/admin')
+
+  useEffect(() => {
+    if (!isAdmin && pathname) {
+      trackEvent({ eventType: 'page_view', pagePath: pathname })
+    }
+  }, [isAdmin, pathname])
 
   if (isAdmin) {
     return <>{children}</>

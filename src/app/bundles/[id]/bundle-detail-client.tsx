@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/analytics-service";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,6 +29,15 @@ export default function BundleDetailClient({ bundle }: BundleDetailClientProps) 
     ),
   ];
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    trackEvent({
+      eventType: "product_view",
+      bundleId: bundle.id,
+      itemName: bundle.name,
+      valueInr: bundle.price.current,
+    });
+  }, [bundle.id, bundle.name, bundle.price.current]);
   const [added, setAdded] = useState(false);
 
   const discountPercent =

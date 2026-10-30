@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Package, DollarSign, TrendingUp, AlertTriangle, ShoppingBag, IndianRupee, Star, Ticket, Truck, Sparkles } from 'lucide-react'
+import { Package, DollarSign, TrendingUp, AlertTriangle, ShoppingBag, IndianRupee, Star, Ticket, Truck, Sparkles, BarChart3, Users, Eye } from 'lucide-react'
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { fetchProductStats, fetchProducts } from '@/lib/product-service'
 import { Product } from '@/stores/cart-store'
-import { fetchOrderStats, OrderStats } from '@/lib/order-admin-service'
+import { fetchOrders, fetchOrderStats, OrderRow, OrderStats } from '@/lib/order-admin-service'
+import { fetchAnalyticsFunnel } from '@/lib/analytics-service'
+import { buildIstRevenueSeries, computeTopSoldItems, summarizeAnalyticsFunnel, type AnalyticsFunnelSummary } from '@/lib/admin-reporting'
 import { fetchAllCoupons, CouponRow } from '@/lib/coupon-service'
 import { fetchAllReviews, ReviewRow } from '@/lib/review-service'
 import { getFreeShipping, getShippingRate, getSetting, updateSetting, FreeShippingSetting, ShippingRateSetting } from '@/lib/settings-service'
@@ -42,6 +45,9 @@ export default function AdminDashboard() {
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [spotlightId, setSpotlightId] = useState<string>('')
   const [savingSpotlight, setSavingSpotlight] = useState(false)
+  const [recentOrders, setRecentOrders] = useState<OrderRow[]>([])
+  const [chartDays, setChartDays] = useState<7 | 30>(7)
+  const [funnel, setFunnel] = useState<AnalyticsFunnelSummary>(() => summarizeAnalyticsFunnel([]))
 
   useEffect(() => {
     Promise.all([
@@ -53,6 +59,8 @@ export default function AdminDashboard() {
       getShippingRate().then(setShippingRate).catch(() => {}),
       fetchProducts().then(setAllProducts).catch(() => {}),
       getSetting<string>('spotlight_product_id').then((id) => { if (id) setSpotlightId(id) }).catch(() => {}),
+      fetchOrders({ dateRange: 'month' }).then(setRecentOrders).catch(() => {}),
+      fetchAnalyticsFunnel(30).then(setFunnel).catch(() => {}),
     ]).finally(() => setLoading(false))
   }, [])
 
@@ -99,6 +107,9 @@ export default function AdminDashboard() {
 
   const activeCoupons = coupons.filter((c) => c.is_active && (!c.ends_at || new Date(c.ends_at) > new Date())).length
   const activeReviews = reviews.filter((r) => r.is_active).length
+  const revenueSeries = buildIstRevenueSeries(recentOrders as unknown as Record<string, unknown>[], chartDays)
+  const periodRevenue = revenueSeries.reduce((sum, b) => sum + b.revenue, 0)
+  const topSoldItems = computeTopSoldItems(recentOrders as unknown as Record<string, unknown>[], 5)
 
   const topCards = [
     { title: 'Total Revenue', value: `₹${Number(orderStats?.total_revenue ?? 0).toLocaleString('en-IN')}`, icon: IndianRupee, color: 'text-green-600', bg: 'bg-green-50' },
@@ -132,6 +143,142 @@ export default function AdminDashboard() {
             </Card>
           )
         })}
+      </div>
+
+      {/* Paid Revenue Chart (IST) & Storefront Funnel */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-emerald-600" />
+                Paid Revenue (IST)
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Last {chartDays} days: ₹{periodRevenue.toLocaleString('en-IN')} across paid orders only
+              </p>
+            </div>
+            <div className="flex gap-1">
+              <Button
+                size="sm"
+                variant={chartDays === 7 ? 'default' : 'outline'}
+                onClick={() => setChartDays(7)}
+              >
+                7D
+              </Button>
+              <Button
+                size="sm"
+                variant={chartDays === 30 ? 'default' : 'outline'}
+                onClick={() => setChartDays(30)}
+              >
+                30D
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={revenueSeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${v}`} width={60} />
+                  <Tooltip
+                    formatter={(value: number) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Paid Revenue']}
+                  />
+                  <Bar dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Users className="h-4 w-4 text-indigo-600" />
+              30D Visitor Funnel
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Unique Visitors</span>
+                <span className="font-semibold">{funnel.uniqueVisitors}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Product / Bundle Views</span>
+                <span className="font-semibold">{funnel.productViews}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Added to Cart</span>
+                <span className="font-semibold">{funnel.addToCarts}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Checkout Started</span>
+                <span className="font-semibold">{funnel.checkoutsStarted}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Completed Purchases</span>
+                <span className="font-semibold text-emerald-600">{funnel.purchases}</span>
+              </div>
+              <div className="pt-2 border-t flex justify-between">
+                <span className="text-muted-foreground">Visitor to Paid Rate</span>
+                <span className="font-semibold">{funnel.conversionRate}%</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top 5 Sold & Top 5 Viewed */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-emerald-600" />
+              Top 5 Best Sellers (30D Paid)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topSoldItems.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No paid items recorded in the last 30 days.</p>
+            ) : (
+              <div className="space-y-2 text-sm">
+                {topSoldItems.map((item) => (
+                  <div key={item.name} className="flex justify-between items-center py-1 border-b last:border-0">
+                    <span className="truncate pr-3 font-medium">{item.name}</span>
+                    <span className="text-muted-foreground whitespace-nowrap">
+                      {item.units} sold · ₹{item.revenue.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Eye className="h-4 w-4 text-blue-600" />
+              Top 5 Most Viewed (30D)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {funnel.topViewed.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Views will populate as shoppers browse product pages.</p>
+            ) : (
+              <div className="space-y-2 text-sm">
+                {funnel.topViewed.map((item) => (
+                  <div key={item.name} className="flex justify-between items-center py-1 border-b last:border-0">
+                    <span className="truncate pr-3 font-medium">{item.name}</span>
+                    <span className="text-muted-foreground whitespace-nowrap">{item.views} views</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Products */}
