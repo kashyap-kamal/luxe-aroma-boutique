@@ -1,36 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, JetBrains_Mono, Inter } from "next/font/google";
+import "./fonts.css";
 import "./globals.css";
 import { LayoutWrapper } from "@/components/layout-wrapper";
 import { Toaster } from "sonner";
 import PerformanceMonitor from "@/components/performance-monitor";
 import { baseMetadata } from "@/lib/metadata";
 import { AuthProvider } from "@/components/auth/auth-provider";
-
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-  preload: true,
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-  preload: false,
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-  preload: true,
-});
 
 // Use centralized metadata
 export const metadata: Metadata = baseMetadata;
@@ -57,30 +32,29 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="512x512" href="/assets/android-chrome-512x512.png" />
 
         {/* Preconnect to external domains for better performance */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
         <link rel="preconnect" href="https://images.unsplash.com" />
 
         {/* DNS prefetch for external resources */}
         <link rel="dns-prefetch" href="//sdk.cashfree.com" />
         <link rel="dns-prefetch" href="//apiv2.shiprocket.in" />
 
-        {/* Preload critical resources */}
+        {/* Preload primary self-hosted variable fonts */}
         <link
           rel="preload"
-          href="/fonts/geist-sans.woff2"
+          href="/fonts/fraunces-normal-latin.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/inter-normal-latin.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
         />
       </head>
-      <body
-        className={`${fraunces.variable} ${jetbrainsMono.variable} ${inter.variable} antialiased`}
-      >
+      <body className="antialiased">
         <AuthProvider>
           <LayoutWrapper>
             {children}

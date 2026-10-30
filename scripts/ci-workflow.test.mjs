@@ -84,3 +84,22 @@ test("should execute all 4 steps of hosting_deployStaticWebsite against Hostinge
   assert.equal(fs.existsSync(tmpZip), false, "removeArchive: true should unlink temp zip");
   assert.equal(calls.length, 5);
 });
+
+test("should self-host variable fonts locally without build-time next/font/google network fetch", () => {
+  const layout = fs.readFileSync(path.join(root, "src/app/layout.tsx"), "utf8");
+  const globalsCss = fs.readFileSync(path.join(root, "src/app/globals.css"), "utf8");
+  assert.doesNotMatch(layout, /next\/font\/google/, "layout.tsx must not rely on flaky build-time Google Fonts fetch");
+  assert.doesNotMatch(globalsCss, /fonts\.googleapis\.com/, "globals.css must not duplicate Google Fonts import");
+  for (const fontFile of [
+    "fraunces-normal-latin.woff2",
+    "fraunces-normal-latin-ext.woff2",
+    "fraunces-italic-latin.woff2",
+    "fraunces-italic-latin-ext.woff2",
+    "inter-normal-latin.woff2",
+    "inter-normal-latin-ext.woff2",
+    "jetbrains-mono-normal-latin.woff2",
+    "jetbrains-mono-normal-latin-ext.woff2",
+  ]) {
+    assert.equal(fs.existsSync(path.join(root, "public/fonts", fontFile)), true, `Missing self-hosted font ${fontFile}`);
+  }
+});
