@@ -95,18 +95,28 @@
 # Redirects
 Redirect 301 /home /index.html
 
-# Handle client-side routing for SPA
+# Handle dynamic entity fallbacks for static export
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    
-    # Handle Angular and React Router
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /index.html [QSA,L]
-    
+
     # Auto-serve .html files without extension
     RewriteCond %{REQUEST_FILENAME}.html -f
     RewriteRule !.*\.html$ %{REQUEST_FILENAME}.html [L]
+
+    # Admin product edit fallback (supports newly created products and legacy /admin/products/<id> URLs)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^admin/products/(?!new(?:/|$)|edit(?:/|$))([^/.]+)/?$ /admin/products/edit/?id=$1 [R=302,QSA,L]
+
+    # Storefront product detail fallback for products created in CMS after build
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^products/(?!detail(?:/|$))([^/.]+)/?$ /products/detail/?id=$1 [R=302,QSA,L]
+
+    # Storefront bundle detail fallback for bundles created in CMS after build
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^bundles/(?!detail(?:/|$))([^/.]+)/?$ /bundles/detail/?id=$1 [R=302,QSA,L]
 </IfModule>
 
 # Error pages

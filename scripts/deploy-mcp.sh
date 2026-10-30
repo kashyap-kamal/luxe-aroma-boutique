@@ -72,6 +72,8 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     fail "'out/index.html' missing — build may have failed silently"
   fi
 
+  cp -f .htaccess out/.htaccess
+
   PAGE_COUNT=$(find out -name "*.html" | wc -l | tr -d ' ')
   ok "Build complete — ${PAGE_COUNT} HTML pages"
 else

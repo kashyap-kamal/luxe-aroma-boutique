@@ -1,24 +1,34 @@
 "use client"
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import React, { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { fetchProductRowById, ProductRow } from '@/lib/product-service'
 import { ProductForm } from '@/components/admin/product-form'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-export default function EditProductClient() {
-  const params = useParams()
-  const id = params.id as string
+function EditProductContent() {
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id')
   const [product, setProduct] = useState<ProductRow | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!id) {
+      setLoading(false)
+      return
+    }
     fetchProductRowById(id)
       .then(setProduct)
-      .catch((err) => toast.error(err.message))
+      .catch((err: unknown) =>
+        toast.error(err instanceof Error ? err.message : 'Failed to load product')
+      )
       .finally(() => setLoading(false))
   }, [id])
+
+  if (!id) {
+    return <p className="text-muted-foreground">No product ID provided.</p>
+  }
 
   if (loading) {
     return (
@@ -43,5 +53,19 @@ export default function EditProductClient() {
       </h1>
       <ProductForm product={product} />
     </div>
+  )
+}
+
+export default function EditProductPage(): React.JSX.Element {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }
+    >
+      <EditProductContent />
+    </Suspense>
   )
 }

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "node --test scripts/*.test.mjs",
     "deploy": "./scripts/deploy.sh",
     "deploy:mcp": "./scripts/deploy-mcp.sh",
     "deploy:mcp:quick": "./scripts/deploy-mcp.sh --skip-build",

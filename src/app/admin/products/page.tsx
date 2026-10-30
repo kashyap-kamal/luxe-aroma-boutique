@@ -219,7 +219,7 @@ export default function AdminProductsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() =>
-                            router.push(`/admin/products/${product.id}`)
+                            router.push(`/admin/products/edit?id=${product.id}`)
                           }
                         >
                           <Pencil className="h-4 w-4" />

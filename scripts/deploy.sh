@@ -58,6 +58,8 @@ if [ ! -d "out" ] || [ ! -f "out/index.html" ]; then
     exit 1
 fi
 
+cp -f .htaccess out/.htaccess
+
 PAGE_COUNT=$(find out -name "*.html" | wc -l | tr -d ' ')
 echo -e "${GREEN}  ✓ ${PAGE_COUNT} HTML pages generated${NC}"
 
