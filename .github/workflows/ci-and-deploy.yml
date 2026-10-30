@@ -65,6 +65,7 @@ jobs:
       NEXT_PUBLIC_CASHFREE_ENVIRONMENT: ${{ secrets.NEXT_PUBLIC_CASHFREE_ENVIRONMENT || 'production' }}
       NEXT_PUBLIC_APP_URL: https://aromeluxe.in
       NEXT_PUBLIC_SITE_URL: https://aromeluxe.in
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
       HOSTINGER_FTP_SERVER: ${{ secrets.HOSTINGER_FTP_SERVER }}
       HOSTINGER_FTP_USERNAME: ${{ secrets.HOSTINGER_FTP_USERNAME }}
       HOSTINGER_FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
@@ -113,9 +114,14 @@ jobs:
           git commit -m "deploy: static export for ${{ github.sha }}"
           git push --force "$GH_REPO_URL" hostinger-deploy:hostinger-deploy
 
-      - name: Deploy out/ to Hostinger via FTP (optional if FTP secrets configured)
+      - name: Deploy aromeluxe_deploy.zip to Hostinger via API (hosting_deployStaticWebsite)
+        if: env.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' && env.HOSTINGER_API_TOKEN != ''
+        run: node scripts/deploy-hostinger-static.mjs
+
+      - name: Deploy out/ to Hostinger via FTP (optional fallback if only FTP secrets configured)
         if: >-
           env.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' &&
+          env.HOSTINGER_API_TOKEN == '' &&
           env.HOSTINGER_FTP_SERVER != '' &&
           env.HOSTINGER_FTP_USERNAME != '' &&
           env.HOSTINGER_FTP_PASSWORD != ''
