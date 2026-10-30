@@ -17,6 +17,8 @@ test("should configure GitHub Actions CI + nightly Hostinger deploy with hidden 
   assert.match(wf, /npm test/, "Workflow must run Node test suite");
   assert.match(wf, /cp \.htaccess out\/\.htaccess/, "Workflow must copy .htaccess into out/");
   assert.match(wf, /include-hidden-files:\s*true/, "Artifact upload must preserve hidden .htaccess file");
+  assert.match(wf, /hostinger-deploy:hostinger-deploy/, "Workflow must publish out/ to hostinger-deploy branch for zero-FTP Hostinger Git");
+  assert.match(wf, /NEXT_PUBLIC_CASHFREE_ENVIRONMENT:.*production/, "Deploy build must default Cashfree SDK environment to production");
   assert.match(wf, /FTP-Deploy-Action/, "Workflow must include Hostinger FTP deploy step");
 });
 

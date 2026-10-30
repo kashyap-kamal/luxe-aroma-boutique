@@ -2,105 +2,131 @@ name: CI and Hostinger Deploy
 
 on:
   pull_request:
-    branches:
-      - main
-      - feat/stitch-redesign
+    branches: [main, feat/stitch-redesign]
   push:
-    branches:
-      - main
-      - feat/stitch-redesign
+    branches: [main, feat/stitch-redesign]
   schedule:
-    # 03:00 IST daily static SEO and sitemap refresh
+    # 03:00 IST daily SEO + sitemap rebuild (21:30 UTC)
     - cron: "30 21 * * *"
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 concurrency:
-  group: aromeluxe-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  verify-and-build:
-    name: Typecheck, Test, and Static Export
+  check:
+    name: Typecheck, Test, and Static Build
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://bzqwezglotpkzxghjxvc.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: 20
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: TypeScript check
+      - name: Run TypeScript check
         run: npx tsc --noEmit
 
-      - name: Unit and regression tests
+      - name: Run unit tests
         run: npm test
 
       - name: Build static export
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL || 'https://bzqwezglotpkzxghjxvc.supabase.co' }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'public-anon-placeholder' }}
-          NEXT_PUBLIC_CASHFREE_ENVIRONMENT: production
-          NEXT_PUBLIC_APP_URL: https://aromeluxe.in
+        run: npm run build
+
+      - name: Verify Apache .htaccess copy into out/
+        run: |
+          cp .htaccess out/.htaccess
+          test -f out/.htaccess
+          test -f out/index.html
+
+  deploy:
+    name: Publish Static Export (Hostinger Git + Zip + Optional FTP)
+    needs: check
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://bzqwezglotpkzxghjxvc.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' }}
+      NEXT_PUBLIC_CASHFREE_ENVIRONMENT: ${{ secrets.NEXT_PUBLIC_CASHFREE_ENVIRONMENT || 'production' }}
+      NEXT_PUBLIC_APP_URL: https://aromeluxe.in
+      NEXT_PUBLIC_SITE_URL: https://aromeluxe.in
+      HOSTINGER_FTP_SERVER: ${{ secrets.HOSTINGER_FTP_SERVER }}
+      HOSTINGER_FTP_USERNAME: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+      HOSTINGER_FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production static export and deploy zip
+        if: env.NEXT_PUBLIC_SUPABASE_ANON_KEY != ''
         run: |
           npm run build
           cp .htaccess out/.htaccess
-          test -f out/index.html
           test -f out/.htaccess
+          (cd out && zip -rq ../aromeluxe_deploy.zip . .htaccess)
 
-      - name: Upload static export artifact
+      - name: Upload aromeluxe_deploy.zip artifact
+        if: env.NEXT_PUBLIC_SUPABASE_ANON_KEY != ''
         uses: actions/upload-artifact@v4
         with:
-          name: aromeluxe-static-out
-          path: out/
+          name: aromeluxe-hostinger-deploy-zip
+          path: aromeluxe_deploy.zip
           include-hidden-files: true
-          retention-days: 7
+          retention-days: 30
 
-  deploy-hostinger:
-    name: Deploy to Hostinger (aromeluxe.in)
-    needs: verify-and-build
-    if: >-
-      github.event_name != 'pull_request' &&
-      (github.ref == 'refs/heads/main' ||
-       github.event_name == 'schedule' ||
-       github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download static export artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: aromeluxe-static-out
-          path: out/
-
-      - name: Check Hostinger FTP secrets
-        id: check_ftp
+      - name: Publish static export to hostinger-deploy branch (Zero-FTP Hostinger Git)
+        if: env.NEXT_PUBLIC_SUPABASE_ANON_KEY != ''
         env:
-          FTP_SERVER: ${{ secrets.HOSTINGER_FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.HOSTINGER_FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          GH_REPO_URL: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         run: |
-          if [ -n "$FTP_SERVER" ] && [ -n "$FTP_USERNAME" ] && [ -n "$FTP_PASSWORD" ]; then
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Hostinger FTP secrets not configured yet. Skipping live upload."
-          fi
+          cd out
+          test -f .htaccess
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b hostinger-deploy
+          git add -A
+          git commit -m "deploy: static export for ${{ github.sha }}"
+          git push --force "$GH_REPO_URL" hostinger-deploy:hostinger-deploy
 
-      - name: Upload out/ to Hostinger public_html
-        if: steps.check_ftp.outputs.configured == 'true'
+      - name: Deploy out/ to Hostinger via FTP (optional if FTP secrets configured)
+        if: >-
+          env.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' &&
+          env.HOSTINGER_FTP_SERVER != '' &&
+          env.HOSTINGER_FTP_USERNAME != '' &&
+          env.HOSTINGER_FTP_PASSWORD != ''
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.HOSTINGER_FTP_SERVER }}
           username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
           local-dir: ./out/
-          server-dir: ${{ vars.HOSTINGER_SERVER_DIR || './public_html/' }}
+          server-dir: ./
           dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**

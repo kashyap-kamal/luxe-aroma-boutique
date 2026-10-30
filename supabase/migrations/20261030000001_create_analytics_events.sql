@@ -22,6 +22,7 @@ CREATE INDEX IF NOT EXISTS idx_analytics_events_session ON analytics_events(sess
 
 ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public can insert constrained analytics events" ON analytics_events;
 CREATE POLICY "Public can insert constrained analytics events"
   ON analytics_events FOR INSERT
   WITH CHECK (
@@ -29,6 +30,7 @@ CREATE POLICY "Public can insert constrained analytics events"
     AND char_length(session_id) BETWEEN 8 AND 128
   );
 
+DROP POLICY IF EXISTS "Admins can read analytics events" ON analytics_events;
 CREATE POLICY "Admins can read analytics events"
   ON analytics_events FOR SELECT
   USING (

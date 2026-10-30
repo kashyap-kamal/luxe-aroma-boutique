@@ -16,3 +16,7 @@ verify_jwt = false
 # Renamed endpoint for Shiprocket (Shiprocket blocks URLs containing "shiprocket")
 [functions.shipment-tracking-webhook]
 verify_jwt = false
+
+# Allow guest and expired-JWT sessions to initiate Cashfree orders
+[functions.create-cashfree-order]
+verify_jwt = false

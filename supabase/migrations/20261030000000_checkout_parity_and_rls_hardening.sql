@@ -63,7 +63,7 @@ BEGIN
     SELECT 1 FROM pg_policies
      WHERE schemaname = 'public'
        AND tablename = 'orders'
-       AND policyname = 'Admins can view all orders'
+       AND policyname IN ('Admins can view all orders', 'Admin can view all orders')
   ) THEN
     CREATE POLICY "Admins can view all orders"
       ON orders FOR SELECT
