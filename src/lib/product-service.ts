@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { Product } from '@/stores/cart-store'
+import { compressImageFileToWebp } from './image-compression'
 
 // Database row type matching the products table
 export interface ProductRow {
@@ -59,7 +60,7 @@ export function toProduct(row: ProductRow): Product {
       currency: row.currency,
       on_sale: row.on_sale,
     },
-    image: row.image_url || `/assets/perfumes/${row.slug}.png`,
+    image: row.image_url || `/assets/perfumes/${row.slug}.webp`,
     category: row.category,
     size: row.size,
     description: row.description || `Premium ${row.name} fragrance - a luxurious scent perfect for any occasion.`,
@@ -216,14 +217,15 @@ export async function deleteProduct(id: string): Promise<void> {
 // ============================================================
 
 export async function uploadProductImage(file: File, slug: string): Promise<string> {
-  const ext = file.name.split('.').pop() || 'png'
-  const fileName = `${slug}-${Date.now()}.${ext}`
+  const compressed = await compressImageFileToWebp(file)
+  const fileName = `${slug}-${Date.now()}.${compressed.ext}`
   const filePath = `products/${fileName}`
 
   const { error } = await supabase.storage
     .from('product-images')
-    .upload(filePath, file, {
-      cacheControl: '3600',
+    .upload(filePath, compressed.file, {
+      contentType: compressed.contentType,
+      cacheControl: '31536000',
       upsert: false,
     })
 

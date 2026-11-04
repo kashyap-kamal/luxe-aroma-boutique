@@ -7,25 +7,45 @@ import { Loader2 } from "lucide-react";
 export const metadata: Metadata = {
   title: "Sign In | Aromé Luxe",
   description:
-    "Sign in to your Aromé Luxe account to access exclusive fragrances and personalized recommendations.",
+    "Sign in to your Aromé Luxe account to access exclusive fragrances and order history.",
 };
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <main
+      className="flex-1 flex items-center justify-center px-5 py-12 md:py-20"
+      style={{ background: "#F2EDE4", color: "#0E0E0C" }}
+    >
+      <div className="w-full max-w-[460px] space-y-5">
         <AuthHeader />
         <Suspense
           fallback={
-            <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow p-6 text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-              <p className="text-muted-foreground">Loading sign in form...</p>
+            <div
+              style={{
+                border: "1px solid #0E0E0C",
+                background: "#FAF7F2",
+                padding: "48px 28px",
+                textAlign: "center",
+              }}
+            >
+              <Loader2 className="h-5 w-5 animate-spin mx-auto mb-3" style={{ color: "#E8763A" }} />
+              <p
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 10,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  opacity: 0.6,
+                }}
+              >
+                LOADING...
+              </p>
             </div>
           }
         >
           <SignInForm />
         </Suspense>
       </div>
-    </div>
+    </main>
   );
 }

@@ -1,28 +1,45 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
-/**
- * Auth Header Component
- * Displays the logo and tagline on auth pages
- * Uses dark logo since auth pages have light backgrounds
- */
+const INK = "#0E0E0C";
+const SAFFRON = "#E8763A";
+
 export function AuthHeader() {
   return (
-    <div className="text-center">
-      <Link href="/" className="inline-block">
-        <Image
-          src="/assets/arome-luxe-logo.png"
-          alt="Aromé Luxe"
-          width={180}
-          height={60}
-          className="h-auto max-h-14 w-auto object-contain mx-auto"
-          priority
-        />
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingBottom: 14,
+        borderBottom: `1px solid ${INK}`,
+      }}
+    >
+      <Link
+        href="/"
+        style={{
+          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontSize: 10,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: INK,
+          textDecoration: "none",
+        }}
+      >
+        AROMÉ LUXE · HOUSE ACCOUNT
       </Link>
-      <p className="text-gray-600 mt-2">Luxury Fragrances & Perfumes</p>
+      <span
+        style={{
+          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontSize: 9,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: SAFFRON,
+        }}
+      >
+        PRIVATE ATELIER
+      </span>
     </div>
   );
 }
-

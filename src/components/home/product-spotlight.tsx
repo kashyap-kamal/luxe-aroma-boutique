@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { getSetting } from "@/lib/settings-service";
 import { fetchProductById } from "@/lib/product-service";
+import { useViewportMode } from "@/hooks/use-viewport-mode";
 
 const SAFFRON = "#E8763A";
 const CREAM = "#F2EDE4";
@@ -21,6 +22,7 @@ export default function ProductSpotlight({ products: initialProducts }: ProductS
   const { addToCart } = useCartStore();
   const [addedId, setAddedId] = useState<string | null>(null);
   const [configuredProduct, setConfiguredProduct] = useState<Product | null>(null);
+  const { showDesktop, showMobile } = useViewportMode();
 
   useEffect(() => {
     getSetting<string>("spotlight_product_id").then(async (id) => {
@@ -62,6 +64,7 @@ export default function ProductSpotlight({ products: initialProducts }: ProductS
 
   return (
   <>
+    {showDesktop && (
     <section
       style={{
         gridTemplateColumns: "1fr 1fr",
@@ -248,9 +251,11 @@ export default function ProductSpotlight({ products: initialProducts }: ProductS
         }}
       >
         <Image
-          src="/assets/perfumes/ameer-al-oud-nobg.png"
+          src="/assets/perfumes/ameer-al-oud-nobg.webp"
           alt={product.name}
           fill
+          loading="lazy"
+          decoding="async"
           sizes="50vw"
           className="object-contain"
           style={{ padding: "48px 64px", filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.5))" }}
@@ -288,8 +293,10 @@ export default function ProductSpotlight({ products: initialProducts }: ProductS
         </div>
       </div>
     </section>
+    )}
 
     {/* MOBILE SIGNATURE FEATURE */}
+    {showMobile && (
     <section
       className="flex flex-col md:hidden"
       style={{
@@ -322,9 +329,11 @@ export default function ProductSpotlight({ products: initialProducts }: ProductS
           PLATE II.
         </div>
         <Image
-          src="/assets/perfumes/ameer-al-oud-nobg.png"
+          src="/assets/perfumes/ameer-al-oud-nobg.webp"
           alt={product.name}
           fill
+          loading="lazy"
+          decoding="async"
           sizes="100vw"
           className="object-contain"
           style={{ padding: "24px 40px", filter: "drop-shadow(0 20px 32px rgba(0,0,0,0.5))" }}
@@ -463,6 +472,7 @@ export default function ProductSpotlight({ products: initialProducts }: ProductS
         </div>
       </div>
     </section>
+    )}
   </>
   );
 }

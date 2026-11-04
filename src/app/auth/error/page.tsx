@@ -2,92 +2,99 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { AuthHeader } from "@/components/auth/auth-header";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const PAPER = "#FAF7F2";
+const SAFFRON = "#E8763A";
 
 function AuthErrorContent() {
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const errorParam = searchParams.get("error");
-    setError(errorParam);
+    setError(searchParams.get("error"));
   }, [searchParams]);
 
-  const getErrorMessage = (error: string) => {
-    switch (error) {
+  const getErrorMessage = (err: string) => {
+    switch (err) {
       case "Configuration":
         return "There is a problem with the server configuration.";
       case "AccessDenied":
         return "Access denied. You do not have permission to sign in.";
       case "Verification":
         return "The verification token has expired or has already been used.";
-      case "Default":
-        return "An error occurred during authentication.";
       default:
-        return "An unexpected error occurred.";
+        return "An error occurred during authentication.";
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <main
+      className="flex-1 flex items-center justify-center px-5 py-12 md:py-20"
+      style={{ background: CREAM, color: INK }}
+    >
+      <div className="w-full max-w-[460px] space-y-5">
         <AuthHeader />
-
-        <Card>
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+        <div style={{ border: `1px solid ${INK}`, background: PAPER }}>
+          <div style={{ padding: "28px 28px 22px", borderBottom: `1px solid ${INK}` }}>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: SAFFRON, marginBottom: 10 }}>
+              AUTHENTICATION NOTICE
             </div>
-            <CardTitle className="text-xl">Authentication Error</CardTitle>
-            <CardDescription>
-              {error
-                ? getErrorMessage(error)
-                : "An error occurred during authentication."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-col space-y-2">
-              <Button asChild>
-                <Link href="/auth/signin">Try Again</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/">Go Home</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            <h1 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "2.1rem", fontWeight: 300, lineHeight: 0.95, letterSpacing: "-0.03em", color: INK, margin: 0 }}>
+              Unable to <em style={{ fontStyle: "italic", color: SAFFRON }}>sign in.</em>
+            </h1>
+          </div>
+          <div style={{ padding: 28, display: "flex", flexDirection: "column", gap: 14 }}>
+            <p style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, lineHeight: 1.6, color: "#3A3833", margin: 0 }}>
+              {error ? getErrorMessage(error) : "An error occurred during authentication."}
+            </p>
+            <Link
+              href="/auth/signin"
+              style={{
+                display: "block",
+                textAlign: "center",
+                background: INK,
+                color: CREAM,
+                padding: "15px 20px",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 10,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                textDecoration: "none",
+              }}
+            >
+              TRY AGAIN →
+            </Link>
+            <Link
+              href="/"
+              style={{
+                display: "block",
+                textAlign: "center",
+                border: `1px solid ${INK}`,
+                color: INK,
+                padding: "14px 20px",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 10,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                textDecoration: "none",
+              }}
+            >
+              RETURN HOME
+            </Link>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
 
 export default function AuthErrorPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-md w-full space-y-8">
-            <AuthHeader />
-            <Card>
-              <CardContent className="p-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-luxe-blue mx-auto"></div>
-                <p className="mt-4 text-gray-600">Loading...</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<main className="flex-1" style={{ background: CREAM, minHeight: "60vh" }} />}>
       <AuthErrorContent />
     </Suspense>
   );

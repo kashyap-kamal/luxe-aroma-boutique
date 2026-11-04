@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, X, Search, User, ChevronDown, LogOut } from "lucide-react";
+import { ShoppingBag, X, Search, User, ChevronDown, LogOut, Menu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/stores/cart-store";
@@ -46,7 +46,7 @@ const Navbar = () => {
   const user = useUser();
   const logout = useLogout();
   const router = useRouter();
-  const { navDrawerOpen, closeNavDrawer } = useUIStore();
+  const { navDrawerOpen, openNavDrawer, closeNavDrawer } = useUIStore();
 
   useEffect(() => {
     if (isSearchOpen) {
@@ -72,11 +72,11 @@ const Navbar = () => {
     bundleItems.reduce((t, i) => t + i.quantity, 0);
 
   const navLinkClass =
-    "transition-all duration-200 whitespace-nowrap";
+    "transition-all duration-200 whitespace-nowrap hover:opacity-60";
 
   return (
     <>
-      {/* Sticky navbar — Saffron Press editorial wordmark */}
+      {/* Sticky navbar: Saffron Press editorial wordmark */}
       <header
         className="sticky top-0 z-50"
         style={{
@@ -88,13 +88,16 @@ const Navbar = () => {
         <nav className="hidden lg:grid grid-cols-[1fr_auto_1fr] items-center px-8 xl:px-12 py-4 xl:py-5">
           {/* Left links */}
           <div className="flex gap-6 xl:gap-8 items-center">
-            {/* SHOP BY MOOD — dropdown */}
+            {/* SHOP BY MOOD dropdown */}
             <div
               className="relative"
               onMouseEnter={() => setMoodOpen(true)}
               onMouseLeave={() => setMoodOpen(false)}
             >
               <button
+                type="button"
+                aria-expanded={moodOpen}
+                onClick={() => setMoodOpen((prev) => !prev)}
                 className={`${navLinkClass} flex items-center gap-1`}
                 style={{
                   fontFamily: "var(--font-jetbrains-mono), monospace",
@@ -116,31 +119,34 @@ const Navbar = () => {
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 4 }}
-                    transition={{ duration: 0.12 }}
-                    className="absolute top-full left-0 mt-0 py-1 min-w-[180px] z-50"
-                    style={{
-                      background: "#F2EDE4",
-                      border: "1px solid #0E0E0C",
-                      borderTop: "none",
-                    }}
+                    transition={{ duration: 0.14 }}
+                    className="absolute top-full left-0 pt-2.5 min-w-[200px] z-50"
                   >
-                    {moodSubLinks.map((link) => (
-                      <Link
-                        key={link.href + link.label}
-                        href={link.href}
-                        className="block px-4 py-2 transition-colors hover:bg-[#0E0E0C] hover:text-[#F2EDE4]"
-                        style={{
-                          fontFamily: "var(--font-jetbrains-mono), monospace",
-                          fontSize: "10px",
-                          letterSpacing: "0.15em",
-                          textTransform: "uppercase",
-                          color: "#0E0E0C",
-                        }}
-                        onClick={() => setMoodOpen(false)}
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
+                    <div
+                      className="py-1"
+                      style={{
+                        background: "#F2EDE4",
+                        border: "1px solid #0E0E0C",
+                        boxShadow: "0 12px 28px rgba(14,14,12,0.12)",
+                      }}
+                    >
+                      {moodSubLinks.map((link) => (
+                        <Link
+                          key={link.href + link.label}
+                          href={link.href}
+                          className="block px-4 py-2.5 text-[#0E0E0C] transition-colors hover:bg-[#0E0E0C] hover:text-[#F2EDE4]"
+                          style={{
+                            fontFamily: "var(--font-jetbrains-mono), monospace",
+                            fontSize: "10px",
+                            letterSpacing: "0.15em",
+                            textTransform: "uppercase",
+                          }}
+                          onClick={() => setMoodOpen(false)}
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -165,7 +171,7 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Center logo — editorial Fraunces wordmark */}
+          {/* Center logo: editorial Fraunces wordmark */}
           <Link href="/" className="px-6 xl:px-10">
             <h1
               className="font-serif whitespace-nowrap"
@@ -234,26 +240,43 @@ const Navbar = () => {
         </nav>
 
         {/* Mobile/tablet nav */}
-        <nav className="lg:hidden flex justify-between items-center px-5 py-4">
-          <Link href="/">
-            <h1
-              className="font-serif"
-              style={{
-                fontSize: "1.25rem",
-                fontWeight: 300,
-                letterSpacing: "-0.02em",
-                color: "#0E0E0C",
-                fontFamily: "var(--font-fraunces), serif",
-              }}
+        <nav className="lg:hidden flex justify-between items-center px-5 py-3.5">
+          <div className="flex items-center gap-3.5" style={{ color: "#0E0E0C" }}>
+            <button
+              type="button"
+              aria-label="Open menu"
+              onClick={openNavDrawer}
+              className="p-1 -ml-1 active:opacity-60"
             >
-              Aromé <em style={{ fontStyle: "italic" }}>Luxe</em>
-            </h1>
-          </Link>
+              <Menu className="h-[19px] w-[19px]" strokeWidth={1.5} />
+            </button>
+            <Link href="/">
+              <h1
+                className="font-serif"
+                style={{
+                  fontSize: "1.25rem",
+                  fontWeight: 300,
+                  letterSpacing: "-0.02em",
+                  color: "#0E0E0C",
+                  fontFamily: "var(--font-fraunces), serif",
+                }}
+              >
+                Aromé <em style={{ fontStyle: "italic" }}>Luxe</em>
+              </h1>
+            </Link>
+          </div>
           <div className="flex items-center gap-4" style={{ color: "#0E0E0C" }}>
-            <button aria-label="Search" onClick={() => setIsSearchOpen(true)}>
+            <button type="button" aria-label="Search" onClick={() => setIsSearchOpen(true)} className="active:opacity-60">
               <Search className="h-[17px] w-[17px]" strokeWidth={1.5} />
             </button>
-            <Link href="/cart" className="relative" aria-label="Cart">
+            <Link
+              href={user ? "/profile" : "/auth/signin"}
+              aria-label={user ? "Account" : "Sign in"}
+              className="active:opacity-60"
+            >
+              <User className="h-[17px] w-[17px]" strokeWidth={1.5} />
+            </Link>
+            <Link href="/cart" className="relative active:opacity-60" aria-label="Cart">
               <ShoppingBag className="h-[17px] w-[17px]" strokeWidth={1.5} />
               {itemCount > 0 && (
                 <Badge
@@ -340,7 +363,7 @@ const Navbar = () => {
         )}
       </AnimatePresence>
 
-      {/* Mobile drawer — fullscreen, slides from LEFT */}
+      {/* Mobile drawer: fullscreen, slides from LEFT */}
       <AnimatePresence>
         {navDrawerOpen && (
           <>
@@ -349,7 +372,7 @@ const Navbar = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
               onClick={closeNavDrawer}
             />
             <motion.div
@@ -357,8 +380,8 @@ const Navbar = () => {
               animate={{ x: "0%" }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 220 }}
-              className="fixed top-0 left-0 bottom-0 w-full z-50 flex flex-col overflow-y-auto"
-              style={{ background: "#F2EDE4" }}
+              className="fixed top-0 left-0 bottom-0 w-full z-[60] flex flex-col overflow-y-auto"
+              style={{ background: "#F2EDE4", paddingBottom: "env(safe-area-inset-bottom)" }}
             >
               {/* Drawer header */}
               <div
@@ -447,7 +470,7 @@ const Navbar = () => {
 
               {/* Nav links */}
               <nav className="flex-shrink-0 px-6 py-4 flex flex-col gap-1">
-                {/* Shop by Mood — expandable */}
+                {/* Shop by Mood: expandable */}
                 <div>
                   <button
                     className="w-full flex items-center justify-between py-3 uppercase tracking-widest transition-opacity hover:opacity-60"
@@ -478,6 +501,7 @@ const Navbar = () => {
                   { href: "/products?category=women", label: "Women" },
                   { href: "/products?category=unisex", label: "Unisex" },
                   { href: "/products?featured=true", label: "Bestsellers" },
+                  { href: "/bundles", label: "Discovery Sets" },
                   { href: "/quiz", label: "Scent Quiz" },
                   { href: "/about", label: "About" },
                   { href: "/contact", label: "Contact" },

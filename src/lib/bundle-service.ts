@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import { Product } from '@/stores/cart-store'
 import { toProduct, ProductRow } from './product-service'
+import { compressImageFileToWebp } from './image-compression'
 
 export type BundleType = 'discovery_set' | 'duo' | 'trio' | 'collection'
 export type BundleStatus = 'active' | 'pre_order' | 'sold_out'
@@ -263,14 +264,15 @@ export async function deleteBundle(id: string): Promise<void> {
 // ============================================================
 
 export async function uploadBundleImage(file: File, slug: string): Promise<string> {
-  const ext = file.name.split('.').pop() || 'png'
-  const fileName = `${slug}-${Date.now()}.${ext}`
+  const compressed = await compressImageFileToWebp(file)
+  const fileName = `${slug}-${Date.now()}.${compressed.ext}`
   const filePath = `bundles/${fileName}`
 
   const { error } = await supabase.storage
     .from('product-images')
-    .upload(filePath, file, {
-      cacheControl: '3600',
+    .upload(filePath, compressed.file, {
+      contentType: compressed.contentType,
+      cacheControl: '31536000',
       upsert: false,
     })
 

@@ -71,6 +71,8 @@ const BundleCard: React.FC<BundleCardProps> = ({ bundle, index = 0 }) => {
               src={bundle.imageUrl}
               alt={bundle.name}
               fill
+              loading="lazy"
+              decoding="async"
               sizes="(max-width: 640px) 50vw, 25vw"
               className="object-cover transition-transform duration-700 hover:scale-[1.04]"
             />
@@ -99,6 +101,8 @@ const BundleCard: React.FC<BundleCardProps> = ({ bundle, index = 0 }) => {
                     alt={item.product.name}
                     width={200}
                     height={200}
+                    loading="lazy"
+                    decoding="async"
                     className="object-cover w-full h-full"
                   />
                 </div>

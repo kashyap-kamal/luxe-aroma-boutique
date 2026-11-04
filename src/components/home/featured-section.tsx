@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Product, useCartStore } from "@/stores/cart-store";
 import { useProducts } from "@/hooks/use-products";
+import { useViewportMode } from "@/hooks/use-viewport-mode";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -19,6 +20,7 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
   const { products } = useProducts(initialProducts, { featured: true, limit: 8 });
   const { addToCart } = useCartStore();
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
+  const { showDesktop, showMobile } = useViewportMode();
 
   const handleAdd = (product: Product) => {
     if (addedIds[product.id]) return;
@@ -143,6 +145,7 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
       </div>
 
       {/* Product grid */}
+      {showDesktop && (
       <div
         className="hidden md:grid"
         style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
@@ -215,6 +218,8 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
                     src={product.image}
                     alt={product.name}
                     fill
+                    loading="lazy"
+                    decoding="async"
                     className="object-contain p-8 mix-blend-multiply hover:scale-105 transition-transform duration-500"
                     sizes="(max-width: 768px) 50vw, 25vw"
                   />
@@ -345,8 +350,10 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
           );
         })}
       </div>
+      )}
 
       {/* Mobile: 2-column grid */}
+      {showMobile && (
       <div
         className="grid md:hidden"
         style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
@@ -377,6 +384,7 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
                   aspectRatio: "1",
                   position: "relative",
                   background: "#EDE9E0",
+                  borderBottom: `1px solid ${INK}`,
                   display: "block",
                   overflow: "hidden",
                 }}
@@ -404,6 +412,8 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
                     src={product.image}
                     alt={product.name}
                     fill
+                    loading="lazy"
+                    decoding="async"
                     className="object-contain p-6 mix-blend-multiply"
                     sizes="50vw"
                   />
@@ -469,6 +479,7 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
           );
         })}
       </div>
+      )}
     </section>
   );
 }

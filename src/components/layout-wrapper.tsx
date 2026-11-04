@@ -12,6 +12,7 @@ import MobileBottomNav from '@/components/mobile-bottom-nav'
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isAdmin = pathname?.startsWith('/admin')
+  const isStandalone = isAdmin || pathname?.startsWith('/quiz')
 
   useEffect(() => {
     if (!isAdmin && pathname) {
@@ -19,7 +20,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     }
   }, [isAdmin, pathname])
 
-  if (isAdmin) {
+  if (isStandalone) {
     return <>{children}</>
   }
 

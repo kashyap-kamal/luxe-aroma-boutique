@@ -13,7 +13,7 @@ const moods = [
   { name: "SPICY", sub: "pepper · cardamom", bg: "#C24F1B", fg: CREAM, count: "06", href: "/products?tag=spicy" },
   { name: "FLORAL", sub: "rose · jasmine", bg: "#E8B4B8", fg: INK, count: "09", href: "/products?tag=floral" },
   { name: "OUD", sub: "amber · resin", bg: "#2A1810", fg: SAFFRON, count: "07", href: "/products?tag=oud" },
-  { name: "GOURMAND", sub: "vanilla · coffee", bg: "#D4A574", fg: INK, count: "04", href: "/products?tag=gourmand" },
+  { name: "GOURMAND", sub: "vanilla · coffee", bg: "#D4A574", fg: INK, count: "04", href: "/products?tag=sweet" },
 ];
 
 export default function CollectionsSection() {
@@ -40,7 +40,7 @@ export default function CollectionsSection() {
               textTransform: "uppercase",
             }}
           >
-            FEATURE — 02 / SHOP BY MOOD
+            FEATURE 02 / SHOP BY MOOD
           </div>
           <h2
             style={{
@@ -65,7 +65,7 @@ export default function CollectionsSection() {
             lineHeight: 1.5,
           }}
         >
-          Six territories. Forty-two scents. Pick a mood — we&apos;ll do the
+          Six territories. Forty-two scents. Pick a mood, we&apos;ll do the
           cartography.
         </div>
       </div>
@@ -98,12 +98,13 @@ export default function CollectionsSection() {
         </div>
       </div>
 
-      {/* Mood grid — horizontal scroll on desktop */}
+      {/* Mood grid: responsive editorial strip on desktop */}
       <div
         className="hidden md:flex"
         style={{
           borderTop: `1px solid ${INK}`,
           overflowX: "auto",
+          overflowY: "hidden",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}
@@ -115,9 +116,9 @@ export default function CollectionsSection() {
             style={{
               background: mood.bg,
               color: mood.fg,
-              minWidth: 240,
+              flex: "1 0 220px",
+              minWidth: 220,
               height: 240,
-              flexShrink: 0,
               borderRight: i < moods.length - 1 ? `1px solid ${INK}` : "none",
               padding: 20,
               display: "flex",
@@ -125,8 +126,8 @@ export default function CollectionsSection() {
               justifyContent: "space-between",
               position: "relative",
               cursor: "pointer",
-              transform: hovered === i ? "scale(1.03)" : "scale(1)",
-              transition: "transform 250ms ease",
+              boxShadow: hovered === i ? `inset 0 0 0 2px ${mood.fg}` : "none",
+              transition: "box-shadow 220ms ease",
               zIndex: hovered === i ? 2 : 1,
               textDecoration: "none",
             }}
@@ -142,7 +143,12 @@ export default function CollectionsSection() {
             >
               N° {String(i + 1).padStart(2, "0")}
             </div>
-            <div>
+            <div
+              style={{
+                transform: hovered === i ? "translateY(-4px)" : "translateY(0)",
+                transition: "transform 220ms ease",
+              }}
+            >
               <div
                 style={{
                   fontSize: "clamp(1.8rem, 2.8vw, 2.5rem)",
@@ -176,7 +182,15 @@ export default function CollectionsSection() {
               }}
             >
               <span>{mood.count} SCENTS</span>
-              <span>→</span>
+              <span
+                style={{
+                  display: "inline-block",
+                  transform: hovered === i ? "translateX(4px)" : "translateX(0)",
+                  transition: "transform 220ms ease",
+                }}
+              >
+                →
+              </span>
             </div>
           </Link>
         ))}

@@ -4,19 +4,36 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/auth-service";
 import { validatePassword } from "@/lib/password-validator";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 import { PasswordStrengthIndicator } from "@/components/auth/password-strength-indicator";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const PAPER = "#FAF7F2";
+const SAFFRON = "#E8763A";
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+  fontSize: 10,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: INK,
+  marginBottom: 8,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: CREAM,
+  border: `1px solid ${INK}`,
+  padding: "13px 14px",
+  fontFamily: "var(--font-inter), sans-serif",
+  fontSize: 16,
+  color: INK,
+  outline: "none",
+  borderRadius: 0,
+};
 
 export function SignUpForm() {
   const [email, setEmail] = useState("");
@@ -32,7 +49,6 @@ export function SignUpForm() {
     e.preventDefault();
     setError("");
 
-    // Validate password strength
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
       setError(passwordValidation.errors.join(". "));
@@ -40,17 +56,13 @@ export function SignUpForm() {
     }
 
     setIsLoading(true);
-
     try {
-      // Use Supabase Edge Function for secure signup
       const result = await signUp(email, password, fullName);
-
       if (result.success) {
         setSuccess(true);
-        // Redirect to email verification page after successful signup
         setTimeout(() => {
           router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
-        }, 2000);
+        }, 1800);
       } else {
         setError(result.error || "An error occurred. Please try again.");
       }
@@ -63,115 +75,245 @@ export function SignUpForm() {
 
   if (success) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardContent className="pt-6">
-          <Alert>
-            <AlertDescription>
-              Account created successfully! Check your email for a verification code to complete your registration.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
+      <div style={{ border: `1px solid ${INK}`, background: PAPER, padding: 28 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 12,
+            color: "#1F6F43",
+          }}
+        >
+          <CheckCircle2 style={{ width: 20, height: 20, flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <div
+              style={{
+                fontFamily: "var(--font-fraunces), serif",
+                fontSize: "1.4rem",
+                fontWeight: 300,
+                color: INK,
+                marginBottom: 6,
+              }}
+            >
+              Account created.
+            </div>
+            <p
+              style={{
+                fontFamily: "var(--font-inter), sans-serif",
+                fontSize: 13,
+                lineHeight: 1.6,
+                color: "#3A3833",
+                margin: 0,
+              }}
+            >
+              Check your inbox for a 6-digit verification code. Redirecting to verification...
+            </p>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
-          Create Account
-        </CardTitle>
-        <CardDescription className="text-center">
-          Join Aromé Luxe and discover luxury fragrances
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div style={{ border: `1px solid ${INK}`, background: PAPER }}>
+      <div style={{ padding: "28px 28px 22px", borderBottom: `1px solid ${INK}` }}>
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: SAFFRON,
+            marginBottom: 10,
+          }}
+        >
+          02 / NEW MEMBERSHIP
+        </div>
+        <h1
+          style={{
+            fontFamily: "var(--font-fraunces), serif",
+            fontSize: "clamp(2rem, 5vw, 2.6rem)",
+            fontWeight: 300,
+            lineHeight: 0.95,
+            letterSpacing: "-0.03em",
+            color: INK,
+            margin: 0,
+          }}
+        >
+          Join the <em style={{ fontStyle: "italic", color: SAFFRON }}>house.</em>
+        </h1>
+        <p
+          style={{
+            fontFamily: "var(--font-inter), sans-serif",
+            fontSize: 13,
+            lineHeight: 1.6,
+            color: "#3A3833",
+            marginTop: 10,
+            marginBottom: 0,
+          }}
+        >
+          Create your Aromé Luxe profile for faster checkout and order history.
+        </p>
+      </div>
+
+      <div style={{ padding: "26px 28px 28px" }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+            <div
+              role="alert"
+              style={{
+                border: `1px solid ${SAFFRON}`,
+                background: "rgba(232,118,58,0.08)",
+                padding: "12px 14px",
+                fontFamily: "var(--font-inter), sans-serif",
+                fontSize: 13,
+                color: INK,
+              }}
+            >
+              {error}
+            </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="Enter your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="pl-10"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="fullName" style={labelStyle}>
+              FULL NAME
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              autoComplete="name"
+              placeholder="Your full name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              style={inputStyle}
+              required
+              disabled={isLoading}
+            />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="email" style={labelStyle}>
+              EMAIL ADDRESS
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@domain.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={inputStyle}
+              required
+              disabled={isLoading}
+            />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
+          <div>
+            <label htmlFor="password" style={labelStyle}>
+              PASSWORD
+            </label>
+            <div style={{ position: "relative" }}>
+              <input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 placeholder="Create a secure password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10"
+                style={{ ...inputStyle, paddingRight: 44 }}
                 required
                 disabled={isLoading}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                tabIndex={-1}
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                style={{
+                  position: "absolute",
+                  right: 12,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: INK,
+                  opacity: 0.55,
+                  padding: 4,
+                  display: "flex",
+                  alignItems: "center",
+                }}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff style={{ width: 16, height: 16 }} />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Eye style={{ width: 16, height: 16 }} />
                 )}
               </button>
             </div>
             <PasswordStrengthIndicator password={password} />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Create Account
-          </Button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="transition-colors hover:opacity-90"
+            style={{
+              width: "100%",
+              background: INK,
+              color: CREAM,
+              border: `1px solid ${INK}`,
+              padding: "16px 20px",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              opacity: isLoading ? 0.7 : 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              marginTop: 4,
+            }}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />
+                CREATING ACCOUNT...
+              </>
+            ) : (
+              "CREATE ACCOUNT →"
+            )}
+          </button>
         </form>
 
-        <div className="mt-4 text-center text-sm">
-          Already have an account?{" "}
-          <Button
-            variant="link"
-            className="p-0 h-auto font-semibold"
-            onClick={() => router.push("/auth/signin")}
+        <div
+          style={{
+            marginTop: 22,
+            paddingTop: 18,
+            borderTop: "1px dotted rgba(14,14,12,0.25)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+          }}
+        >
+          <span style={{ color: INK, opacity: 0.55 }}>ALREADY A MEMBER?</span>
+          <Link
+            href="/auth/signin"
+            style={{
+              color: SAFFRON,
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
           >
-            Sign in
-          </Button>
+            SIGN IN →
+          </Link>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

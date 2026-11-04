@@ -72,12 +72,12 @@ export default function BundleDetailClient({ bundle }: BundleDetailClientProps) 
       <div className="luxury-container">
         {/* Back link */}
         <Link
-          href="/"
+          href="/bundles"
           className="inline-flex items-center gap-1.5 font-sans text-sm mb-8 transition-colors hover:opacity-70"
           style={{ color: "#5c5b5b" }}
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back
+          All Discovery Sets
         </Link>
 
         <div className="flex flex-col lg:flex-row gap-10 xl:gap-16">
@@ -279,7 +279,7 @@ export default function BundleDetailClient({ bundle }: BundleDetailClientProps) 
               </div>
             </div>
 
-            {/* CTAs — desktop */}
+            {/* CTAs: desktop */}
             <div className="hidden md:flex gap-3">
               <motion.button
                 onClick={handleAddToCart}
@@ -323,35 +323,50 @@ export default function BundleDetailClient({ bundle }: BundleDetailClientProps) 
       </div>
 
       {/* Spacer for mobile sticky bar */}
-      <div className="h-24 md:hidden" />
+      <div className="h-36 md:hidden" />
 
-      {/* Sticky mobile bottom bar */}
+      {/* Sticky mobile bottom bar lifted above MobileBottomNav */}
       <div
-        className="fixed bottom-0 left-0 right-0 md:hidden z-40 px-4 py-3 flex gap-3"
-        style={{ background: "#ffffff", borderTop: "1px solid #e8e5e0" }}
+        className="fixed left-0 right-0 md:hidden z-[41] px-4 py-2.5 flex gap-2.5"
+        style={{
+          bottom: "calc(56px + env(safe-area-inset-bottom))",
+          background: "#F2EDE4",
+          borderTop: "1px solid #0E0E0C",
+        }}
       >
+        <button
+          onClick={handleBuyNow}
+          className="flex-1 py-3 uppercase"
+          style={{
+            background: "#E8763A",
+            color: "#0E0E0C",
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.15em",
+            borderRadius: 0,
+            border: "none",
+          }}
+        >
+          BUY NOW →
+        </button>
         <motion.button
           onClick={handleAddToCart}
-          className="flex-1 flex items-center justify-center gap-2 py-3 font-sans text-sm font-medium"
+          className="flex-1 flex items-center justify-center gap-2 py-3 uppercase"
           style={{
-            background: added ? "rgba(115,92,0,0.06)" : "#735c00",
-            color: added ? "#735c00" : "#ffffff",
-            borderRadius: "0.25rem",
-            border: added ? "1px solid rgba(115,92,0,0.3)" : "1px solid transparent",
+            background: added ? "transparent" : "#0E0E0C",
+            color: added ? "#E8763A" : "#F2EDE4",
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.15em",
+            borderRadius: 0,
+            border: added ? "1px solid #E8763A" : "1px solid #0E0E0C",
           }}
           animate={added ? { scale: [1, 1.02, 1] } : {}}
           transition={{ duration: 0.25 }}
         >
-          <ShoppingBag className="h-4 w-4" />
-          {added ? "Added!" : "Add to Cart"}
+          <ShoppingBag className="h-3.5 w-3.5" />
+          {added ? "ADDED ✓" : "ADD TO CART"}
         </motion.button>
-        <button
-          onClick={handleBuyNow}
-          className="flex-1 py-3 font-sans text-sm font-medium"
-          style={{ background: "#1c1b1b", color: "#f9f9f9", borderRadius: "0.25rem" }}
-        >
-          Buy Now
-        </button>
       </div>
     </main>
   );

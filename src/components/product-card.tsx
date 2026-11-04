@@ -58,6 +58,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, fullWidthMobile = fa
             src={product.image}
             alt={product.name}
             fill
+            loading="lazy"
+            decoding="async"
             sizes={fullWidthMobile ? "(max-width: 640px) 100vw, 33vw" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
             className="object-cover transition-transform duration-700 hover:scale-[1.04]"
           />

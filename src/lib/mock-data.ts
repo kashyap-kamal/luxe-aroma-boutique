@@ -11,7 +11,7 @@ export const products: Product[] = productsData.products.map((product) => ({
     currency: product.price.currency,
     on_sale: product.price.on_sale,
   },
-  image: `/assets/perfumes/${product.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace('-edp', '')}.png`,
+  image: `/assets/perfumes/${product.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace('-edp', '')}.webp`,
   category: product.category,
   size: "50ml", // Default size since not specified in JSON
   description: `Premium ${product.name} fragrance - a luxurious scent perfect for any occasion.`,

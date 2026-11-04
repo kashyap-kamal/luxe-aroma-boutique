@@ -3,41 +3,67 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/auth-service";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock, CheckCircle2 } from "lucide-react";
+import { Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const PAPER = "#FAF7F2";
+const SAFFRON = "#E8763A";
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+  fontSize: 10,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: INK,
+  marginBottom: 8,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: CREAM,
+  border: `1px solid ${INK}`,
+  padding: "13px 14px",
+  fontFamily: "var(--font-inter), sans-serif",
+  fontSize: 16,
+  color: INK,
+  outline: "none",
+  borderRadius: 0,
+};
 
 export function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [verified, setVerified] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Check if user just verified their email
+  const rawRedirect = searchParams.get("redirect");
+  const redirectTarget =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/";
+
   useEffect(() => {
     const verifiedParam = searchParams.get("verified");
     if (verifiedParam === "true") {
       setVerified(true);
-      // Clear the verified param from URL after showing message
-      setTimeout(() => {
-        router.replace("/auth/signin");
+      const timer = setTimeout(() => {
+        const nextUrl =
+          redirectTarget !== "/"
+            ? `/auth/signin?redirect=${encodeURIComponent(redirectTarget)}`
+            : "/auth/signin";
+        router.replace(nextUrl);
         setVerified(false);
       }, 5000);
+      return () => clearTimeout(timer);
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, redirectTarget]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,11 +71,9 @@ export function SignInForm() {
     setError("");
 
     try {
-      // Use Supabase Edge Function for secure signin
       const result = await signIn(email, password);
-
       if (result.success) {
-        router.push("/");
+        router.push(redirectTarget);
         router.refresh();
       } else {
         setError(result.error || "Invalid email or password");
@@ -62,88 +86,229 @@ export function SignInForm() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
-          Welcome Back
-        </CardTitle>
-        <CardDescription className="text-center">
-          Sign in to your Aromé Luxe account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div style={{ border: `1px solid ${INK}`, background: PAPER }}>
+      <div style={{ padding: "28px 28px 22px", borderBottom: `1px solid ${INK}` }}>
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: SAFFRON,
+            marginBottom: 10,
+          }}
+        >
+          01 / MEMBER ACCESS
+        </div>
+        <h1
+          style={{
+            fontFamily: "var(--font-fraunces), serif",
+            fontSize: "clamp(2rem, 5vw, 2.6rem)",
+            fontWeight: 300,
+            lineHeight: 0.95,
+            letterSpacing: "-0.03em",
+            color: INK,
+            margin: 0,
+          }}
+        >
+          Welcome <em style={{ fontStyle: "italic", color: SAFFRON }}>back.</em>
+        </h1>
+        <p
+          style={{
+            fontFamily: "var(--font-inter), sans-serif",
+            fontSize: 13,
+            lineHeight: 1.6,
+            color: "#3A3833",
+            marginTop: 10,
+            marginBottom: 0,
+          }}
+        >
+          Sign in to track orders, manage saved addresses, and access your fragrance archive.
+        </p>
+      </div>
+
+      <div style={{ padding: "26px 28px 28px" }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           {verified && (
-            <Alert className="border-green-500 bg-green-50">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                Email verified successfully! You can now sign in.
-              </AlertDescription>
-            </Alert>
-          )}
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+            <div
+              style={{
+                border: "1px solid #1F6F43",
+                background: "rgba(31,111,67,0.08)",
+                padding: "12px 14px",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                fontFamily: "var(--font-inter), sans-serif",
+                fontSize: 13,
+                color: "#1F6F43",
+              }}
+            >
+              <CheckCircle2 style={{ width: 16, height: 16, flexShrink: 0 }} />
+              <span>Email verified. You can sign in below.</span>
+            </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
-                required
-              />
+          {error && (
+            <div
+              role="alert"
+              style={{
+                border: `1px solid ${SAFFRON}`,
+                background: "rgba(232,118,58,0.08)",
+                padding: "12px 14px",
+                fontFamily: "var(--font-inter), sans-serif",
+                fontSize: 13,
+                color: INK,
+              }}
+            >
+              {error}
             </div>
+          )}
+
+          <div>
+            <label htmlFor="email" style={labelStyle}>
+              EMAIL ADDRESS
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@domain.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={inputStyle}
+              required
+              disabled={isLoading}
+            />
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                justifyContent: "space-between",
+                marginBottom: 8,
+              }}
+            >
+              <label htmlFor="password" style={{ ...labelStyle, marginBottom: 0 }}>
+                PASSWORD
+              </label>
               <Link
                 href="/auth/forgot-password"
-                className="text-sm font-medium text-primary hover:underline"
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 9,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: INK,
+                  opacity: 0.65,
+                  textDecoration: "underline",
+                }}
               >
-                Forgot password?
+                FORGOT?
               </Link>
             </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
+            <div style={{ position: "relative" }}>
+              <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10"
+                style={{ ...inputStyle, paddingRight: 44 }}
                 required
+                disabled={isLoading}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                style={{
+                  position: "absolute",
+                  right: 12,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: INK,
+                  opacity: 0.55,
+                  padding: 4,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                {showPassword ? (
+                  <EyeOff style={{ width: 16, height: 16 }} />
+                ) : (
+                  <Eye style={{ width: 16, height: 16 }} />
+                )}
+              </button>
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign In
-          </Button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="transition-colors hover:opacity-90"
+            style={{
+              width: "100%",
+              background: INK,
+              color: CREAM,
+              border: `1px solid ${INK}`,
+              padding: "16px 20px",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              opacity: isLoading ? 0.7 : 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              marginTop: 4,
+            }}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />
+                SIGNING IN...
+              </>
+            ) : (
+              "SIGN IN →"
+            )}
+          </button>
         </form>
 
-        <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Button
-            variant="link"
-            className="p-0 h-auto font-semibold"
-            onClick={() => router.push("/auth/signup")}
+        <div
+          style={{
+            marginTop: 22,
+            paddingTop: 18,
+            borderTop: "1px dotted rgba(14,14,12,0.25)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+          }}
+        >
+          <span style={{ color: INK, opacity: 0.55 }}>NEW TO AROMÉ LUXE?</span>
+          <Link
+            href="/auth/signup"
+            style={{
+              color: SAFFRON,
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
           >
-            Sign up
-          </Button>
+            CREATE ACCOUNT →
+          </Link>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -4,20 +4,37 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { resetPassword, getCurrentSession } from "@/lib/auth-service";
 import { validatePassword } from "@/lib/password-validator";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Lock, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Loader2, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { PasswordStrengthIndicator } from "@/components/auth/password-strength-indicator";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const PAPER = "#FAF7F2";
+const SAFFRON = "#E8763A";
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+  fontSize: 10,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: INK,
+  marginBottom: 8,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: CREAM,
+  border: `1px solid ${INK}`,
+  padding: "13px 14px",
+  paddingRight: 44,
+  fontFamily: "var(--font-inter), sans-serif",
+  fontSize: 16,
+  color: INK,
+  outline: "none",
+  borderRadius: 0,
+};
 
 export function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -30,46 +47,33 @@ export function ResetPasswordForm() {
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
   const router = useRouter();
 
-  // Check if we have a valid reset token from the URL
-  // Supabase automatically handles the token from the email link
   useEffect(() => {
     const checkSession = async () => {
       try {
-        // Check if there's a valid session (created when user clicks email link)
         const session = await getCurrentSession();
-
         if (session) {
-          // Valid token - user can reset password
           setIsValidToken(true);
         } else {
-          // No valid session - token might be expired or invalid
           setIsValidToken(false);
-          setError(
-            "Invalid or expired reset link. Please request a new password reset."
-          );
+          setError("Invalid or expired reset link. Please request a new password reset.");
         }
       } catch {
         setIsValidToken(false);
         setError("Failed to verify reset link. Please try again.");
       }
     };
-
     checkSession();
   }, []);
 
-  // Handle form submission
-  // Updates the user's password in Supabase
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    // Validate password strength
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
       setError(passwordValidation.errors.join(". "));
@@ -77,18 +81,13 @@ export function ResetPasswordForm() {
     }
 
     setIsLoading(true);
-
     try {
-      // Use Supabase Edge Function for secure password reset
       const result = await resetPassword(password);
-
       if (result.success) {
-        // Success - password has been reset
         setSuccess(true);
-        // Redirect to sign in after a short delay
         setTimeout(() => {
           router.push("/auth/signin");
-        }, 2000);
+        }, 1800);
       } else {
         setError(result.error || "Failed to reset password. Please try again.");
       }
@@ -99,173 +98,184 @@ export function ResetPasswordForm() {
     }
   };
 
-  // Show loading state while checking token
   if (isValidToken === null) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
+      <div style={{ border: `1px solid ${INK}`, background: PAPER, padding: "48px 28px", textAlign: "center" }}>
+        <Loader2 style={{ width: 22, height: 22, margin: "0 auto 12px", color: SAFFRON, animation: "spin 1s linear infinite" }} />
+        <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: INK, opacity: 0.6 }}>
+          VERIFYING LINK...
+        </div>
+      </div>
     );
   }
 
-  // Show error if token is invalid
   if (isValidToken === false) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Invalid Reset Link
-          </CardTitle>
-          <CardDescription className="text-center">
-            This password reset link is invalid or has expired
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-          <div className="space-y-2">
-            <Link href="/auth/forgot-password">
-              <Button className="w-full">Request New Reset Link</Button>
-            </Link>
-            <Link href="/auth/signin">
-              <Button variant="outline" className="w-full">
-                Back to Sign In
-              </Button>
-            </Link>
+      <div style={{ border: `1px solid ${INK}`, background: PAPER }}>
+        <div style={{ padding: "28px 28px 22px", borderBottom: `1px solid ${INK}` }}>
+          <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: SAFFRON, marginBottom: 10 }}>
+            LINK EXPIRED
           </div>
-        </CardContent>
-      </Card>
+          <h1 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "2.1rem", fontWeight: 300, lineHeight: 0.95, letterSpacing: "-0.03em", color: INK, margin: 0 }}>
+            Invalid <em style={{ fontStyle: "italic", color: SAFFRON }}>reset link.</em>
+          </h1>
+        </div>
+        <div style={{ padding: 28, display: "flex", flexDirection: "column", gap: 14 }}>
+          <p style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, lineHeight: 1.6, color: "#3A3833", margin: 0 }}>
+            {error}
+          </p>
+          <Link
+            href="/auth/forgot-password"
+            style={{
+              display: "block",
+              textAlign: "center",
+              background: INK,
+              color: CREAM,
+              padding: "15px 20px",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+            }}
+          >
+            REQUEST NEW LINK →
+          </Link>
+          <Link
+            href="/auth/signin"
+            style={{
+              display: "block",
+              textAlign: "center",
+              border: `1px solid ${INK}`,
+              color: INK,
+              padding: "14px 20px",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+            }}
+          >
+            BACK TO SIGN IN
+          </Link>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
-          Reset Password
-        </CardTitle>
-        <CardDescription className="text-center">
-          Enter your new password below
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div style={{ border: `1px solid ${INK}`, background: PAPER }}>
+      <div style={{ padding: "28px 28px 22px", borderBottom: `1px solid ${INK}` }}>
+        <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: SAFFRON, marginBottom: 10 }}>
+          SECURITY UPDATE
+        </div>
+        <h1 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "clamp(2rem, 5vw, 2.5rem)", fontWeight: 300, lineHeight: 0.95, letterSpacing: "-0.03em", color: INK, margin: 0 }}>
+          Choose a new <em style={{ fontStyle: "italic", color: SAFFRON }}>password.</em>
+        </h1>
+      </div>
+
+      <div style={{ padding: "26px 28px 28px" }}>
         {success ? (
-          // Success state - show confirmation message
-          <div className="space-y-4">
-            <Alert className="border-green-500 bg-green-50">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                Password reset successfully! Redirecting to sign in...
-              </AlertDescription>
-            </Alert>
+          <div style={{ border: "1px solid #1F6F43", background: "rgba(31,111,67,0.08)", padding: "14px 16px", display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-inter), sans-serif", fontSize: 13, color: "#1F6F43" }}>
+            <CheckCircle2 style={{ width: 16, height: 16, flexShrink: 0 }} />
+            <span>Password updated. Redirecting to sign in...</span>
           </div>
         ) : (
-          // Form state - show password inputs
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              <div role="alert" style={{ border: `1px solid ${SAFFRON}`, background: "rgba(232,118,58,0.08)", padding: "12px 14px", fontFamily: "var(--font-inter), sans-serif", fontSize: 13, color: INK }}>
+                {error}
+              </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
+            <div>
+              <label htmlFor="password" style={labelStyle}>NEW PASSWORD</label>
+              <div style={{ position: "relative" }}>
+                <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your new password"
+                  placeholder="Enter new password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10"
+                  style={inputStyle}
                   required
                   disabled={isLoading}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: INK, opacity: 0.55, padding: 4 }}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff style={{ width: 16, height: 16 }} /> : <Eye style={{ width: 16, height: 16 }} />}
                 </button>
               </div>
               <PasswordStrengthIndicator password={password} />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
+            <div>
+              <label htmlFor="confirmPassword" style={labelStyle}>CONFIRM PASSWORD</label>
+              <div style={{ position: "relative" }}>
+                <input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your new password"
+                  placeholder="Re-enter new password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`pl-10 pr-10 ${
-                    password && confirmPassword && password !== confirmPassword
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : password &&
-                        confirmPassword &&
-                        password === confirmPassword
-                      ? "border-green-500 focus:border-green-500 focus:ring-green-500"
-                      : ""
-                  }`}
+                  style={{
+                    ...inputStyle,
+                    borderColor:
+                      password && confirmPassword && password !== confirmPassword
+                        ? SAFFRON
+                        : INK,
+                  }}
                   required
                   disabled={isLoading}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                  tabIndex={-1}
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: INK, opacity: 0.55, padding: 4 }}
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showConfirmPassword ? <EyeOff style={{ width: 16, height: 16 }} /> : <Eye style={{ width: 16, height: 16 }} />}
                 </button>
               </div>
-              {password && confirmPassword && password !== confirmPassword && (
-                <p className="text-xs text-red-500">Passwords do not match</p>
-              )}
-              {password &&
-                confirmPassword &&
-                password === confirmPassword &&
-                validatePassword(password).isValid && (
-                  <p className="text-xs text-green-600">Passwords match ✓</p>
-                )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Reset Password
-            </Button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              style={{
+                width: "100%",
+                background: INK,
+                color: CREAM,
+                border: `1px solid ${INK}`,
+                padding: "16px 20px",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 11,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                cursor: isLoading ? "not-allowed" : "pointer",
+                opacity: isLoading ? 0.7 : 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />
+                  UPDATING...
+                </>
+              ) : (
+                "UPDATE PASSWORD →"
+              )}
+            </button>
           </form>
         )}
-
-        <div className="mt-4 text-center text-sm">
-          Remember your password?{" "}
-          <Link
-            href="/auth/signin"
-            className="font-semibold text-primary hover:underline"
-          >
-            Sign in
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

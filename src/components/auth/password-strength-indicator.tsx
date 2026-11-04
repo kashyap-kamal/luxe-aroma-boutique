@@ -1,7 +1,10 @@
 "use client";
 
-import { validatePassword, getPasswordRequirements, getStrengthBgColor } from "@/lib/password-validator";
+import { validatePassword, getPasswordRequirements } from "@/lib/password-validator";
 import { Check, X } from "lucide-react";
+
+const INK = "#0E0E0C";
+const SAFFRON = "#E8763A";
 
 interface PasswordStrengthIndicatorProps {
   password: string;
@@ -19,119 +22,89 @@ export function PasswordStrengthIndicator({
   const validation = validatePassword(password);
   const requirements = getPasswordRequirements();
 
-  // Check individual requirements
-  const checks = {
-    length: password.length >= 8,
-    uppercase: /[A-Z]/.test(password),
-    lowercase: /[a-z]/.test(password),
-    number: /[0-9]/.test(password),
-    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
-  };
+  const checks = [
+    password.length >= 8,
+    /[A-Z]/.test(password),
+    /[a-z]/.test(password),
+    /[0-9]/.test(password),
+    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  ];
+
+  const barColor =
+    validation.strength === "weak"
+      ? "#B42318"
+      : validation.strength === "medium"
+      ? SAFFRON
+      : "#1F6F43";
 
   return (
-    <div className="space-y-3 mt-2">
-      {/* Strength Bar */}
-      <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Password strength:</span>
-          <span
-            className={`font-medium ${
-              validation.strength === "weak"
-                ? "text-red-500"
-                : validation.strength === "medium"
-                ? "text-yellow-500"
-                : validation.strength === "strong"
-                ? "text-blue-500"
-                : "text-green-500"
-            }`}
-          >
-            {validation.strength
-              .split("-")
-              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(" ")}
+    <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 6,
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 9,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+          }}
+        >
+          <span style={{ color: INK, opacity: 0.55 }}>STRENGTH</span>
+          <span style={{ color: barColor, fontWeight: 600 }}>
+            {validation.strength.replace("-", " ")}
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+        <div
+          style={{
+            width: "100%",
+            height: 3,
+            background: "rgba(14,14,12,0.12)",
+            overflow: "hidden",
+          }}
+        >
           <div
-            className={`h-full transition-all duration-300 ${getStrengthBgColor(
-              validation.strength
-            )}`}
-            style={{ width: `${validation.score}%` }}
+            style={{
+              height: "100%",
+              width: `${validation.score}%`,
+              background: barColor,
+              transition: "width 240ms ease, background 240ms ease",
+            }}
           />
         </div>
       </div>
 
-      {/* Requirements List */}
       {showRequirements && (
-        <div className="space-y-1.5">
-          <p className="text-xs font-medium text-muted-foreground">
-            Password requirements:
-          </p>
-          <ul className="space-y-1 text-xs">
-            <li
-              className={`flex items-center gap-2 ${
-                checks.length ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              {checks.length ? (
-                <Check className="h-3 w-3" />
-              ) : (
-                <X className="h-3 w-3" />
-              )}
-              <span>{requirements[0]}</span>
-            </li>
-            <li
-              className={`flex items-center gap-2 ${
-                checks.uppercase ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              {checks.uppercase ? (
-                <Check className="h-3 w-3" />
-              ) : (
-                <X className="h-3 w-3" />
-              )}
-              <span>{requirements[1]}</span>
-            </li>
-            <li
-              className={`flex items-center gap-2 ${
-                checks.lowercase ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              {checks.lowercase ? (
-                <Check className="h-3 w-3" />
-              ) : (
-                <X className="h-3 w-3" />
-              )}
-              <span>{requirements[2]}</span>
-            </li>
-            <li
-              className={`flex items-center gap-2 ${
-                checks.number ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              {checks.number ? (
-                <Check className="h-3 w-3" />
-              ) : (
-                <X className="h-3 w-3" />
-              )}
-              <span>{requirements[3]}</span>
-            </li>
-            <li
-              className={`flex items-center gap-2 ${
-                checks.special ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              {checks.special ? (
-                <Check className="h-3 w-3" />
-              ) : (
-                <X className="h-3 w-3" />
-              )}
-              <span>{requirements[4]}</span>
-            </li>
-          </ul>
-        </div>
+        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 4 }}>
+          {requirements.map((req, idx) => {
+            const passed = checks[idx];
+            return (
+              <li
+                key={req}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 9,
+                  letterSpacing: "0.08em",
+                  color: passed ? "#1F6F43" : INK,
+                  opacity: passed ? 1 : 0.5,
+                }}
+              >
+                {passed ? (
+                  <Check style={{ width: 11, height: 11, flexShrink: 0 }} />
+                ) : (
+                  <X style={{ width: 11, height: 11, flexShrink: 0 }} />
+                )}
+                <span>{req}</span>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );
 }
-

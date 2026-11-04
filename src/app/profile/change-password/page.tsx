@@ -11,14 +11,15 @@ export const metadata: Metadata = {
 export default function ChangePasswordPage() {
   return (
     <ProtectedRoute>
-      {/* pt-28 accounts for fixed navbar height */}
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 pt-28 pb-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+      <main
+        className="flex-1 flex items-center justify-center px-5 py-12 md:py-20"
+        style={{ background: "#F2EDE4", color: "#0E0E0C" }}
+      >
+        <div className="w-full max-w-[460px] space-y-5">
           <AuthHeader />
           <ChangePasswordForm />
         </div>
-      </div>
+      </main>
     </ProtectedRoute>
   );
 }
-

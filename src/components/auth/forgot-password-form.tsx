@@ -3,19 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { forgotPassword } from "@/lib/auth-service";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+
+const INK = "#0E0E0C";
+const CREAM = "#F2EDE4";
+const PAPER = "#FAF7F2";
+const SAFFRON = "#E8763A";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -24,8 +18,6 @@ export function ForgotPasswordForm() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
-  // Handle form submission
-  // Sends password reset email to the user
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -33,17 +25,11 @@ export function ForgotPasswordForm() {
     setSuccess(false);
 
     try {
-      // Use Supabase Edge Function for secure password reset request
       const result = await forgotPassword(email);
-
       if (result.success) {
-        // Show success message
-        // User will receive an email with reset instructions
         setSuccess(true);
       } else {
-        setError(
-          result.error || "Failed to send reset email. Please try again."
-        );
+        setError(result.error || "Failed to send reset email. Please try again.");
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -53,81 +39,204 @@ export function ForgotPasswordForm() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
-          Forgot Password
-        </CardTitle>
-        <CardDescription className="text-center">
-          Enter your email address and we&apos;ll send you a link to reset your
-          password
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div style={{ border: `1px solid ${INK}`, background: PAPER }}>
+      <div style={{ padding: "28px 28px 22px", borderBottom: `1px solid ${INK}` }}>
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 10,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: SAFFRON,
+            marginBottom: 10,
+          }}
+        >
+          ACCOUNT RECOVERY
+        </div>
+        <h1
+          style={{
+            fontFamily: "var(--font-fraunces), serif",
+            fontSize: "clamp(2rem, 5vw, 2.5rem)",
+            fontWeight: 300,
+            lineHeight: 0.95,
+            letterSpacing: "-0.03em",
+            color: INK,
+            margin: 0,
+          }}
+        >
+          Reset <em style={{ fontStyle: "italic", color: SAFFRON }}>password.</em>
+        </h1>
+        <p
+          style={{
+            fontFamily: "var(--font-inter), sans-serif",
+            fontSize: 13,
+            lineHeight: 1.6,
+            color: "#3A3833",
+            marginTop: 10,
+            marginBottom: 0,
+          }}
+        >
+          Enter the email linked to your account and we will send a recovery link.
+        </p>
+      </div>
+
+      <div style={{ padding: "26px 28px 28px" }}>
         {success ? (
-          // Success state - show confirmation message
-          <div className="space-y-4">
-            <Alert className="border-green-500 bg-green-50">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                Password reset email sent! Please check your inbox and follow
-                the instructions to reset your password.
-              </AlertDescription>
-            </Alert>
-            <div className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push("/auth/signin")}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Sign In
-              </Button>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div
+              style={{
+                border: "1px solid #1F6F43",
+                background: "rgba(31,111,67,0.08)",
+                padding: "14px 16px",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                fontFamily: "var(--font-inter), sans-serif",
+                fontSize: 13,
+                lineHeight: 1.5,
+                color: "#1F6F43",
+              }}
+            >
+              <CheckCircle2 style={{ width: 16, height: 16, flexShrink: 0, marginTop: 2 }} />
+              <span>Password reset link sent. Check your inbox and follow the instructions.</span>
             </div>
+            <button
+              type="button"
+              onClick={() => router.push("/auth/signin")}
+              style={{
+                width: "100%",
+                background: "transparent",
+                color: INK,
+                border: `1px solid ${INK}`,
+                padding: "14px 20px",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 10,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <ArrowLeft style={{ width: 13, height: 13 }} />
+              BACK TO SIGN IN
+            </button>
           </div>
         ) : (
-          // Form state - show email input
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              <div
+                role="alert"
+                style={{
+                  border: `1px solid ${SAFFRON}`,
+                  background: "rgba(232,118,58,0.08)",
+                  padding: "12px 14px",
+                  fontFamily: "var(--font-inter), sans-serif",
+                  fontSize: 13,
+                  color: INK,
+                }}
+              >
+                {error}
+              </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="email"
+                style={{
+                  display: "block",
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: 10,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: INK,
+                  marginBottom: 8,
+                }}
+              >
+                EMAIL ADDRESS
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@domain.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  width: "100%",
+                  background: CREAM,
+                  border: `1px solid ${INK}`,
+                  padding: "13px 14px",
+                  fontFamily: "var(--font-inter), sans-serif",
+                  fontSize: 16,
+                  color: INK,
+                  outline: "none",
+                  borderRadius: 0,
+                }}
+                required
+                disabled={isLoading}
+              />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Send Reset Link
-            </Button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              style={{
+                width: "100%",
+                background: INK,
+                color: CREAM,
+                border: `1px solid ${INK}`,
+                padding: "16px 20px",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 11,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                cursor: isLoading ? "not-allowed" : "pointer",
+                opacity: isLoading ? 0.7 : 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />
+                  SENDING...
+                </>
+              ) : (
+                "SEND RESET LINK →"
+              )}
+            </button>
           </form>
         )}
 
-        <div className="mt-4 text-center text-sm">
-          Remember your password?{" "}
+        <div
+          style={{
+            marginTop: 22,
+            paddingTop: 18,
+            borderTop: "1px dotted rgba(14,14,12,0.25)",
+            textAlign: "center",
+          }}
+        >
           <Link
             href="/auth/signin"
-            className="font-semibold text-primary hover:underline"
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: INK,
+              opacity: 0.7,
+              textDecoration: "underline",
+            }}
           >
-            Sign in
+            ← RETURN TO SIGN IN
           </Link>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

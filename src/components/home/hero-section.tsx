@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/stores/cart-store";
 import { useProducts } from "@/hooks/use-products";
+import { useViewportMode } from "@/hooks/use-viewport-mode";
 
 const INK = "#0E0E0C";
 const CREAM = "#F2EDE4";
@@ -24,18 +24,7 @@ interface HeroSectionProps {
 
 export default function HeroSection({ products: initialProducts }: HeroSectionProps) {
   const { products } = useProducts(initialProducts, { featured: true, limit: 8 });
-  const [viewport, setViewport] = useState<"ssr" | "desktop" | "mobile">("ssr");
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const sync = () => setViewport(mq.matches ? "desktop" : "mobile");
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  const showDesktop = viewport !== "mobile";
-  const showMobile = viewport !== "desktop";
+  const { showDesktop, showMobile } = useViewportMode();
   const minPrice = products.length > 0
     ? Math.min(...products.map(p => p.price.current))
     : 499;
@@ -237,7 +226,7 @@ export default function HeroSection({ products: initialProducts }: HeroSectionPr
           </div>
           {/* Bottle — 1 Million, background removed */}
           <Image
-            src="/assets/perfumes/1-million-nobg.png"
+            src="/assets/perfumes/1-million-nobg.webp"
             alt="1 Million"
             fill
             sizes="33vw"
@@ -428,7 +417,7 @@ export default function HeroSection({ products: initialProducts }: HeroSectionPr
             PLATE I.
           </div>
           <Image
-            src="/assets/perfumes/1-million-nobg.png"
+            src="/assets/perfumes/1-million-nobg.webp"
             alt="1 Million"
             fill
             sizes="100vw"

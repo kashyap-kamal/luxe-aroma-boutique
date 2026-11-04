@@ -72,6 +72,11 @@ const FilterChip = ({
   </button>
 );
 
+const normalizeTagParam = (raw: string | null): string => {
+  if (!raw) return "";
+  return raw.toLowerCase() === "gourmand" ? "sweet" : raw;
+};
+
 const ProductsContent = () => {
   const searchParams = useSearchParams();
   const { replace } = useRouter();
@@ -79,8 +84,9 @@ const ProductsContent = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const initialCategory = searchParams.get("category") || "";
-  const initialTag = searchParams.get("tag") || "";
+  const initialTag = normalizeTagParam(searchParams.get("tag"));
   const initialSearch = searchParams.get("q") || "";
+  const initialFeatured = searchParams.get("featured") === "true";
 
   const { products: allProducts } = useProducts(staticProducts);
   const categories = [...new Set(allProducts.map((p) => p.category))];
@@ -88,6 +94,7 @@ const ProductsContent = () => {
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedTag, setSelectedTag] = useState(initialTag);
+  const [featuredOnly, setFeaturedOnly] = useState(initialFeatured);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
   const [sortBy, setSortBy] = useState<SortOption>("default");
   const [searchQuery, setSearchQuery] = useState(initialSearch);
@@ -103,8 +110,9 @@ const ProductsContent = () => {
 
   useEffect(() => {
     setSelectedCategory(searchParams.get("category") || "");
-    setSelectedTag(searchParams.get("tag") || "");
+    setSelectedTag(normalizeTagParam(searchParams.get("tag")));
     setSearchQuery(searchParams.get("q") || "");
+    setFeaturedOnly(searchParams.get("featured") === "true");
     const sort = searchParams.get("sort") as SortOption | null;
     if (sort) setSortBy(sort);
   }, [searchParams]);
@@ -133,6 +141,7 @@ const ProductsContent = () => {
     } else {
       setMatchingBundles([]);
     }
+    if (featuredOnly) filtered = filtered.filter((p) => Boolean(p.featured));
     if (selectedCategory) filtered = filtered.filter((p) => p.category === selectedCategory);
     if (selectedTag) filtered = filtered.filter((p) => p.tags?.includes(selectedTag));
     filtered = filtered.filter(
@@ -144,24 +153,28 @@ const ProductsContent = () => {
     if (searchQuery) params.set("q", searchQuery);
     if (selectedCategory) params.set("category", selectedCategory);
     if (selectedTag) params.set("tag", selectedTag);
+    if (featuredOnly) params.set("featured", "true");
     if (sortBy !== "default") params.set("sort", sortBy);
-    replace(`${pathname}?${params.toString()}`);
-  }, [searchQuery, selectedCategory, selectedTag, priceRange, sortBy, allProducts, allBundles, replace, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+    const qs = params.toString();
+    replace(qs ? `${pathname}?${qs}` : pathname);
+  }, [searchQuery, selectedCategory, selectedTag, featuredOnly, priceRange, sortBy, allProducts, allBundles, replace, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleReset = () => {
     setSearchQuery("");
     setSelectedCategory("");
     setSelectedTag("");
+    setFeaturedOnly(false);
     setPriceRange([0, maxPrice]);
     setSortBy("default");
     replace(pathname);
   };
 
-  const activeFilterCount = [selectedCategory, selectedTag, searchQuery].filter(Boolean).length;
+  const activeFilterCount = [selectedCategory, selectedTag, searchQuery, featuredOnly ? "featured" : ""].filter(Boolean).length;
 
   const pageLabel = (() => {
     if (selectedCategory) return (categoryNameMap(selectedCategory) || selectedCategory).toUpperCase();
     if (selectedTag) return selectedTag.replace(/-/g, " ").toUpperCase();
+    if (featuredOnly) return "BESTSELLERS";
     if (searchQuery) return `"${searchQuery.toUpperCase()}"`;
     return "ALL FRAGRANCES";
   })();
@@ -182,7 +195,7 @@ const ProductsContent = () => {
             marginBottom: 10,
           }}
         >
-          THE COLLECTION — {filteredProducts.length} FRAGRANCES
+          THE COLLECTION · {filteredProducts.length} FRAGRANCES
         </div>
         <h1
           style={{
@@ -211,7 +224,7 @@ const ProductsContent = () => {
             marginBottom: 8,
           }}
         >
-          THE COLLECTION — {filteredProducts.length}
+          THE COLLECTION · {filteredProducts.length}
         </div>
         <h1
           style={{
@@ -235,45 +248,47 @@ const ProductsContent = () => {
         }}
       >
         <div
+          className="px-4 md:px-6"
           style={{
             flex: 1,
             display: "flex",
             alignItems: "center",
-            gap: 12,
-            padding: "0 24px",
+            gap: 10,
             borderRight: `1px solid ${INK}`,
           }}
         >
-          <Search style={{ width: 13, height: 13, opacity: 0.4, flexShrink: 0 }} />
+          <Search style={{ width: 14, height: 14, opacity: 0.45, flexShrink: 0 }} />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search fragrances, notes, moods..."
+            className="text-base md:text-[11px]"
             style={{
               flex: 1,
+              minWidth: 0,
               background: "transparent",
               border: "none",
               outline: "none",
               fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: 10,
-              letterSpacing: "0.1em",
+              letterSpacing: "0.06em",
               color: INK,
-              padding: "18px 0",
+              padding: "16px 0",
             }}
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
               style={{ background: "none", border: "none", cursor: "pointer", opacity: 0.4 }}
+              aria-label="Clear search"
             >
               <X style={{ width: 12, height: 12 }} />
             </button>
           )}
         </div>
 
-        {/* Sort buttons — desktop */}
+        {/* Sort buttons: desktop */}
         <div className="hidden md:flex" style={{ alignItems: "stretch" }}>
           {SORT_OPTIONS.map((opt) => (
             <button
@@ -299,8 +314,8 @@ const ProductsContent = () => {
 
         <button
           onClick={() => setShowFilters(!showFilters)}
+          className="px-4 md:px-6"
           style={{
-            padding: "0 24px",
             background: showFilters ? INK : "transparent",
             color: showFilters ? CREAM : INK,
             fontFamily: "var(--font-jetbrains-mono), monospace",
@@ -332,6 +347,7 @@ const ProductsContent = () => {
           <div>
             <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>CATEGORY</div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+              <FilterChip label="Bestsellers" active={featuredOnly} onClick={() => setFeaturedOnly((prev) => !prev)} />
               {categories.map((cat) => (
                 <FilterChip key={cat} label={categoryNameMap(cat) || cat} active={selectedCategory === cat} onClick={() => setSelectedCategory(selectedCategory === cat ? "" : cat)} />
               ))}
@@ -367,6 +383,7 @@ const ProductsContent = () => {
           <div>
             <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>CATEGORY</div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+              <FilterChip label="Bestsellers" active={featuredOnly} onClick={() => setFeaturedOnly((prev) => !prev)} />
               {categories.map((cat) => <FilterChip key={cat} label={categoryNameMap(cat) || cat} active={selectedCategory === cat} onClick={() => setSelectedCategory(selectedCategory === cat ? "" : cat)} />)}
             </div>
           </div>
@@ -374,6 +391,12 @@ const ProductsContent = () => {
             <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>SCENT</div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
               {SCENT_FAMILIES.map((s) => <FilterChip key={s.tag} label={s.label} active={selectedTag === s.tag} onClick={() => setSelectedTag(selectedTag === s.tag ? "" : s.tag)} />)}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, opacity: 0.5, marginBottom: 8 }}>OCCASION</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+              {OCCASIONS.map((o) => <FilterChip key={o.tag} label={o.label} active={selectedTag === o.tag} onClick={() => setSelectedTag(selectedTag === o.tag ? "" : o.tag)} />)}
             </div>
           </div>
           <div>
@@ -410,9 +433,9 @@ const ProductsContent = () => {
       {matchingBundles.length > 0 && (
         <div style={{ borderTop: `1px solid ${INK}` }}>
           <div style={{ paddingTop: 28, paddingBottom: 20, borderBottom: `1px solid ${INK}`, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" as const }} className="px-5 md:px-12">
-            MATCHING SETS & BUNDLES — {matchingBundles.length}
+            MATCHING SETS & BUNDLES · {matchingBundles.length}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4" style={{ borderLeft: `1px solid ${INK}` }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4" style={{ borderLeft: `1px solid ${INK}` }}>
             {matchingBundles.map((bundle, i) => (
               <div key={bundle.id} style={{ borderRight: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}>
                 <BundleCard bundle={bundle} index={i} />
@@ -427,13 +450,13 @@ const ProductsContent = () => {
 
 const ProductsLoading = () => (
   <div style={{ background: "#F2EDE4", minHeight: "100vh" }}>
-    <div style={{ padding: "56px 48px 32px", borderBottom: "1px solid #0E0E0C" }}>
-      <div style={{ height: 10, background: "#EDE9E0", width: 200, marginBottom: 16 }} />
-      <div style={{ height: 48, background: "#EDE9E0", width: "40%" }} />
+    <div className="px-5 py-7 md:px-12 md:pt-14 md:pb-8" style={{ borderBottom: "1px solid #0E0E0C" }}>
+      <div style={{ height: 10, background: "#EDE9E0", width: 180, marginBottom: 14 }} />
+      <div style={{ height: 40, background: "#EDE9E0", width: "55%" }} />
     </div>
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", borderTop: "1px solid #0E0E0C", borderLeft: "1px solid #0E0E0C" }}>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4" style={{ borderTop: "1px solid #0E0E0C", borderLeft: "1px solid #0E0E0C" }}>
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} style={{ borderRight: "1px solid #0E0E0C", borderBottom: "1px solid #0E0E0C", padding: 24 }}>
+        <div key={i} className="p-4 md:p-6" style={{ borderRight: "1px solid #0E0E0C", borderBottom: "1px solid #0E0E0C" }}>
           <div style={{ aspectRatio: "3/4", background: "#EDE9E0" }} />
           <div style={{ height: 10, background: "#EDE9E0", marginTop: 14, width: "60%" }} />
           <div style={{ height: 14, background: "#EDE9E0", marginTop: 8, width: "80%" }} />

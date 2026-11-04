@@ -23,7 +23,6 @@ export default function BundleSection() {
   return (
     <section
       style={{
-        borderBottom: `1px solid ${INK}`,
         background: CREAM,
         color: INK,
       }}
@@ -48,7 +47,7 @@ export default function BundleSection() {
               textTransform: "uppercase",
             }}
           >
-            FEATURE — 05 / DISCOVERY SETS
+            FEATURE 05 / DISCOVERY SETS
           </div>
           <h2
             style={{
@@ -87,6 +86,7 @@ export default function BundleSection() {
           justifyContent: "space-between",
           alignItems: "flex-end",
           borderBottom: `1px solid ${INK}`,
+          gap: 12,
         }}
       >
         <div>
@@ -113,22 +113,35 @@ export default function BundleSection() {
             The discovery set, <em>reconsidered.</em>
           </h2>
         </div>
+        <Link
+          href="/bundles"
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 9,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            textDecoration: "underline",
+            color: INK,
+            whiteSpace: "nowrap",
+          }}
+        >
+          ALL →
+        </Link>
       </div>
 
       {/* Bundle grid */}
       {!loaded ? (
         <div
-          className="grid"
-          style={{
-            gridTemplateColumns: "repeat(4, 1fr)",
-          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+          style={{ borderLeft: `1px solid ${INK}` }}
         >
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
+              className="p-5 md:p-6"
               style={{
-                borderRight: i < 3 ? `1px solid ${INK}` : "none",
-                padding: 24,
+                borderRight: `1px solid ${INK}`,
+                borderBottom: `1px solid ${INK}`,
               }}
             >
               <div
@@ -159,20 +172,18 @@ export default function BundleSection() {
         </div>
       ) : (
         <div
-          className="grid"
-          style={{
-            gridTemplateColumns: `repeat(${Math.min(bundles.length, 4)}, 1fr)`,
-          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+          style={{ borderLeft: `1px solid ${INK}` }}
         >
           {bundles.map((bundle, i) => (
             <div
               key={bundle.id}
               style={{
-                borderRight:
-                  i < bundles.length - 1 ? `1px solid ${INK}` : "none",
+                borderRight: `1px solid ${INK}`,
+                borderBottom: `1px solid ${INK}`,
               }}
             >
-              <BundleCard bundle={bundle} />
+              <BundleCard bundle={bundle} index={i} />
             </div>
           ))}
         </div>

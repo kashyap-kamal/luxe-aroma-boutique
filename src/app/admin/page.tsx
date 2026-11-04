@@ -33,6 +33,8 @@ interface ProductStats {
   max_price: number
 }
 
+const DEFAULT_SPOTLIGHT_VALUE = '__default__'
+
 export default function AdminDashboard() {
   const [productStats, setProductStats] = useState<ProductStats | null>(null)
   const [orderStats, setOrderStats] = useState<OrderStats | null>(null)
@@ -360,13 +362,16 @@ export default function AdminDashboard() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-1">
                 <Label htmlFor="spotlight-select" className="text-sm text-muted-foreground mb-2 block">Featured product on homepage</Label>
-                <Select value={spotlightId} onValueChange={setSpotlightId}>
+                <Select
+                  value={spotlightId || DEFAULT_SPOTLIGHT_VALUE}
+                  onValueChange={(val) => setSpotlightId(val === DEFAULT_SPOTLIGHT_VALUE ? '' : val)}
+                >
                   <SelectTrigger id="spotlight-select" className="w-full sm:max-w-xs">
-                    <SelectValue placeholder="Select a product…" />
+                    <SelectValue placeholder="Select a product..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Default (first featured product)</SelectItem>
-                    {allProducts.map((p) => (
+                    <SelectItem value={DEFAULT_SPOTLIGHT_VALUE}>Default (first featured product)</SelectItem>
+                    {allProducts.filter((p) => Boolean(p.id)).map((p) => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>

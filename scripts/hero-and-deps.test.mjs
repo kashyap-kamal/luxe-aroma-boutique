@@ -61,7 +61,17 @@ test("should mark mobile hero bottle Image as priority and gate inactive viewpor
   );
   assert.match(
     heroSrc,
-    /matchMedia\(["']\(min-width:\s*768px\)["']\)/,
-    "HeroSection should gate inactive viewport branch via matchMedia after mount"
+    /useViewportMode\(/,
+    "HeroSection should gate inactive viewport branch via shared useViewportMode hook"
   );
+  const hookSrc = fs.readFileSync(
+    path.join(root, "src/hooks/use-viewport-mode.ts"),
+    "utf8"
+  );
+  assert.match(
+    hookSrc,
+    /\(min-width:\s*768px\)/,
+    "useViewportMode should default to (min-width: 768px) matchMedia query"
+  );
+  assert.match(hookSrc, /window\.matchMedia\(mediaQuery\)/);
 });

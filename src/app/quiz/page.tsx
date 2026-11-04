@@ -182,14 +182,15 @@ export default function QuizPage() {
       className="min-h-screen flex flex-col"
       style={{ background: DARK, color: CREAM }}
     >
-      {/* ── Top bar ── */}
+      {/* Top bar */}
       <div
+        className="px-4 py-3.5 sm:px-8 sm:py-4"
         style={{
           borderBottom: `1px solid rgba(242,237,228,0.12)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "16px 32px",
+          gap: 12,
         }}
       >
         <Link
@@ -201,6 +202,7 @@ export default function QuizPage() {
             letterSpacing: "-0.02em",
             color: CREAM,
             textDecoration: "none",
+            whiteSpace: "nowrap",
           }}
         >
           Aromé <em>Luxe</em>
@@ -213,9 +215,10 @@ export default function QuizPage() {
               fontSize: 10,
               letterSpacing: "0.2em",
               color: SAFFRON,
+              whiteSpace: "nowrap",
             }}
           >
-            SCENT DIAGNOSTIC — {q?.step}/{QUESTIONS.length}
+            DIAGNOSTIC · {q?.step}/{QUESTIONS.length}
           </div>
         )}
 
@@ -316,13 +319,9 @@ export default function QuizPage() {
 
               {/* Options */}
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    q.options.length === 3 ? "repeat(3, 1fr)" : "repeat(2, 1fr)",
-                  gap: 12,
-                }}
-                className="!grid-cols-1 sm:!grid-cols-none"
+                className={`grid grid-cols-1 ${
+                  q.options.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"
+                } gap-3`}
               >
                 {q.options.map((opt, i) => (
                   <motion.button

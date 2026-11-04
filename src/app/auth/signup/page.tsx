@@ -5,16 +5,19 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Sign Up | Aromé Luxe",
   description:
-    "Create your Aromé Luxe account to discover luxury fragrances and enjoy personalized shopping experiences.",
+    "Create your Aromé Luxe account to discover luxury fragrances and track your orders.",
 };
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <main
+      className="flex-1 flex items-center justify-center px-5 py-12 md:py-20"
+      style={{ background: "#F2EDE4", color: "#0E0E0C" }}
+    >
+      <div className="w-full max-w-[460px] space-y-5">
         <AuthHeader />
         <SignUpForm />
       </div>
-    </div>
+    </main>
   );
 }
