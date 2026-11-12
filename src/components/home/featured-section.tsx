@@ -36,6 +36,8 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
   if (products.length === 0) return null;
 
   const display = products.slice(0, 4);
+  // Mobile is 2-up: drop the orphan so the last row is never half empty
+  const mobileDisplay = display.length > 1 && display.length % 2 ? display.slice(0, -1) : display;
 
   return (
     <section
@@ -49,7 +51,6 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
       <div
         style={{
           padding: "56px 48px 20px",
-          display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-end",
           borderBottom: `1px solid ${INK}`,
@@ -148,7 +149,7 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
       {showDesktop && (
       <div
         className="hidden md:grid"
-        style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
+        style={{ gridTemplateColumns: `repeat(${display.length}, 1fr)` }}
       >
         {display.map((product, i) => {
           const discount =
@@ -164,7 +165,7 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
             <div
               key={product.id}
               style={{
-                borderRight: i < 3 ? `1px solid ${INK}` : "none",
+                borderRight: i < display.length - 1 ? `1px solid ${INK}` : "none",
                 display: "flex",
                 flexDirection: "column",
               }}
@@ -358,7 +359,7 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
         className="grid md:hidden"
         style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
       >
-        {display.map((product, i) => {
+        {mobileDisplay.map((product, i) => {
           const discount =
             product.price.on_sale && product.price.original > 0
               ? Math.round(

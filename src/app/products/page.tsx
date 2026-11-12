@@ -88,7 +88,9 @@ const ProductsContent = () => {
   const initialSearch = searchParams.get("q") || "";
   const initialFeatured = searchParams.get("featured") === "true";
 
-  const { products: allProducts } = useProducts(staticProducts);
+  const { products: liveProducts, isLoading } = useProducts([]);
+  // The bundled catalogue is out of date: only a fallback when Supabase is unreachable
+  const allProducts = isLoading || liveProducts.length > 0 ? liveProducts : staticProducts;
   const categories = [...new Set(allProducts.map((p) => p.category))];
   const maxPrice = Math.max(...allProducts.map((p) => p.price.current), 0);
 
@@ -195,7 +197,7 @@ const ProductsContent = () => {
             marginBottom: 10,
           }}
         >
-          THE COLLECTION · {filteredProducts.length} FRAGRANCES
+          THE COLLECTION · {isLoading ? "…" : filteredProducts.length} FRAGRANCES
         </div>
         <h1
           style={{
@@ -224,7 +226,7 @@ const ProductsContent = () => {
             marginBottom: 8,
           }}
         >
-          THE COLLECTION · {filteredProducts.length}
+          THE COLLECTION · {isLoading ? "…" : filteredProducts.length}
         </div>
         <h1
           style={{
@@ -338,7 +340,6 @@ const ProductsContent = () => {
           style={{
             borderBottom: `1px solid ${INK}`,
             padding: "24px 48px",
-            display: "flex",
             flexWrap: "wrap" as const,
             gap: 28,
           }}
@@ -410,7 +411,11 @@ const ProductsContent = () => {
       )}
 
       {/* Products grid */}
-      {filteredProducts.length > 0 ? (
+      {isLoading ? (
+        <div className="animate-pulse" style={{ padding: "120px 0", textAlign: "center", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.45 }}>
+          ARRANGING THE SHELF
+        </div>
+      ) : filteredProducts.length > 0 ? (
         <>
           <div className="flex md:hidden" style={{ padding: "12px 20px", borderBottom: `1px solid ${INK}`, justifyContent: "flex-end", gap: 0 }}>
             {([1, 2] as const).map((n) => (

@@ -14,9 +14,11 @@ const SAFFRON = "#E8763A";
 interface BundleCardProps {
   bundle: Bundle;
   index?: number;
+  /** Landscape image area, for grids with one or two cards */
+  wide?: boolean;
 }
 
-const BundleCard: React.FC<BundleCardProps> = ({ bundle, index = 0 }) => {
+const BundleCard: React.FC<BundleCardProps> = ({ bundle, index = 0, wide = false }) => {
   const { addBundleToCart } = useCartStore();
   const [added, setAdded] = useState(false);
 
@@ -60,7 +62,7 @@ const BundleCard: React.FC<BundleCardProps> = ({ bundle, index = 0 }) => {
         <div
           style={{
             position: "relative",
-            aspectRatio: "3/4",
+            aspectRatio: wide ? "16/10" : "3/4",
             background: "#EDE9E0",
             overflow: "hidden",
             borderBottom: `1px solid ${INK}`,
@@ -82,18 +84,19 @@ const BundleCard: React.FC<BundleCardProps> = ({ bundle, index = 0 }) => {
                 width: "100%",
                 height: "100%",
                 display: "flex",
-                flexWrap: "wrap",
+                alignItems: "center",
+                padding: wide ? "0 8%" : "0 4%",
               }}
             >
               {bundle.items.slice(0, 4).map((item, i) => (
                 <div
                   key={i}
                   style={{
-                    width: "50%",
-                    height: "50%",
-                    overflow: "hidden",
-                    borderRight: i % 2 === 0 ? `1px solid ${INK}` : "none",
-                    borderBottom: i < 2 ? `1px solid ${INK}` : "none",
+                    flex: 1,
+                    minWidth: 0,
+                    height: "100%",
+                    // overlap so the bottles read as one set
+                    marginLeft: i > 0 ? "-6%" : 0,
                   }}
                 >
                   <Image
@@ -103,7 +106,7 @@ const BundleCard: React.FC<BundleCardProps> = ({ bundle, index = 0 }) => {
                     height={200}
                     loading="lazy"
                     decoding="async"
-                    className="object-cover w-full h-full"
+                    className="object-contain w-full h-full mix-blend-multiply"
                   />
                 </div>
               ))}
@@ -155,8 +158,8 @@ const BundleCard: React.FC<BundleCardProps> = ({ bundle, index = 0 }) => {
               fontFamily: "var(--font-jetbrains-mono), monospace",
               fontSize: 9,
               letterSpacing: "0.2em",
-              color: CREAM,
-              opacity: 0.6,
+              color: INK,
+              opacity: 0.45,
             }}
           >
             N° {String(index + 1).padStart(2, "0")}

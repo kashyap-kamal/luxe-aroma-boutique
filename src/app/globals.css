@@ -328,3 +328,71 @@ h1, h2, h3, h4, h5, h6 {
 .safe-area-bottom {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
+
+/* ── Motion system ─────────────────────────────────────────────────
+   One easing, slow and quiet. Everything below is switched off for
+   prefers-reduced-motion at the end of this block. */
+:root {
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::selection {
+  background: #E8763A;
+  color: #0E0E0C;
+}
+
+/* Page enter. Opacity only: a transform here would re-anchor fixed bars. */
+@keyframes page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+main {
+  animation: page-in 700ms var(--ease-luxe) both;
+}
+
+/* Scroll reveal, driven by components/scroll-reveal.tsx.
+   Hidden state applies only once JS has opted in (html.reveal-on). */
+html.reveal-on [data-reveal]:not([data-reveal="in"]) {
+  opacity: 0;
+  transform: translateY(20px);
+}
+html.reveal-on [data-reveal] {
+  transition: opacity 800ms var(--ease-luxe), transform 800ms var(--ease-luxe);
+}
+
+/* Interactive elements ease instead of snapping */
+a,
+button {
+  transition:
+    color 250ms var(--ease-luxe),
+    background-color 250ms var(--ease-luxe),
+    border-color 250ms var(--ease-luxe),
+    opacity 250ms var(--ease-luxe),
+    transform 250ms var(--ease-luxe);
+}
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #E8763A;
+  outline-offset: 2px;
+}
+
+/* Product imagery drifts in slowly on hover */
+main a img {
+  transition: transform 900ms var(--ease-luxe);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

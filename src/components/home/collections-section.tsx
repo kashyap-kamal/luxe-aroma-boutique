@@ -25,7 +25,6 @@ export default function CollectionsSection() {
       <div
         style={{
           padding: "40px 48px 20px",
-          display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-end",
         }}
@@ -151,7 +150,7 @@ export default function CollectionsSection() {
             >
               <div
                 style={{
-                  fontSize: "clamp(1.8rem, 2.8vw, 2.5rem)",
+                  fontSize: "clamp(1.5rem, 2.1vw, 2.5rem)",
                   lineHeight: 0.95,
                   fontWeight: 300,
                   letterSpacing: "-0.02em",

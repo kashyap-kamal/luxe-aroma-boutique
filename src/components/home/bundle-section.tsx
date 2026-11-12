@@ -31,7 +31,6 @@ export default function BundleSection() {
       <div
         style={{
           padding: "56px 48px 20px",
-          display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-end",
           borderBottom: `1px solid ${INK}`,
@@ -172,7 +171,7 @@ export default function BundleSection() {
         </div>
       ) : (
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+          className={`grid grid-cols-1 ${["", "", "sm:grid-cols-2", "sm:grid-cols-2 lg:grid-cols-3"][bundles.length] ?? "sm:grid-cols-2 lg:grid-cols-4"}`}
           style={{ borderLeft: `1px solid ${INK}` }}
         >
           {bundles.map((bundle, i) => (
@@ -183,7 +182,7 @@ export default function BundleSection() {
                 borderBottom: `1px solid ${INK}`,
               }}
             >
-              <BundleCard bundle={bundle} index={i} />
+              <BundleCard bundle={bundle} index={i} wide={bundles.length <= 2} />
             </div>
           ))}
         </div>

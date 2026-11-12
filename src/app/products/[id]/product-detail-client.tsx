@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Product } from "@/lib/data-service";
 import { useCartStore } from "@/stores/cart-store";
-import { useProductById } from "@/hooks/use-products";
+import { useProductById, useProducts } from "@/hooks/use-products";
+import ProductCard from "@/components/product-card";
 import { toast } from "sonner";
 import Image from "next/image";
 import { TAG_META, tagLabel } from "@/lib/utils";
@@ -71,6 +72,22 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
 
   const scentTags = product.tags?.filter((t) => TAG_META[t]?.group === "scent") ?? [];
   const occasionTags = product.tags?.filter((t) => TAG_META[t]?.group === "occasion") ?? [];
+  const notes = product.fragrance_notes;
+  const hasNotes = !!(notes?.top?.length || notes?.middle?.length || notes?.base?.length);
+
+  // Related: same category first, then most shared tags
+  const { products: catalogue } = useProducts([]);
+  const related = catalogue
+    .filter((p) => p.id !== product.id)
+    .map((p) => ({
+      p,
+      score:
+        (p.category === product.category ? 2 : 0) +
+        (p.tags ?? []).filter((t) => product.tags?.includes(t)).length,
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4)
+    .map(({ p }) => p);
 
   return (
     <main style={{ background: CREAM, color: INK, minHeight: "100vh" }}>
@@ -116,7 +133,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
               fill
               priority
               sizes="50vw"
-              className="object-contain"
+              className="object-contain mix-blend-multiply"
               style={{ padding: 48 }}
             />
           )}
@@ -209,16 +226,16 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
           )}
 
           {/* Notes grid */}
-          {product.fragrance_notes && (
+          {hasNotes && notes && (
             <div style={{ marginBottom: 32 }}>
               <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 14, opacity: 0.5 }}>
                 FRAGRANCE NOTES
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", border: `1px solid ${INK}` }}>
                 {[
-                  { tier: "Top", notes: product.fragrance_notes.top },
-                  { tier: "Heart", notes: product.fragrance_notes.middle },
-                  { tier: "Base", notes: product.fragrance_notes.base },
+                  { tier: "Top", notes: notes.top },
+                  { tier: "Heart", notes: notes.middle },
+                  { tier: "Base", notes: notes.base },
                 ].map(({ tier, notes }, i) =>
                   notes?.length ? (
                     <div key={tier} style={{ padding: "14px 16px", borderRight: i < 2 ? `1px solid ${INK}` : "none" }}>
@@ -300,7 +317,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
               fill
               priority
               sizes="100vw"
-              className="object-contain"
+              className="object-contain mix-blend-multiply"
               style={{ padding: 32 }}
             />
           )}
@@ -314,7 +331,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
           </div>
         </div>
 
-        <div style={{ padding: "24px 20px 156px" }}>
+        <div style={{ padding: "24px 20px 40px" }}>
           <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: SAFFRON, marginBottom: 10 }}>
             {product.category.toUpperCase()} · AROMÉ LUXE
           </div>
@@ -338,14 +355,14 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
             </p>
           )}
 
-          {product.fragrance_notes && (
+          {hasNotes && notes && (
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.5, marginBottom: 10 }}>NOTES</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", border: `1px solid ${INK}` }}>
                 {[
-                  { tier: "Top", notes: product.fragrance_notes.top },
-                  { tier: "Heart", notes: product.fragrance_notes.middle },
-                  { tier: "Base", notes: product.fragrance_notes.base },
+                  { tier: "Top", notes: notes.top },
+                  { tier: "Heart", notes: notes.middle },
+                  { tier: "Base", notes: notes.base },
                 ].map(({ tier, notes }, i) =>
                   notes?.length ? (
                     <div key={tier} style={{ padding: "10px 12px", borderRight: i < 2 ? `1px solid ${INK}` : "none" }}>
@@ -418,6 +435,33 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
           </button>
         </div>
       </div>
+
+      {/* Related fragrances */}
+      {related.length > 0 && (
+        <section style={{ borderTop: `1px solid ${INK}` }} data-reveal>
+          <div className="px-5 md:px-12 pt-8 md:pt-12 pb-5">
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase" }}>
+              PAIRINGS / FROM THE SAME SHELF
+            </div>
+            <h2 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "clamp(2rem, 4vw, 3.25rem)", fontWeight: 300, lineHeight: 0.95, letterSpacing: "-0.03em", marginTop: 10 }}>
+              You may also <em>wear.</em>
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4" style={{ borderTop: `1px solid ${INK}` }}>
+            {related.map((p, i) => (
+              <div
+                key={p.id}
+                className={i % 2 === 0 ? "border-r lg:border-r" : i < 3 ? "lg:border-r" : ""}
+                style={{ borderColor: INK, borderBottom: `1px solid ${INK}` }}
+              >
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      {/* Clears the fixed mobile CTA bar */}
+      <div className="md:hidden" style={{ height: 64 }} />
     </main>
   );
 };
