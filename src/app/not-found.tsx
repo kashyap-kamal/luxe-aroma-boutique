@@ -34,25 +34,34 @@ const NotFound = () => {
   // Show loading state while redirecting
   if (isRedirecting) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brown-600 mx-auto mb-4"></div>
-          <p className="text-xl text-gray-600">Redirecting to order page...</p>
-        </div>
-      </div>
+      <main className="flex items-center justify-center px-5" style={{ minHeight: "60vh", background: "#F2EDE4", color: "#0E0E0C" }}>
+        <p className="animate-pulse" style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.6 }}>
+          Opening your order
+        </p>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <Link href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
+    <main className="flex flex-col justify-center px-5 md:px-12" style={{ minHeight: "60vh", padding: "64px 20px", gap: 18, background: "#F2EDE4", color: "#0E0E0C" }}>
+      <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8763A" }}>
+        Error 404
+      </span>
+      <h1 style={{ fontFamily: "var(--font-fraunces), serif", fontWeight: 300, fontSize: "clamp(2.6rem, 8vw, 5rem)", lineHeight: 0.95, letterSpacing: "-0.03em", margin: 0 }}>
+        This page has <em>evaporated.</em>
+      </h1>
+      <p style={{ fontSize: 15, lineHeight: 1.6, opacity: 0.7, maxWidth: "38ch", margin: 0 }}>
+        The link may be old, or the bottle has moved. The full collection is one tap away.
+      </p>
+      <div className="flex flex-col sm:flex-row" style={{ gap: 10, marginTop: 8 }}>
+        <Link href="/products" className="flex items-center justify-between" style={{ height: 54, padding: "0 20px", minWidth: 240, background: "#0E0E0C", color: "#F2EDE4", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase" }}>
+          Browse fragrances <span aria-hidden>→</span>
+        </Link>
+        <Link href="/" className="flex items-center justify-center" style={{ height: 54, padding: "0 20px", border: "1px solid #0E0E0C", color: "#0E0E0C", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase" }}>
+          Home
         </Link>
       </div>
-    </div>
+    </main>
   );
 };
 

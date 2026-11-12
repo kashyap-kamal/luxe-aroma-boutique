@@ -75,7 +75,7 @@ const Cart = () => {
         <div
           style={{
             fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: 9,
+            fontSize: 10,
             letterSpacing: "0.2em",
             textTransform: "uppercase",
             marginBottom: 8,
@@ -178,7 +178,7 @@ const Cart = () => {
                   border: "none",
                   cursor: "pointer",
                   fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: 9,
+                  fontSize: 10,
                   letterSpacing: "0.15em",
                   textTransform: "uppercase",
                   opacity: 0.4,
@@ -238,7 +238,7 @@ const Cart = () => {
               <div
                 style={{
                   fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: 9,
+                  fontSize: 10,
                   letterSpacing: "0.15em",
                   textTransform: "uppercase",
                   opacity: 0.5,
@@ -253,7 +253,7 @@ const Cart = () => {
                   border: "none",
                   cursor: "pointer",
                   fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: 9,
+                  fontSize: 10,
                   letterSpacing: "0.1em",
                   opacity: 0.4,
                   color: INK,

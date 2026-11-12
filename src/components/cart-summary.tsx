@@ -83,7 +83,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ subtotal }) => {
                   border: "none",
                   cursor: "pointer",
                   fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: 9,
+                  fontSize: 10,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: INK,
@@ -104,12 +104,14 @@ const CartSummary: React.FC<CartSummaryProps> = ({ subtotal }) => {
                 aria-label="Coupon code"
                 style={{
                   flex: 1,
+                  minWidth: 0,
                   background: "transparent",
                   border: `1px solid ${INK}`,
-                  padding: "9px 10px",
+                  borderRadius: 0,
+                  padding: "10px 12px",
                   fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: 10,
-                  letterSpacing: "0.14em",
+                  fontSize: 16,
+                  letterSpacing: "0.08em",
                   color: INK,
                   outline: "none",
                 }}
@@ -139,7 +141,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ subtotal }) => {
               style={{
                 marginTop: 6,
                 fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: 9,
+                fontSize: 10,
                 color: SAFFRON,
               }}
             >
@@ -249,7 +251,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ subtotal }) => {
         <div
           style={{
             fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: 9,
+            fontSize: 10,
             letterSpacing: "0.1em",
             opacity: 0.5,
             color: INK,

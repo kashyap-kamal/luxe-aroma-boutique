@@ -133,55 +133,30 @@ const Footer = () => {
       </div>
 
       {/* Mobile footer */}
-      <div className="flex flex-col md:hidden" style={{ padding: "40px 20px" }}>
-        <div
-          style={{
-            fontSize: "1.6rem",
-            fontWeight: 300,
-            fontFamily: "var(--font-fraunces), serif",
-            marginBottom: 16,
-          }}
-        >
-          Aromé <em style={{ fontStyle: "italic", color: SAFFRON }}>Luxe.</em>
+      <div className="flex flex-col md:hidden" style={{ padding: "40px 20px 28px", gap: 28 }}>
+        <div className="flex flex-col" style={{ gap: 10 }}>
+          <div style={{ fontSize: "1.8rem", fontWeight: 300, fontFamily: "var(--font-fraunces), serif" }}>
+            Aromé <em style={{ fontStyle: "italic", color: SAFFRON }}>Luxe.</em>
+          </div>
+          <p style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 14, lineHeight: 1.55, color: CREAM, opacity: 0.6, margin: 0 }}>
+            Premium fragrances, honest prices. Blended in India.
+          </p>
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 24,
-            marginBottom: 32,
-          }}
-        >
+        <div className="grid grid-cols-2" style={{ columnGap: 20, rowGap: 24 }}>
           {footerColumns.map((col) => (
             <div key={col.head}>
-              <div
-                style={{
-                  color: SAFFRON,
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: 9,
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  marginBottom: 12,
-                }}
-              >
+              <div style={{ color: SAFFRON, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 4 }}>
                 {col.head}
               </div>
               <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                 {col.items.map((item) => (
-                  <li key={item.href} style={{ marginBottom: 8 }}>
+                  <li key={item.href}>
                     <Link
                       href={item.href}
-                      style={{
-                        fontFamily: "var(--font-jetbrains-mono), monospace",
-                        fontSize: 9,
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                        color: CREAM,
-                        opacity: 0.5,
-                        textDecoration: "none",
-                      }}
+                      className="flex items-center"
+                      style={{ minHeight: 40, fontFamily: "var(--font-inter), sans-serif", fontSize: 14, color: CREAM, opacity: 0.75 }}
                     >
-                      {item.label}
+                      {item.label.charAt(0) + item.label.slice(1).toLowerCase()}
                     </Link>
                   </li>
                 ))}
@@ -218,13 +193,13 @@ const Footer = () => {
           padding: "16px 20px",
           borderTop: `1px solid rgba(242,237,228,0.08)`,
           fontFamily: "var(--font-jetbrains-mono), monospace",
-          fontSize: 9,
-          letterSpacing: "0.1em",
-          opacity: 0.3,
+          fontSize: 10,
+          letterSpacing: "0.12em",
+          opacity: 0.45,
           textTransform: "uppercase",
         }}
       >
-        © MMXXVI AROMÉ LUXE
+        © MMXXVI Aromé Luxe · Bombay
       </div>
     </footer>
   );

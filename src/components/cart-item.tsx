@@ -60,7 +60,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           <div
             style={{
               fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: 9,
+              fontSize: 10,
               letterSpacing: "0.15em",
               textTransform: "uppercase",
               opacity: 0.5,
@@ -77,8 +77,8 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           <button
             onClick={() => quantity > 1 ? updateQuantity(product.id, quantity - 1) : removeFromCart(product.id)}
             style={{
-              width: 28,
-              height: 28,
+              width: 36,
+              height: 36,
               border: `1px solid ${INK}`,
               background: "transparent",
               cursor: "pointer",
@@ -91,8 +91,8 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           </button>
           <div
             style={{
-              width: 36,
-              height: 28,
+              width: 40,
+              height: 36,
               border: `1px solid ${INK}`,
               borderLeft: "none",
               borderRight: "none",
@@ -109,8 +109,8 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           <button
             onClick={() => updateQuantity(product.id, quantity + 1)}
             style={{
-              width: 28,
-              height: 28,
+              width: 36,
+              height: 36,
               border: `1px solid ${INK}`,
               background: "transparent",
               cursor: "pointer",
@@ -146,7 +146,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           <div
             style={{
               fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: 9,
+              fontSize: 10,
               textDecoration: "line-through",
               opacity: 0.4,
               color: INK,

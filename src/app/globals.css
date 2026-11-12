@@ -416,3 +416,12 @@ main a img {
   40% { transform: scale(1.25); }
 }
 .bag-bump { animation: bag-bump 450ms var(--ease-luxe); }
+
+/* Phones: iOS Safari zooms the page when a focused field is under 16px */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
