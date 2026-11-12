@@ -32,7 +32,7 @@ export default async function Home() {
   const featuredProducts = await getFeaturedProducts(8);
 
   return (
-    <main className="flex-grow overflow-x-hidden" style={{ background: "#F2EDE4" }}>
+    <main className="flex-grow overflow-x-clip" style={{ background: "#F2EDE4" }}>
       {homepageConfig.showHero && (
         <HeroSection products={featuredProducts} />
       )}
