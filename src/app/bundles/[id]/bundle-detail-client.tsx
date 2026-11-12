@@ -325,11 +325,12 @@ export default function BundleDetailClient({ bundle }: BundleDetailClientProps) 
       {/* Spacer for mobile sticky bar */}
       <div className="h-36 md:hidden" />
 
-      {/* Sticky mobile bottom bar lifted above MobileBottomNav */}
+      {/* Fixed mobile buy bar */}
       <div
         className="fixed left-0 right-0 md:hidden z-[41] px-4 py-2.5 flex gap-2.5"
         style={{
-          bottom: "calc(56px + env(safe-area-inset-bottom))",
+          bottom: 0,
+          paddingBottom: "calc(10px + env(safe-area-inset-bottom))",
           background: "#F2EDE4",
           borderTop: "1px solid #0E0E0C",
         }}

@@ -8,6 +8,7 @@ import Image from "next/image";
 import { getSetting } from "@/lib/settings-service";
 import { fetchProductById } from "@/lib/product-service";
 import { useViewportMode } from "@/hooks/use-viewport-mode";
+import { PLATE_BG } from "@/components/plate-card";
 
 const SAFFRON = "#E8763A";
 const CREAM = "#F2EDE4";
@@ -295,183 +296,50 @@ export default function ProductSpotlight({ products: initialProducts }: ProductS
     </section>
     )}
 
-    {/* MOBILE SIGNATURE FEATURE */}
+    {/* MOBILE SIGNATURE FEATURE: dark band, bottle on a lit plate */}
     {showMobile && (
-    <section
-      className="flex flex-col md:hidden"
-      style={{
-        background: "#1A0908",
-        color: CREAM,
-        borderBottom: `1px solid ${INK}`,
-      }}
-    >
-      {/* Bottle panel */}
-      <div
-        style={{
-          background: `radial-gradient(circle at 50% 50%, #6B2310 0%, #1A0908 70%)`,
-          height: 320,
-          position: "relative",
-          overflow: "hidden",
-          borderBottom: "1px solid rgba(232,118,58,0.2)",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: 14,
-            left: 16,
-            fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: 9,
-            letterSpacing: "0.2em",
-            color: SAFFRON,
-          }}
-        >
-          PLATE II.
+      <section className="flex flex-col gap-4 md:hidden" style={{ background: "#1A0908", color: CREAM, padding: "30px 20px 32px" }}>
+        <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: SAFFRON }}>
+          Signature series
+        </span>
+        <div className="relative" style={{ height: 260, background: PLATE_BG }}>
+          {product.image && (
+            <Image src={product.image} alt={product.name} fill loading="lazy" sizes="100vw" className="object-contain mix-blend-multiply" style={{ padding: "18px 0" }} />
+          )}
         </div>
-        <Image
-          src="/assets/perfumes/ameer-al-oud-nobg.webp"
-          alt={product.name}
-          fill
-          loading="lazy"
-          decoding="async"
-          sizes="100vw"
-          className="object-contain"
-          style={{ padding: "24px 40px", filter: "drop-shadow(0 20px 32px rgba(0,0,0,0.5))" }}
-        />
-      </div>
-
-      {/* Info */}
-      <div style={{ padding: "28px 20px 32px" }}>
-        <div
-          style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: 9,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: SAFFRON,
-            marginBottom: 10,
-          }}
-        >
-          FEATURE — 03 / SIGNATURE SERIES
-        </div>
-        <h2
-          style={{
-            fontSize: "3.2rem",
-            lineHeight: 0.88,
-            letterSpacing: "-0.04em",
-            fontWeight: 300,
-            fontFamily: "var(--font-fraunces), serif",
-            marginBottom: 14,
-          }}
-        >
-          {product.name.split(" ")[0]}
-          <br />
-          <em style={{ color: SAFFRON }}>
-            {product.name.split(" ").slice(1).join(" ") || "Al Oud."}
-          </em>
+        <h2 style={{ fontSize: "2.4rem", lineHeight: 0.95, letterSpacing: "-0.03em", fontWeight: 300, fontFamily: "var(--font-fraunces), serif", margin: "6px 0 0" }}>
+          {product.name}
         </h2>
-        <p
-          style={{
-            fontFamily: "var(--font-inter), sans-serif",
-            fontSize: 13,
-            lineHeight: 1.6,
-            opacity: 0.8,
-            marginBottom: 20,
-          }}
-        >
-          A no-fade fragrance built for ten-hour skin. Saffron, Bulgarian rose,
-          Cambodian oud.
-        </p>
-
-        {/* Notes row */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            border: "1px solid rgba(232,118,58,0.3)",
-            marginBottom: 20,
-          }}
-        >
-          {notes.map((note, i) => (
-            <div
-              key={note.tier}
-              style={{
-                padding: "12px 10px",
-                borderRight: i < 2 ? "1px solid rgba(232,118,58,0.3)" : "none",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: 8,
-                  letterSpacing: "0.2em",
-                  color: note.color,
-                  textTransform: "uppercase",
-                }}
-              >
-                {note.tier}
-              </div>
-              <div
-                style={{
-                  fontFamily: "var(--font-fraunces), serif",
-                  fontSize: 16,
-                  fontStyle: "italic",
-                  marginTop: 4,
-                }}
-              >
-                {note.name}
-              </div>
+        <div className="grid" style={{ borderTop: "1px solid rgba(242,237,228,0.18)" }}>
+          {notes.map((note) => (
+            <div key={note.tier} className="grid items-baseline" style={{ gridTemplateColumns: "64px 1fr auto", gap: 10, padding: "11px 0", borderBottom: "1px solid rgba(242,237,228,0.18)" }}>
+              <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.18em", color: note.color }}>{note.tier}</span>
+              <span style={{ fontFamily: "var(--font-fraunces), serif", fontSize: 17, fontStyle: "italic" }}>{note.name}</span>
+              <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, opacity: 0.5 }}>{note.duration}</span>
             </div>
           ))}
         </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div>
-            <div style={{ fontSize: 26, fontWeight: 300, fontFamily: "var(--font-fraunces), serif" }}>
-              {product.price.currency}
-              {product.price.current.toLocaleString("en-IN")}
-              {product.price.on_sale && (
-                <span
-                  style={{
-                    fontSize: 13,
-                    opacity: 0.4,
-                    textDecoration: "line-through",
-                    marginLeft: 8,
-                  }}
-                >
-                  {product.price.currency}
-                  {product.price.original.toLocaleString("en-IN")}
-                </span>
-              )}
-            </div>
-          </div>
+        <div className="flex items-center justify-between" style={{ marginTop: 4 }}>
+          <span style={{ fontFamily: "var(--font-fraunces), serif", fontWeight: 300, fontSize: 26 }}>
+            {product.price.currency}
+            {product.price.current.toLocaleString("en-IN")}
+            {product.price.on_sale && product.price.original > product.price.current && (
+              <span style={{ fontSize: 14, opacity: 0.45, textDecoration: "line-through", marginLeft: 8 }}>
+                {product.price.currency}
+                {product.price.original.toLocaleString("en-IN")}
+              </span>
+            )}
+          </span>
           <button
+            type="button"
             onClick={handleAdd}
             disabled={isAdded}
-            style={{
-              background: SAFFRON,
-              color: INK,
-              border: "none",
-              padding: "14px 22px",
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: 10,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              cursor: isAdded ? "not-allowed" : "pointer",
-              opacity: isAdded ? 0.7 : 1,
-            }}
+            style={{ height: 46, padding: "0 18px", border: "1px solid rgba(242,237,228,0.5)", background: isAdded ? CREAM : "transparent", color: isAdded ? INK : CREAM, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase" }}
           >
-            {isAdded ? "ADDED!" : "ADD →"}
+            {isAdded ? "Added ✓" : "Add to bag →"}
           </button>
         </div>
-      </div>
-    </section>
+      </section>
     )}
   </>
   );

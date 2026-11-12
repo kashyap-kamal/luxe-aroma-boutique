@@ -131,8 +131,10 @@ const BundleCard: React.FC<BundleCardProps> = ({ bundle, index = 0, wide = false
             {bundle.bundleType.replace(/_/g, " ")}
           </span>
 
+          {/* Phones show the quiet struck price only; badge from md up */}
           {discountPercent > 0 && (
             <span
+              className="hidden md:inline"
               style={{
                 position: "absolute",
                 top: 10,

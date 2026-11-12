@@ -7,7 +7,7 @@ import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import PromoBanner from '@/components/promo-banner'
 import CartSidebar from '@/components/cart-sidebar'
-import MobileBottomNav from '@/components/mobile-bottom-nav'
+import MobileBagButton from '@/components/mobile-bag-button'
 import ScrollReveal from '@/components/scroll-reveal'
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -31,10 +31,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <Navbar />
       {children}
       <Footer />
-      {/* Spacer so fixed bottom nav doesn't cover page content on mobile */}
-      <div className="h-[68px] lg:hidden flex-shrink-0" style={{ background: '#0E0E0C' }} aria-hidden="true" />
       <CartSidebar />
-      <MobileBottomNav />
+      <MobileBagButton />
       <ScrollReveal />
     </div>
   )

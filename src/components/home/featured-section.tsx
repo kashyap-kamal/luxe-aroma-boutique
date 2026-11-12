@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Product, useCartStore } from "@/stores/cart-store";
 import { useProducts } from "@/hooks/use-products";
 import { useViewportMode } from "@/hooks/use-viewport-mode";
+import PlateCard from "@/components/plate-card";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -36,8 +37,6 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
   if (products.length === 0) return null;
 
   const display = products.slice(0, 4);
-  // Mobile is 2-up: drop the orphan so the last row is never half empty
-  const mobileDisplay = display.length > 1 && display.length % 2 ? display.slice(0, -1) : display;
 
   return (
     <section
@@ -97,51 +96,12 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
       </div>
 
       {/* Mobile header */}
-      <div
-        className="flex md:hidden"
-        style={{
-          padding: "28px 20px 16px",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          borderBottom: `1px solid ${INK}`,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: 10,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              marginBottom: 6,
-            }}
-          >
-            BESTSELLERS
-          </div>
-          <h2
-            style={{
-              fontSize: "2rem",
-              lineHeight: 0.95,
-              letterSpacing: "-0.03em",
-              fontWeight: 300,
-              fontFamily: "var(--font-fraunces), serif",
-            }}
-          >
-            Worn <em>by you.</em>
-          </h2>
-        </div>
-        <Link
-          href="/products"
-          style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: 10,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            textDecoration: "underline",
-            color: INK,
-          }}
-        >
-          ALL →
+      <div className="flex md:hidden items-baseline justify-between" style={{ padding: "30px 20px 16px" }}>
+        <h2 style={{ fontSize: "1.75rem", lineHeight: 1, letterSpacing: "-0.02em", fontWeight: 300, fontFamily: "var(--font-fraunces), serif", margin: 0 }}>
+          Worn <em>by you</em>
+        </h2>
+        <Link href="/products?featured=true" style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: INK, opacity: 0.6 }}>
+          View all
         </Link>
       </div>
 
@@ -353,133 +313,13 @@ export default function FeaturedSection({ products: initialProducts }: FeaturedS
       </div>
       )}
 
-      {/* Mobile: 2-column grid */}
+      {/* Mobile: swipe row */}
       {showMobile && (
-      <div
-        className="grid md:hidden"
-        style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
-      >
-        {mobileDisplay.map((product, i) => {
-          const discount =
-            product.price.on_sale && product.price.original > 0
-              ? Math.round(
-                  ((product.price.original - product.price.current) /
-                    product.price.original) *
-                    100
-                )
-              : 0;
-
-          return (
-            <div
-              key={product.id}
-              style={{
-                borderRight: i % 2 === 0 ? `1px solid ${INK}` : "none",
-                borderBottom: i < 2 ? `1px solid ${INK}` : "none",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <Link
-                href={`/products/${product.id}`}
-                style={{
-                  aspectRatio: "1",
-                  position: "relative",
-                  background: "#EDE9E0",
-                  borderBottom: `1px solid ${INK}`,
-                  display: "block",
-                  overflow: "hidden",
-                }}
-              >
-                {discount > 0 && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 8,
-                      right: 8,
-                      background: SAFFRON,
-                      color: INK,
-                      padding: "2px 6px",
-                      fontFamily: "var(--font-jetbrains-mono), monospace",
-                      fontSize: 8,
-                      letterSpacing: "0.1em",
-                      zIndex: 2,
-                    }}
-                  >
-                    {discount}% OFF
-                  </div>
-                )}
-                {product.image ? (
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    loading="lazy"
-                    decoding="async"
-                    className="object-contain p-6 mix-blend-multiply"
-                    sizes="50vw"
-                  />
-                ) : (
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontFamily: "var(--font-fraunces), serif",
-                      fontSize: "1.2rem",
-                      fontStyle: "italic",
-                      opacity: 0.3,
-                    }}
-                  >
-                    {product.name}
-                  </div>
-                )}
-              </Link>
-              <div style={{ padding: "12px 14px 16px" }}>
-                <div
-                  style={{
-                    fontFamily: "var(--font-fraunces), serif",
-                    fontSize: "1rem",
-                    fontWeight: 300,
-                    letterSpacing: "-0.01em",
-                  }}
-                >
-                  {product.name}
-                </div>
-                <div
-                  style={{
-                    marginTop: 8,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "baseline",
-                  }}
-                >
-                  <span style={{ fontSize: 15, fontFamily: "var(--font-fraunces), serif" }}>
-                    {product.price.currency}
-                    {product.price.current.toLocaleString("en-IN")}
-                  </span>
-                  <button
-                    onClick={() => handleAdd(product)}
-                    style={{
-                      fontFamily: "var(--font-jetbrains-mono), monospace",
-                      fontSize: 9,
-                      letterSpacing: "0.15em",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: addedIds[product.id] ? SAFFRON : INK,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {addedIds[product.id] ? "✓" : "ADD →"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+        <div className="swipe-row md:hidden" style={{ paddingBottom: 32 }}>
+          {products.slice(0, 8).map((product) => (
+            <PlateCard key={product.id} product={product} className="w-[208px]" />
+          ))}
+        </div>
       )}
     </section>
   );

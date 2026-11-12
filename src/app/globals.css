@@ -396,3 +396,23 @@ main a img {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Horizontal swipe rows on phones (moods, bestsellers) */
+.swipe-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 20px;
+  padding: 0 20px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.swipe-row::-webkit-scrollbar { display: none; }
+.swipe-row > * { flex: 0 0 auto; scroll-snap-align: start; }
+.swipe-row::after { content: ""; flex: 0 0 8px; }
+
+@keyframes bag-bump {
+  40% { transform: scale(1.25); }
+}
+.bag-bump { animation: bag-bump 450ms var(--ease-luxe); }

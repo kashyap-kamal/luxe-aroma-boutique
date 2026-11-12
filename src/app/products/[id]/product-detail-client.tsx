@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import { Product } from "@/lib/data-service";
 import { useCartStore } from "@/stores/cart-store";
 import { useProductById, useProducts } from "@/hooks/use-products";
-import ProductCard from "@/components/product-card";
+import ProductGrid from "@/components/product-grid";
+import { PLATE_BG, PriceLine } from "@/components/plate-card";
 import { toast } from "sonner";
 import Image from "next/image";
 import { TAG_META, tagLabel } from "@/lib/utils";
@@ -49,6 +50,8 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
     });
   }, [product.id, product.name, currentPrice]);
   const [added, setAdded] = useState(false);
+  // Mobile buy bar turns into "View bag" once something was added, and stays that way
+  const [inBag, setInBag] = useState(false);
 
   const discountPercent =
     product.price.on_sale && product.price.original > 0
@@ -59,6 +62,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
     if (added) return;
     addToCart(product, quantity);
     setAdded(true);
+    setInBag(true);
     setTimeout(() => setAdded(false), 1500);
     toast("Added to cart", {
       description: `${product.name} ×${quantity} added to your collection.`,
@@ -307,132 +311,99 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
         </div>
       </div>
 
-      {/* Mobile layout */}
+      {/* Mobile layout: plate, title, wear guide, one buy bar */}
       <div className="flex flex-col md:hidden">
-        <div style={{ position: "relative", aspectRatio: "1", background: "#EDE9E0", borderBottom: `1px solid ${INK}` }}>
-          {showMobile && (
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              priority
-              sizes="100vw"
-              className="object-contain mix-blend-multiply"
-              style={{ padding: 32 }}
-            />
+        <div className="relative" style={{ height: 380, background: PLATE_BG }}>
+          {showMobile && product.image && (
+            <Image src={product.image} alt={product.name} fill priority sizes="100vw" className="object-contain mix-blend-multiply" style={{ padding: "28px 0 32px" }} />
           )}
-          {discountPercent > 0 && (
-            <div style={{ position: "absolute", top: 16, right: 16, background: SAFFRON, color: INK, padding: "3px 8px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.15em" }}>
-              {discountPercent}% OFF
-            </div>
-          )}
-          <div style={{ position: "absolute", bottom: 14, left: 16, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 8, letterSpacing: "0.2em", color: INK, opacity: 0.45 }}>
-            {product.size || "50ML"} · EAU DE PARFUM
-          </div>
         </div>
-
-        <div style={{ padding: "24px 20px 40px" }}>
-          <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: SAFFRON, marginBottom: 10 }}>
-            {product.category.toUpperCase()} · AROMÉ LUXE
-          </div>
-          <h1 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "2.2rem", fontWeight: 300, lineHeight: 0.92, letterSpacing: "-0.03em", marginBottom: 20 }}>
-            {product.name}
-          </h1>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 24, paddingBottom: 24, borderBottom: `1px solid ${INK}` }}>
-            <span style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "1.6rem", fontWeight: 300 }}>
-              {product.price.currency}{product.price.current.toLocaleString("en-IN")}
+        <div className="flex flex-col" style={{ padding: "22px 20px 32px", gap: 22 }}>
+          <div className="flex flex-col" style={{ gap: 8 }}>
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", opacity: 0.6 }}>
+              {product.category} · Eau de parfum · {product.size || "50 ml"}
             </span>
-            {product.price.on_sale && (
-              <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, textDecoration: "line-through", opacity: 0.4 }}>
-                {product.price.currency}{product.price.original.toLocaleString("en-IN")}
-              </span>
-            )}
+            <h1 style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "2.2rem", fontWeight: 300, lineHeight: 1, letterSpacing: "-0.02em", margin: 0 }}>
+              {product.name}
+            </h1>
+            <PriceLine product={product} size={22} />
           </div>
-
           {product.description && (
-            <p style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, lineHeight: 1.7, opacity: 0.8, marginBottom: 24 }}>
-              {product.description}
-            </p>
+            <p style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 15, lineHeight: 1.6, opacity: 0.8, margin: 0 }}>{product.description}</p>
           )}
-
           {hasNotes && notes && (
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.5, marginBottom: 10 }}>NOTES</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", border: `1px solid ${INK}` }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", opacity: 0.55, marginBottom: 8 }}>How it wears</div>
+              <div style={{ borderTop: "1px solid rgba(14,14,12,0.14)" }}>
                 {[
-                  { tier: "Top", notes: notes.top },
-                  { tier: "Heart", notes: notes.middle },
-                  { tier: "Base", notes: notes.base },
-                ].map(({ tier, notes }, i) =>
-                  notes?.length ? (
-                    <div key={tier} style={{ padding: "10px 12px", borderRight: i < 2 ? `1px solid ${INK}` : "none" }}>
-                      <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 7, letterSpacing: "0.2em", textTransform: "uppercase", color: NOTE_COLORS[tier], marginBottom: 4 }}>{tier}</div>
-                      <div style={{ fontFamily: "var(--font-fraunces), serif", fontSize: "0.85rem", fontWeight: 300, fontStyle: "italic" }}>{(notes ?? []).slice(0, 2).join(", ")}</div>
-                    </div>
-                  ) : null
-                )}
-              </div>
-            </div>
-          )}
-
-          {(scentTags.length > 0 || occasionTags.length > 0) && (
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 8, opacity: 0.5 }}>
-                CHARACTER
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {[...scentTags, ...occasionTags].map((tag) => (
-                  <Link
-                    key={tag}
-                    href={`/products?tag=${tag}`}
-                    style={{ padding: "4px 10px", border: `1px solid ${INK}`, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 8, letterSpacing: "0.15em", textTransform: "uppercase", color: INK, textDecoration: "none" }}
-                  >
-                    {tagLabel(tag)}
-                  </Link>
+                  { tier: "Top", list: notes.top, when: "0–15 min" },
+                  { tier: "Heart", list: notes.middle, when: "to 2 h" },
+                  { tier: "Base", list: notes.base, when: "2–10 h" },
+                ].filter((r) => r.list?.length).map((r) => (
+                  <div key={r.tier} className="grid items-baseline" style={{ gridTemplateColumns: "60px 1fr auto", gap: 10, padding: "12px 0", borderBottom: "1px solid rgba(14,14,12,0.14)" }}>
+                    <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: NOTE_COLORS[r.tier] === "#E8B4B8" ? "#B5676D" : NOTE_COLORS[r.tier] }}>{r.tier}</span>
+                    <span style={{ fontFamily: "var(--font-fraunces), serif", fontSize: 17, fontStyle: "italic" }}>{(r.list ?? []).join(", ")}</span>
+                    <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, opacity: 0.5 }}>{r.when}</span>
+                  </div>
                 ))}
               </div>
             </div>
           )}
-
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 20, borderTop: `1px solid ${INK}` }}>
-            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", opacity: 0.6 }}>
-              QUANTITY
-            </div>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label="Decrease quantity" style={{ width: 36, height: 36, border: `1px solid ${INK}`, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Minus style={{ width: 11, height: 11 }} />
-              </button>
-              <div style={{ width: 44, height: 36, border: `1px solid ${INK}`, borderLeft: "none", borderRight: "none", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 12 }}>
-                {quantity}
+          <div className="grid grid-cols-3" style={{ gap: 1, background: "rgba(14,14,12,0.14)", border: "1px solid rgba(14,14,12,0.14)" }}>
+            {[
+              ["Strength", "Eau de parfum"],
+              ["Size", product.size || "50 ml"],
+              ["Delivery", "Free"],
+            ].map(([k, v]) => (
+              <div key={k} className="flex flex-col" style={{ background: CREAM, padding: 10, gap: 4 }}>
+                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", opacity: 0.55 }}>{k}</span>
+                <span style={{ fontSize: 13 }}>{v}</span>
               </div>
-              <button type="button" onClick={() => setQuantity((q) => q + 1)} aria-label="Increase quantity" style={{ width: 36, height: 36, border: `1px solid ${INK}`, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Plus style={{ width: 11, height: 11 }} />
-              </button>
-            </div>
+            ))}
           </div>
+          {(scentTags.length > 0 || occasionTags.length > 0) && (
+            <div className="flex flex-wrap" style={{ gap: 6 }}>
+              {[...scentTags, ...occasionTags].map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/products?tag=${tag}`}
+                  style={{ height: 32, padding: "0 12px", display: "inline-flex", alignItems: "center", border: "1px solid rgba(14,14,12,0.3)", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: INK }}
+                >
+                  {tagLabel(tag)}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Sticky CTA lifted above MobileBottomNav */}
+        {/* Fixed buy bar: the only fixed bar on this page */}
         <div
+          className="grid items-center"
           style={{
             position: "fixed",
-            bottom: "calc(56px + env(safe-area-inset-bottom))",
             left: 0,
             right: 0,
-            background: CREAM,
-            borderTop: `1px solid ${INK}`,
-            padding: "10px 16px",
-            display: "flex",
-            gap: 10,
+            bottom: 0,
             zIndex: 41,
+            gridTemplateColumns: "auto 1fr",
+            gap: 14,
+            padding: "12px max(16px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
+            background: "rgba(242,237,228,0.94)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            borderTop: "1px solid rgba(14,14,12,0.12)",
           }}
         >
-          <button onClick={handleBuyNow} style={{ flex: 1, background: SAFFRON, color: INK, border: "none", padding: "13px 12px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}>
-            BUY NOW →
-          </button>
-          <button onClick={handleAddToCart} disabled={added} style={{ flex: 1, background: added ? "transparent" : INK, color: added ? SAFFRON : CREAM, border: added ? `1px solid ${SAFFRON}` : `1px solid ${INK}`, padding: "13px 12px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", cursor: added ? "default" : "pointer", transition: "all 150ms" }}>
-            {added ? "ADDED ✓" : "ADD TO CART"}
-          </button>
+          <PriceLine product={product} size={22} />
+          {inBag ? (
+            <Link href="/cart" className="grid place-items-center" style={{ height: 52, background: SAFFRON, color: INK, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" }}>
+              View bag →
+            </Link>
+          ) : (
+            <button type="button" onClick={handleAddToCart} style={{ height: 52, background: INK, color: CREAM, border: "none", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" }}>
+              Add to bag
+            </button>
+          )}
         </div>
       </div>
 
@@ -447,21 +418,11 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product: init
               You may also <em>wear.</em>
             </h2>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4" style={{ borderTop: `1px solid ${INK}` }}>
-            {related.map((p, i) => (
-              <div
-                key={p.id}
-                className={i % 2 === 0 ? "border-r lg:border-r" : i < 3 ? "lg:border-r" : ""}
-                style={{ borderColor: INK, borderBottom: `1px solid ${INK}` }}
-              >
-                <ProductCard product={p} />
-              </div>
-            ))}
-          </div>
+          <ProductGrid products={related} />
         </section>
       )}
-      {/* Clears the fixed mobile CTA bar */}
-      <div className="md:hidden" style={{ height: 64 }} />
+      {/* Clears the fixed mobile buy bar */}
+      <div className="md:hidden" style={{ height: "calc(80px + env(safe-area-inset-bottom))" }} />
     </main>
   );
 };

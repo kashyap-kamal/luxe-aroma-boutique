@@ -104,7 +104,6 @@ const ProductsContent = () => {
   const [allBundles, setAllBundles] = useState<Bundle[]>([]);
   const [matchingBundles, setMatchingBundles] = useState<Bundle[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [mobileColumns, setMobileColumns] = useState<1 | 2>(2);
 
   useEffect(() => {
     fetchBundles().then(setAllBundles).catch(() => {});
@@ -334,6 +333,25 @@ const ProductsContent = () => {
         </button>
       </div>
 
+      {/* Phones: one-tap category and mood chips */}
+      <div className="swipe-row md:hidden" style={{ gap: 8, padding: "14px 20px", borderBottom: "1px solid rgba(14,14,12,0.12)" }}>
+        {[
+          { key: "all", label: "All", active: !selectedCategory && !selectedTag && !featuredOnly, onClick: () => { setSelectedCategory(""); setSelectedTag(""); setFeaturedOnly(false); } },
+          ...categories.map((cat) => ({ key: cat, label: categoryNameMap(cat) || cat, active: selectedCategory === cat, onClick: () => setSelectedCategory(selectedCategory === cat ? "" : cat) })),
+          ...SCENT_FAMILIES.map((f) => ({ key: f.tag, label: f.label, active: selectedTag === f.tag, onClick: () => setSelectedTag(selectedTag === f.tag ? "" : f.tag) })),
+        ].map((chip) => (
+          <button
+            key={chip.key}
+            type="button"
+            onClick={chip.onClick}
+            aria-pressed={chip.active}
+            style={{ height: 36, padding: "0 14px", border: `1px solid ${chip.active ? INK : "rgba(14,14,12,0.25)"}`, background: chip.active ? INK : "transparent", color: chip.active ? CREAM : INK, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", whiteSpace: "nowrap" }}
+          >
+            {chip.label}
+          </button>
+        ))}
+      </div>
+
       {/* Filter panel */}
       {showFilters && (
         <div
@@ -417,14 +435,7 @@ const ProductsContent = () => {
         </div>
       ) : filteredProducts.length > 0 ? (
         <>
-          <div className="flex md:hidden" style={{ padding: "12px 20px", borderBottom: `1px solid ${INK}`, justifyContent: "flex-end", gap: 0 }}>
-            {([1, 2] as const).map((n) => (
-              <button key={n} onClick={() => setMobileColumns(n)} style={{ padding: "6px 14px", border: `1px solid ${INK}`, borderRight: n === 1 ? "none" : `1px solid ${INK}`, background: mobileColumns === n ? INK : "transparent", color: mobileColumns === n ? CREAM : INK, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.15em", cursor: "pointer" }}>
-                {n === 1 ? "LIST" : "GRID"}
-              </button>
-            ))}
-          </div>
-          <ProductGrid products={filteredProducts} mobileColumns={mobileColumns} />
+          <ProductGrid products={filteredProducts} />
         </>
       ) : (
         <div style={{ padding: "80px 0", textAlign: "center" as const }} className="px-5 md:px-12">

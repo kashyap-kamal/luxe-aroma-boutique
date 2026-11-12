@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Product } from "@/stores/cart-store";
 import { useProducts } from "@/hooks/use-products";
 import { useViewportMode } from "@/hooks/use-viewport-mode";
+import { PLATE_BG } from "@/components/plate-card";
 
 const INK = "#0E0E0C";
 const CREAM = "#F2EDE4";
@@ -28,11 +29,12 @@ export default function HeroSection({ products: initialProducts }: HeroSectionPr
   const minPrice = products.length > 0
     ? Math.min(...products.map(p => p.price.current))
     : 499;
+  const heroProduct = products[0];
 
   return (
     <div style={{ background: CREAM, color: INK, fontFamily: "var(--font-fraunces), serif" }}>
       {/* MASTHEAD */}
-      <div style={{ borderBottom: `1px solid ${INK}` }}>
+      <div className="hidden md:block" style={{ borderBottom: `1px solid ${INK}` }}>
         <div
           style={{
             justifyContent: "space-between",
@@ -48,20 +50,6 @@ export default function HeroSection({ products: initialProducts }: HeroSectionPr
           <span>Vol. XII · Édition de Mai · MMXXVI</span>
           <span>No. 0427 — Bombay · Paris · Grasse</span>
           <span>₹ — Free shipping above ₹999</span>
-        </div>
-        <div
-          style={{
-            padding: "9px 20px",
-            fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: 9,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            textAlign: "center",
-            color: INK,
-          }}
-          className="flex md:hidden"
-        >
-          FREE SHIPPING ON ALL ORDERS · BOMBAY, INDIA
         </div>
       </div>
 
@@ -388,136 +376,44 @@ export default function HeroSection({ products: initialProducts }: HeroSectionPr
 
       )}
 
-      {/* MOBILE HERO */}
+      {/* MOBILE HERO: full-bleed plate, then the line */}
       {showMobile && (
-      <section
-        className="flex flex-col md:hidden"
-        style={{ borderBottom: `1px solid ${INK}` }}
-      >
-        {/* Mobile bottle panel */}
-        <div
-          style={{
-            background: `radial-gradient(ellipse at 50% 60%, #E8763A 0%, #C24F1B 50%, #6B2310 100%)`,
-            height: 320,
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: 16,
-              left: 16,
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: 9,
-              letterSpacing: "0.2em",
-              color: CREAM,
-            }}
-          >
-            PLATE I.
-          </div>
-          <Image
-            src="/assets/perfumes/1-million-nobg.webp"
-            alt="1 Million"
-            fill
-            sizes="100vw"
-            className="object-contain"
-            style={{
-              padding: "20px 36px",
-              filter: "drop-shadow(0 20px 32px rgba(0,0,0,0.5))",
-            }}
-            priority
-          />
-        </div>
-
-        {/* Mobile text */}
-        <div style={{ padding: "32px 20px 40px" }}>
-          <div
-            style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: 10,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              marginBottom: 16,
-            }}
-          >
-            FEATURE — 01
-          </div>
-          <h1
-            style={{
-              fontSize: "clamp(3rem, 14vw, 5rem)",
-              lineHeight: 0.9,
-              letterSpacing: "-0.03em",
-              fontWeight: 300,
-              margin: "0 0 20px",
-            }}
-          >
-            Masterfully{" "}
-            <em style={{ fontStyle: "italic" }}>crafted.</em>
-            <br />
-            <span
-              style={{
-                background: SAFFRON,
-                color: CREAM,
-                padding: "0 8px",
-                display: "inline-block",
-              }}
-            >
-              Accessible.
+        <section className="flex flex-col md:hidden">
+          <Link href={heroProduct ? `/products/${heroProduct.id}` : "/products"} className="relative block" style={{ height: 340, background: PLATE_BG }}>
+            {heroProduct?.image && (
+              <Image src={heroProduct.image} alt={heroProduct.name} fill priority sizes="100vw" className="object-contain mix-blend-multiply" style={{ padding: "28px 0 36px" }} />
+            )}
+            <div className="absolute left-5 right-5 bottom-3.5 flex justify-between" style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", opacity: 0.55 }}>
+              <span>{heroProduct?.name ?? "Plate I"}</span>
+              <span>Eau de parfum · 50 ml</span>
+            </div>
+          </Link>
+          <div className="flex flex-col gap-4" style={{ padding: "28px 20px 34px" }}>
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", opacity: 0.6 }}>
+              The signature series
             </span>
-          </h1>
-          <p
-            style={{
-              fontFamily: "var(--font-inter), sans-serif",
-              fontSize: 14,
-              lineHeight: 1.6,
-              color: "#3A3833",
-              marginBottom: 24,
-            }}
-          >
-            Premium fragrances from ₹{minPrice}. Crafted for the connoisseur
-            who refuses to pay the boutique tax.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            <h1 style={{ fontSize: "2.6rem", lineHeight: 0.95, letterSpacing: "-0.03em", fontWeight: 300, margin: 0, textWrap: "balance" }}>
+              Masterfully crafted. <em style={{ color: SAFFRON }}>Accessible.</em>
+            </h1>
+            <p style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 15, lineHeight: 1.55, color: "#3A3833", margin: 0 }}>
+              Perfumes from ₹{minPrice}, blended in India. We cut the middlemen, not the molecules.
+            </p>
             <Link
               href="/products?featured=true"
-              style={{
-                background: INK,
-                color: CREAM,
-                padding: "16px 24px",
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: 11,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                textDecoration: "none",
-                display: "block",
-                textAlign: "center",
-              }}
+              className="flex items-center justify-between"
+              style={{ height: 54, padding: "0 20px", background: INK, color: CREAM, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase" }}
             >
-              SHOP BESTSELLERS →
+              Shop bestsellers <span aria-hidden>→</span>
             </Link>
             <Link
               href="/quiz"
-              style={{
-                background: "transparent",
-                color: INK,
-                border: `1px solid ${INK}`,
-                borderTop: "none",
-                padding: "16px 24px",
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: 11,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                textDecoration: "none",
-                display: "block",
-                textAlign: "center",
-              }}
+              className="self-start"
+              style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: INK, borderBottom: `1px solid ${INK}`, paddingBottom: 3 }}
             >
-              TAKE THE QUIZ
+              Find your scent in 2 minutes →
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
       )}
     </div>
   );

@@ -239,57 +239,35 @@ const Navbar = () => {
           </div>
         </nav>
 
-        {/* Mobile/tablet nav */}
-        <nav className="lg:hidden flex justify-between items-center px-5 py-3.5">
-          <div className="flex items-center gap-3.5" style={{ color: "#0E0E0C" }}>
-            <button
-              type="button"
-              aria-label="Open menu"
-              onClick={openNavDrawer}
-              className="p-1 -ml-1 active:opacity-60"
-            >
-              <Menu className="h-[19px] w-[19px]" strokeWidth={1.5} />
+        {/* Mobile/tablet nav: one bar, wordmark centred */}
+        <nav className="lg:hidden grid grid-cols-[1fr_auto_1fr] items-center h-14 px-3" style={{ color: "#0E0E0C" }}>
+          <div className="flex items-center">
+            <button type="button" aria-label="Open menu" onClick={openNavDrawer} className="w-11 h-11 grid place-items-center active:opacity-60">
+              <Menu className="h-5 w-5" strokeWidth={1.4} />
             </button>
-            <Link href="/">
-              <h1
-                className="font-serif"
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: 300,
-                  letterSpacing: "-0.02em",
-                  color: "#0E0E0C",
-                  fontFamily: "var(--font-fraunces), serif",
-                }}
-              >
-                Aromé <em style={{ fontStyle: "italic" }}>Luxe</em>
-              </h1>
-            </Link>
+            <button type="button" aria-label="Search" onClick={() => setIsSearchOpen(true)} className="w-11 h-11 grid place-items-center active:opacity-60">
+              <Search className="h-[18px] w-[18px]" strokeWidth={1.4} />
+            </button>
           </div>
-          <div className="flex items-center gap-4" style={{ color: "#0E0E0C" }}>
-            <button type="button" aria-label="Search" onClick={() => setIsSearchOpen(true)} className="active:opacity-60">
-              <Search className="h-[17px] w-[17px]" strokeWidth={1.5} />
-            </button>
-            <Link
-              href={user ? "/profile" : "/auth/signin"}
-              aria-label={user ? "Account" : "Sign in"}
-              className="active:opacity-60"
-            >
-              <User className="h-[17px] w-[17px]" strokeWidth={1.5} />
+          <Link href="/" aria-label="Aromé Luxe home">
+            <span style={{ fontSize: "1.35rem", fontWeight: 300, letterSpacing: "-0.02em", fontFamily: "var(--font-fraunces), serif" }}>
+              Aromé <em style={{ fontStyle: "italic" }}>Luxe</em>
+            </span>
+          </Link>
+          <div className="flex items-center justify-end">
+            <Link href={user ? "/profile" : "/auth/signin"} aria-label={user ? "Account" : "Sign in"} className="w-11 h-11 grid place-items-center active:opacity-60">
+              <User className="h-[18px] w-[18px]" strokeWidth={1.4} />
             </Link>
-            <Link href="/cart" className="relative active:opacity-60" aria-label="Cart">
-              <ShoppingBag className="h-[17px] w-[17px]" strokeWidth={1.5} />
+            <Link href="/cart" className="relative w-11 h-11 grid place-items-center active:opacity-60" aria-label={`Bag, ${itemCount} item${itemCount === 1 ? "" : "s"}`}>
+              <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.4} />
               {itemCount > 0 && (
-                <Badge
-                  className="absolute -top-1.5 -right-2 text-[9px] h-4 min-w-4 flex items-center justify-center border-none p-0"
-                  style={{
-                    background: "#E8763A",
-                    color: "#F2EDE4",
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    borderRadius: 0,
-                  }}
+                <span
+                  key={itemCount}
+                  className="bag-bump absolute top-1.5 right-1 grid place-items-center"
+                  style={{ minWidth: 16, height: 16, borderRadius: 8, padding: "0 4px", background: "#E8763A", color: "#0E0E0C", fontSize: 9, fontWeight: 600, fontFamily: "var(--font-inter), sans-serif" }}
                 >
                   {itemCount}
-                </Badge>
+                </span>
               )}
             </Link>
           </div>

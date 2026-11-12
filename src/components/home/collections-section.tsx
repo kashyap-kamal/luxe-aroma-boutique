@@ -70,31 +70,13 @@ export default function CollectionsSection() {
       </div>
 
       {/* Mobile header */}
-      <div className="flex md:hidden" style={{ padding: "28px 20px 16px" }}>
-        <div>
-          <div
-            style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: 10,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              marginBottom: 8,
-            }}
-          >
-            SHOP BY MOOD
-          </div>
-          <h2
-            style={{
-              fontSize: "2.2rem",
-              lineHeight: 0.95,
-              letterSpacing: "-0.03em",
-              fontWeight: 300,
-              fontFamily: "var(--font-fraunces), serif",
-            }}
-          >
-            The atlas of <em>moods.</em>
-          </h2>
-        </div>
+      <div className="flex md:hidden items-baseline justify-between" style={{ padding: "30px 20px 16px" }}>
+        <h2 style={{ fontSize: "1.75rem", lineHeight: 1, letterSpacing: "-0.02em", fontWeight: 300, fontFamily: "var(--font-fraunces), serif", margin: 0 }}>
+          Shop by <em>mood</em>
+        </h2>
+        <Link href="/products" style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: INK, opacity: 0.6 }}>
+          All
+        </Link>
       </div>
 
       {/* Mood grid: responsive editorial strip on desktop */}
@@ -195,71 +177,21 @@ export default function CollectionsSection() {
         ))}
       </div>
 
-      {/* Mobile: 2-column mood grid */}
-      <div
-        className="grid md:hidden"
-        style={{ gridTemplateColumns: "repeat(2, 1fr)", borderTop: `1px solid ${INK}` }}
-      >
+      {/* Mobile: swipe row */}
+      <div className="swipe-row md:hidden" style={{ paddingBottom: 30 }}>
         {moods.map((mood, i) => (
           <Link
             key={mood.name}
             href={mood.href}
-            style={{
-              background: mood.bg,
-              color: mood.fg,
-              aspectRatio: "1",
-              borderRight: i % 2 === 0 ? `1px solid ${INK}` : "none",
-              borderBottom: i < 4 ? `1px solid ${INK}` : "none",
-              padding: 16,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              textDecoration: "none",
-            }}
+            className="flex flex-col justify-between active:scale-[0.97]"
+            style={{ width: 124, height: 164, padding: 14, background: mood.bg, color: mood.fg }}
           >
-            <div
-              style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: 9,
-                letterSpacing: "0.2em",
-              }}
-            >
-              N° {String(i + 1).padStart(2, "0")}
-            </div>
-            <div>
-              <div
-                style={{
-                  fontSize: "clamp(1.2rem, 7vw, 1.8rem)",
-                  lineHeight: 0.95,
-                  fontWeight: 300,
-                  letterSpacing: "-0.02em",
-                  fontFamily: "var(--font-fraunces), serif",
-                  overflowWrap: "break-word",
-                }}
-              >
-                {mood.name}
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontFamily: "var(--font-inter), sans-serif",
-                  fontStyle: "italic",
-                  marginTop: 4,
-                  opacity: 0.8,
-                }}
-              >
-                {mood.sub}
-              </div>
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: 9,
-                letterSpacing: "0.15em",
-              }}
-            >
-              {mood.count} SCENTS →
-            </div>
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.18em" }}>N° {String(i + 1).padStart(2, "0")}</span>
+            <span>
+              <span style={{ display: "block", fontFamily: "var(--font-fraunces), serif", fontWeight: 300, fontSize: 24, lineHeight: 1, textTransform: "capitalize" }}>{mood.name.toLowerCase()}</span>
+              <span style={{ display: "block", fontSize: 11, fontStyle: "italic", opacity: 0.8, marginTop: 4 }}>{mood.sub}</span>
+            </span>
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, letterSpacing: "0.16em" }}>{mood.count} SCENTS</span>
           </Link>
         ))}
       </div>

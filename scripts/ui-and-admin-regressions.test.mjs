@@ -90,20 +90,28 @@ test("should style auth pages with Saffron Press tokens and preserve safe intern
   }
 });
 
-test("should lift mobile PDP/Bundle sticky CTAs above MobileBottomNav, provide /bundles index, and fix quiz grid", () => {
+test("should pin mobile PDP/Bundle buy bars to the screen edge (no bottom tab bar), provide /bundles index, and fix quiz grid", () => {
   const pdp = fs.readFileSync(
     path.join(ROOT, "src/app/products/[id]/product-detail-client.tsx"),
     "utf8"
   );
-  assert.match(pdp, /calc\(56px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.doesNotMatch(pdp, /calc\(56px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.match(pdp, /env\(safe-area-inset-bottom\)/);
   assert.match(pdp, /zIndex:\s*41/);
 
   const bundleDetail = fs.readFileSync(
     path.join(ROOT, "src/app/bundles/[id]/bundle-detail-client.tsx"),
     "utf8"
   );
-  assert.match(bundleDetail, /calc\(56px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.doesNotMatch(bundleDetail, /calc\(56px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.match(bundleDetail, /env\(safe-area-inset-bottom\)/);
   assert.match(bundleDetail, /z-\[41\]/);
+
+  assert.equal(
+    fs.existsSync(path.join(ROOT, "src/components/mobile-bottom-nav.tsx")),
+    false,
+    "the bottom tab bar was replaced by the floating bag button"
+  );
 
   assert.equal(
     fs.existsSync(path.join(ROOT, "src/app/bundles/page.tsx")),

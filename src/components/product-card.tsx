@@ -12,10 +12,9 @@ const SAFFRON = "#E8763A";
 
 interface ProductCardProps {
   product: Product;
-  fullWidthMobile?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, fullWidthMobile = false }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart, openSidebar } = useCartStore();
   const [added, setAdded] = useState(false);
 
@@ -60,7 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, fullWidthMobile = fa
             fill
             loading="lazy"
             decoding="async"
-            sizes={fullWidthMobile ? "(max-width: 640px) 100vw, 33vw" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover transition-transform duration-700 hover:scale-[1.04]"
           />
 
