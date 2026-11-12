@@ -397,20 +397,24 @@ main a img {
   }
 }
 
-/* Horizontal swipe rows on phones (moods, bestsellers) */
-.swipe-row {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding-left: 20px;
-  padding: 0 20px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+/* Horizontal swipe rows on phones (moods, bestsellers, shop chips).
+   Inside @layer components so Tailwind utilities such as md:hidden still win:
+   unlayered CSS beats every layered rule regardless of specificity. */
+@layer components {
+  .swipe-row {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 20px;
+    padding: 0 20px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .swipe-row::-webkit-scrollbar { display: none; }
+  .swipe-row > * { flex: 0 0 auto; scroll-snap-align: start; }
+  .swipe-row::after { content: ""; flex: 0 0 8px; }
 }
-.swipe-row::-webkit-scrollbar { display: none; }
-.swipe-row > * { flex: 0 0 auto; scroll-snap-align: start; }
-.swipe-row::after { content: ""; flex: 0 0 8px; }
 
 @keyframes bag-bump {
   40% { transform: scale(1.25); }
