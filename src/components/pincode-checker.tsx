@@ -129,19 +129,21 @@ const PincodeChecker: React.FC<PincodeCheckerProps> = ({
           onChange={(e) => handlePincodeChange(e.target.value)}
           maxLength={6}
           disabled={disabled || loading}
-          className="flex-1"
+          inputMode="numeric"
+          className="flex-1 h-12 rounded-none border-[#0E0E0C] bg-transparent text-base shadow-none"
         />
         <Button
           onClick={checkPincode}
           disabled={disabled || loading || pincode.length !== 6}
-          className="px-6"
+          type="button"
+          className="h-12 px-6 rounded-none bg-[#0E0E0C] text-[#F2EDE4] font-mono text-[11px] tracking-[0.18em] uppercase hover:bg-[#0E0E0C]/85"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Check"}
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "CHECK"}
         </Button>
       </div>
 
       {deliveryInfo && (
-        <div className="p-4 rounded-lg border">
+        <div className="p-4 border border-[#0E0E0C]">
           {deliveryInfo.serviceable ? (
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-green-600">

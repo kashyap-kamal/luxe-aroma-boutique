@@ -31,7 +31,7 @@ const fieldStyle: React.CSSProperties = {
   border: `1px solid ${INK}`,
   padding: "12px 14px",
   fontFamily: "var(--font-inter), sans-serif",
-  fontSize: 14,
+  fontSize: 16,
   color: INK,
   outline: "none",
   borderRadius: 0,
@@ -55,11 +55,33 @@ const labelStyle: React.CSSProperties = {
 
 const errorTextStyle: React.CSSProperties = {
   fontFamily: "var(--font-jetbrains-mono), monospace",
-  fontSize: 9,
-  letterSpacing: "0.12em",
+  fontSize: 11,
+  letterSpacing: "0.08em",
   color: SAFFRON,
   marginTop: 4,
 };
+
+// Declared at module level: a component declared inside CheckoutContent is a new
+// type on every render, which remounts its input and drops focus after each keystroke.
+const Field = ({
+  id,
+  label,
+  error,
+  children,
+  colSpan,
+}: {
+  id: string;
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+  colSpan?: boolean;
+}) => (
+  <div style={colSpan ? { gridColumn: "1 / -1" } : {}}>
+    <label htmlFor={id} style={labelStyle}>{label}</label>
+    {children}
+    {error && <div style={errorTextStyle}>{error}</div>}
+  </div>
+);
 
 const panelStyle: React.CSSProperties = {
   border: `1px solid ${INK}`,
@@ -111,7 +133,7 @@ const OrderSummary: React.FC<{
 
   return (
     <div style={{ border: `1px solid ${INK}`, background: CREAM }}>
-      <div style={{ padding: "20px 24px", borderBottom: `1px solid ${INK}` }}>
+      <div className="px-4 md:px-6" style={{ paddingTop: 20, paddingBottom: 20, borderBottom: `1px solid ${INK}` }}>
         <div style={{ ...sectionHeadStyle, marginBottom: 0 }}>ORDER SUMMARY</div>
       </div>
 
@@ -159,7 +181,7 @@ const OrderSummary: React.FC<{
                 }}
                 placeholder="COUPON CODE"
                 aria-label="Coupon code"
-                style={{ flex: 1, background: "transparent", border: `1px solid ${INK}`, padding: "9px 10px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, letterSpacing: "0.14em", color: INK, outline: "none" }}
+                style={{ flex: 1, background: "transparent", border: `1px solid ${INK}`, padding: "9px 10px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 16, letterSpacing: "0.08em", color: INK, outline: "none", borderRadius: 0, minWidth: 0 }}
               />
               <button
                 type="button"
@@ -233,7 +255,6 @@ const CheckoutContent: React.FC = () => {
     processPayment,
     isProcessing,
     clearPaymentState,
-    error: paymentError,
   } = usePaymentStore();
 
   useEffect(() => {
@@ -555,31 +576,19 @@ const CheckoutContent: React.FC = () => {
           description: "Please complete your payment on the next page.",
         });
       } else {
-        toast.error("Payment Failed", { description: paymentError || "Please try again or contact support if the issue persists." });
+        // Read the store directly: `paymentError` in this closure is from before the attempt
+        const failure = usePaymentStore.getState().error;
+        toast.error("Payment could not start", {
+          description: failure?.includes("not enabled")
+            ? "Online payments are being activated. Please try again shortly or contact us to place your order."
+            : failure || "Please try again or contact support if the issue persists.",
+        });
       }
     } catch (error) {
       console.error("Checkout error:", error);
       toast.error("Checkout Error", { description: "An unexpected error occurred. Please try again." });
     }
   };
-
-  const Field = ({
-    id,
-    label,
-    children,
-    colSpan,
-  }: {
-    id: string;
-    label: string;
-    children: React.ReactNode;
-    colSpan?: boolean;
-  }) => (
-    <div style={colSpan ? { gridColumn: "1 / -1" } : {}}>
-      <label htmlFor={id} style={labelStyle}>{label}</label>
-      {children}
-      {formErrors[id] && <div style={errorTextStyle}>{formErrors[id]}</div>}
-    </div>
-  );
 
   return (
     <>
@@ -595,7 +604,7 @@ const CheckoutContent: React.FC = () => {
         </div>
       </div>
 
-      <main style={{ background: CREAM, color: INK }} className="px-5 md:px-12">
+      <main style={{ background: CREAM, color: INK }} className="px-4 md:px-12">
         <div style={{ paddingTop: 40, paddingBottom: 80 }}>
           {/* Form-level errors */}
           {Object.keys(formErrors).length > 0 && (
@@ -635,39 +644,39 @@ const CheckoutContent: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
                   {/* Shipping Information */}
                   <div style={panelStyle}>
-                    <div style={{ padding: "20px 24px", borderBottom: `1px solid ${INK}` }}>
+                    <div className="px-4 md:px-6" style={{ paddingTop: 20, paddingBottom: 20, borderBottom: `1px solid ${INK}` }}>
                       <div style={sectionHeadStyle}>01 / SHIPPING INFORMATION</div>
                     </div>
-                    <div style={{ padding: "24px" }}>
+                    <div className="p-4 md:p-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Field id="firstName" label="First Name *">
+                        <Field id="firstName" label="First Name *" error={formErrors.firstName}>
                           <input id="firstName" value={customerInfo.firstName} onChange={(e) => handleInputChange("firstName", e.target.value)} style={formErrors.firstName ? fieldErrorStyle : fieldStyle} required />
                         </Field>
-                        <Field id="lastName" label="Last Name *">
+                        <Field id="lastName" label="Last Name *" error={formErrors.lastName}>
                           <input id="lastName" value={customerInfo.lastName} onChange={(e) => handleInputChange("lastName", e.target.value)} style={formErrors.lastName ? fieldErrorStyle : fieldStyle} required />
                         </Field>
-                        <Field id="email" label="Email Address *">
+                        <Field id="email" label="Email Address *" error={formErrors.email}>
                           <input id="email" type="email" value={customerInfo.email} onChange={(e) => handleInputChange("email", e.target.value)} style={formErrors.email ? fieldErrorStyle : fieldStyle} required />
                         </Field>
-                        <Field id="phone" label="Phone Number *">
+                        <Field id="phone" label="Phone Number *" error={formErrors.phone}>
                           <input id="phone" value={customerInfo.phone} onChange={(e) => handleInputChange("phone", e.target.value)} placeholder="+91 98765 43210" style={formErrors.phone ? fieldErrorStyle : fieldStyle} required />
                         </Field>
-                        <Field id="address" label="Address *" colSpan>
+                        <Field id="address" label="Address *" error={formErrors.address} colSpan>
                           <input id="address" value={customerInfo.address} onChange={(e) => handleInputChange("address", e.target.value)} style={formErrors.address ? fieldErrorStyle : fieldStyle} required />
                         </Field>
-                        <Field id="city" label="City *">
+                        <Field id="city" label="City *" error={formErrors.city}>
                           <input id="city" value={customerInfo.city} onChange={(e) => handleInputChange("city", e.target.value)} style={formErrors.city ? fieldErrorStyle : fieldStyle} required />
                         </Field>
-                        <Field id="state" label="State *">
+                        <Field id="state" label="State *" error={formErrors.state}>
                           <input id="state" value={customerInfo.state} onChange={(e) => handleInputChange("state", e.target.value)} style={formErrors.state ? fieldErrorStyle : fieldStyle} required />
                         </Field>
-                        <Field id="postalCode" label="Postal Code *">
+                        <Field id="postalCode" label="Postal Code *" error={formErrors.postalCode}>
                           <input id="postalCode" value={customerInfo.postalCode} onChange={(e) => handleInputChange("postalCode", e.target.value)} style={formErrors.postalCode ? fieldErrorStyle : fieldStyle} required />
                         </Field>
-                        <Field id="country" label="Country">
+                        <Field id="country" label="Country" error={formErrors.country}>
                           <input id="country" value={customerInfo.country} onChange={(e) => handleInputChange("country", e.target.value)} style={fieldStyle} required />
                         </Field>
                       </div>
@@ -676,10 +685,10 @@ const CheckoutContent: React.FC = () => {
 
                   {/* Pincode check */}
                   <div style={{ ...panelStyle, marginTop: 2 }}>
-                    <div style={{ padding: "20px 24px", borderBottom: `1px solid ${INK}` }}>
+                    <div className="px-4 md:px-6" style={{ paddingTop: 20, paddingBottom: 20, borderBottom: `1px solid ${INK}` }}>
                       <div style={sectionHeadStyle}>02 / DELIVERY CHECK</div>
                     </div>
-                    <div style={{ padding: "24px" }}>
+                    <div className="p-4 md:p-6">
                       <PincodeChecker onServiceabilityChange={handlePincodeServiceabilityChange} initialPincode={customerInfo.postalCode} />
                       {formErrors.pincode && <div style={{ ...errorTextStyle, marginTop: 8 }}>{formErrors.pincode}</div>}
                     </div>
@@ -706,7 +715,7 @@ const CheckoutContent: React.FC = () => {
                         id="acceptTerms"
                         checked={acceptTerms}
                         onChange={(e) => setAcceptTerms(e.target.checked)}
-                        style={{ marginTop: 3, width: 14, height: 14, accentColor: INK, flexShrink: 0 }}
+                        style={{ marginTop: 1, width: 18, height: 18, accentColor: INK, flexShrink: 0 }}
                       />
                       <span style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 13, lineHeight: 1.5, color: INK, opacity: 0.8 }}>
                         I agree to the{" "}
